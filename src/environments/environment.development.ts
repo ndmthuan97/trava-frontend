@@ -1,4 +1,4 @@
 export const environment = {
-    production: false,
-    baseApiUrl: import.meta.env.BASE_API_URL ?? ''
+  production: false,
+  baseApiUrl: import.meta.env.BASE_API_URL ?? '',
 };
