@@ -1,0 +1,43 @@
+<header class="bg-card border-border flex items-center justify-between border-b px-6 py-4">
+  <!-- Left -->
+  <div class="flex items-center gap-4">
+    <button (click)="onMenuClick()" class="hover:bg-muted rounded-lg p-2 transition-colors">
+      <i class="pi pi-bars text-foreground text-lg"></i>
+    </button>
+
+    <h2 class="text-foreground text-lg font-semibold">Welcome Minh Thuan!</h2>
+  </div>
+
+  <!-- Right -->
+  <div class="flex items-center gap-2">
+    <!-- Search -->
+    <div
+      class="bg-muted border-border hidden items-center gap-2 rounded-lg border px-4 py-2 md:flex">
+      <i class="pi pi-search text-muted-foreground"></i>
+      <input
+        type="text"
+        placeholder="Search..."
+        class="text-foreground placeholder-muted-foreground w-48 bg-transparent text-sm focus:outline-none" />
+    </div>
+
+    <!-- Notification -->
+    <button class="hover:bg-muted relative rounded-lg p-2 transition-colors">
+      <i class="pi pi-bell text-foreground text-lg"></i>
+      <span class="bg-destructive absolute right-1 top-1 h-2 w-2 rounded-full"></span>
+    </button>
+
+    <!-- User -->
+    <div class="relative">
+      <button class="hover:bg-muted flex items-center gap-4 rounded-lg py-2 transition-colors">
+        <span class="text-foreground hidden text-sm font-medium sm:inline">Minh Thuan</span>
+
+        <div class="relative">
+          <img
+            src="https://static.wikia.nocookie.net/party-animals/images/1/1a/NemoAvatar.png"
+            alt="Default user avatar"
+            class="h-8 w-8 rounded-full object-cover" />
+        </div>
+      </button>
+    </div>
+  </div>
+</header>
