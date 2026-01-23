@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  baseApiUrl: import.meta.env.BASE_API_URL ?? '',
+  baseApiUrl: 'https://trava-api.azurewebsites.net/api',
 };

@@ -1,0 +1,55 @@
+<div class="flex min-h-screen items-center justify-center bg-gray-50">
+  <div class="w-full max-w-md">
+    <div class="rounded-lg bg-white p-8 shadow-lg">
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <h2 class="text-2xl font-semibold text-gray-800">Sign In</h2>
+        <p class="mt-2 text-sm text-gray-500">Welcome back! Please sign in to continue.</p>
+      </div>
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- Username Field -->
+        <div class="mb-6">
+          <p-floatlabel variant="on">
+            <input pInputText id="email" formControlName="email" class="w-full" />
+            <label for="email">Email</label>
+          </p-floatlabel>
+        </div>
+
+        <!-- Password Field -->
+        <div class="mb-6">
+          <p-floatlabel variant="on">
+            <p-password
+              id="password"
+              formControlName="password"
+              [toggleMask]="true"
+              [feedback]="false"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+              autocomplete="off" />
+            <label for="password">Password</label>
+          </p-floatlabel>
+        </div>
+
+        <!-- Sign In Button -->
+        <p-button
+          type="submit"
+          label="Sign In"
+          [disabled]="!loginForm.valid"
+          styleClass="w-full"
+          severity="primary" />
+
+        <!-- Sign Up Link -->
+        <div class="mt-6 text-center">
+          <span class="text-sm text-gray-600">Don't have an account? </span>
+          <a
+            routerLink="/auth/register"
+            class="text-sm font-medium text-blue-600 hover:text-blue-700">
+            Sign up
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

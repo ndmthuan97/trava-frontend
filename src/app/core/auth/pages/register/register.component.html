@@ -1,0 +1,79 @@
+<div class="flex min-h-screen items-center justify-center bg-gray-50">
+  <div class="w-full max-w-md">
+    <div class="rounded-lg bg-white p-8 shadow-lg">
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <h2 class="text-2xl font-semibold text-gray-800">Create Account</h2>
+        <p class="mt-2 text-sm text-gray-500">Join us today! Please fill in your details.</p>
+      </div>
+
+      <!-- Register Form -->
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <!-- Full Name Field -->
+        <div class="mb-6">
+          <p-floatlabel variant="on">
+            <input pInputText id="fullName" formControlName="fullName" class="w-full" />
+            <label for="fullName">Full Name</label>
+          </p-floatlabel>
+        </div>
+
+        <!-- Email Field -->
+        <div class="mb-6">
+          <p-floatlabel variant="on">
+            <input pInputText id="email" formControlName="email" class="w-full" />
+            <label for="email">Email</label>
+          </p-floatlabel>
+        </div>
+
+        <!-- Password Field -->
+        <div class="mb-6">
+          <p-floatlabel variant="on">
+            <p-password
+              id="password"
+              formControlName="password"
+              [toggleMask]="true"
+              [feedback]="false"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+              autocomplete="off" />
+            <label for="password">Password</label>
+          </p-floatlabel>
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div class="mb-6">
+          <p-floatlabel variant="on">
+            <p-password
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              [toggleMask]="true"
+              [feedback]="false"
+              styleClass="w-full"
+              inputStyleClass="w-full"
+              autocomplete="off" />
+            <label for="confirmPassword">Confirm Password</label>
+          </p-floatlabel>
+          @if (registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched) {
+            <small class="text-red-500"> Passwords do not match. </small>
+          }
+        </div>
+
+        <!-- Sign Up Button -->
+        <p-button
+          type="submit"
+          label="Sign Up"
+          [disabled]="!registerForm.valid"
+          styleClass="w-full"
+          severity="primary" />
+
+        <!-- Sign In Link -->
+        <div class="mt-6 text-center">
+          <span class="text-sm text-gray-600">Already have an account? </span>
+          <a routerLink="/auth/login" class="text-sm font-medium text-blue-600 hover:text-blue-700">
+            Sign in
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
