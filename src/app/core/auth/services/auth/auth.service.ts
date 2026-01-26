@@ -31,6 +31,7 @@ export class AuthService {
   private readonly LOGIN_API_URL = `${this.BASE_API_URL}/auths/login`;
 
   private readonly isLoggedInSignal = signal<boolean>(!!this.jwtService.getAccessToken());
+  readonly isLoggedIn = this.isLoggedInSignal.asReadonly();
 
   loadCurrentUser(): Observable<boolean> {
     if (!this.jwtService.getAccessToken()) {

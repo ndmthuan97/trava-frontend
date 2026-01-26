@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './core/auth/pages/login/login.component';
 import { RegisterComponent } from './core/auth/pages/register/register.component';
 import { LayoutComponent } from './core/layout/layout.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -15,9 +16,9 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: LayoutComponent,
+    canActivate: [authGuard],
     children: [
-      // Add dashboard children here
-      { path: '', loadComponent: () => import('./core/auth/pages/login/login.component').then(m => m.LoginComponent) } // Placeholder
+      { path: '', loadComponent: () => import('./core/auth/pages/login/login.component').then(m => m.LoginComponent) }
     ]
   }
 ];
