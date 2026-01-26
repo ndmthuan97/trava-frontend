@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -13,7 +13,8 @@ import { StatusCode } from '../../../../shared/constants/status-code.constant';
 import { RegisterRequest } from '../../models/request/register-request.model';
 import { LoginRequest } from '../../models/request/login-request.model';
 import { AuthTokenResponse } from '../../models/response/auth-response.model';
-import { UserRoles } from '../../../../shared/constants/user-roles.constant';
+import { JwtService } from '../jwt/jwt.service';
+import { UserService } from '../../../../shared/services/api/user/user.service';
 
 @Injectable({
   providedIn: 'root',
@@ -21,11 +22,30 @@ import { UserRoles } from '../../../../shared/constants/user-roles.constant';
 export class AuthService {
   private readonly router = inject(Router);
   private readonly requestService = inject(RequestService);
+  private readonly jwtService = inject(JwtService);
   private readonly toastService = inject(ToastService);
+  private readonly userService = inject(UserService);
 
   private readonly BASE_API_URL = environment.baseApiUrl;
   private readonly REGISTER_API_URL = `${this.BASE_API_URL}/auths/register`;
   private readonly LOGIN_API_URL = `${this.BASE_API_URL}/auths/login`;
+
+  private readonly isLoggedInSignal = signal<boolean>(!!this.jwtService.getAccessToken());
+
+  loadCurrentUser(): Observable<boolean> {
+    if (!this.jwtService.getAccessToken()) {
+      return of(true);
+    }
+    return this.userService.getCurrentUserProfile().pipe(
+      map(user => {
+        if (user) {
+          this.isLoggedInSignal.set(true);
+        }
+        return true;
+      }),
+      catchError(() => of(true))
+    );
+  }
 
   register(request: RegisterRequest): Observable<void | null> {
     return this.requestService.post<void>(this.REGISTER_API_URL, request).pipe(
@@ -51,19 +71,40 @@ export class AuthService {
   login(request: LoginRequest): Observable<AuthTokenResponse | null> {
     return this.requestService.post<AuthTokenResponse>(this.LOGIN_API_URL, request).pipe(
       map(res => {
-        if (res.statusCode === StatusCode.SUCCESS) {
-          this.toastService.success('Đăng nhập thành công', 'Chào mừng bạn quay trở lại!');
-          this.router.navigateByUrl('/');
-          return res.data ?? null;
+        if (!res.statusCode || !res.data) {
+          this.toastService.error('Đăng nhập thất bại', 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
+          return null;
         }
-        this.toastService.error('Đăng nhập thất bại', 'Email hoặc mật khẩu không chính xác.');
-        return null;
+
+        switch (res.statusCode) {
+          case StatusCode.SUCCESS:
+            this.handleLoginSuccess(res.data);
+            return res.data;
+          default:
+            this.toastService.error(
+              'Đăng nhập thất bại',
+              'Đã có lỗi xảy ra, vui lòng thử lại sau.'
+            );
+            return null;
+        }
       }),
       catchError(err => {
         this.handleLoginError(err);
         return of(null);
       })
     );
+  }
+
+  private handleTokenStorage(data: AuthTokenResponse): void {
+    const { accessToken, refreshToken, expiresIn } = data;
+    this.jwtService.setAccessToken(accessToken);
+    this.jwtService.setRefreshToken(refreshToken);
+    this.jwtService.setExpiresDate(new Date(Date.now() + expiresIn * 1000).toISOString());
+  }
+
+  handleLoginSuccess(data: AuthTokenResponse): void {
+    this.handleTokenStorage(data);
+    this.redirectUserAfterLogin();
   }
 
   private handleRegisterError(err: HttpErrorResponse): void {
@@ -98,5 +139,23 @@ export class AuthService {
       default:
         this.toastService.error('Đăng nhập thất bại', 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
     }
+  }
+
+  redirectUserAfterLogin(): void {
+    this.userService.getCurrentUserProfile().subscribe(user => {
+      if (!user) {
+        this.toastService.error('Lỗi hệ thống.', 'Không thể lấy thông tin người dùng.');
+        return;
+      }
+
+      this.isLoggedInSignal.set(true);
+      this.router.navigateByUrl('/', { replaceUrl: true });
+    });
+  }
+
+  logout(): void {
+    this.jwtService.clearAll();
+    this.isLoggedInSignal.set(false);
+    this.router.navigateByUrl('/auth/login');
   }
 }
