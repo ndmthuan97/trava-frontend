@@ -6,7 +6,10 @@ import { Observable, catchError, map, of } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 
-import { RequestOptions, RequestService } from '../../../../shared/services/core/request/request.service';
+import {
+  RequestOptions,
+  RequestService,
+} from '../../../../shared/services/core/request/request.service';
 import { ToastService } from '../../../../shared/services/core/toast/toast.service';
 
 import { StatusCode } from '../../../../shared/constants/status-code.constant';
@@ -49,26 +52,21 @@ export class AuthService {
   }
 
   register(request: RegisterRequest, options?: RequestOptions): Observable<void | null> {
-    return this.requestService
-      .post<void>(this.REGISTER_API_URL, request, options)
-      .pipe(
-        map(res => {
-          if (res.statusCode === StatusCode.SUCCESS || res.statusCode === StatusCode.CREATED) {
-            this.toastService.success(
-              'Đăng ký thành công',
-              'Vui lòng kiểm tra email để xác minh tài khoản.'
-            );
-            this.router.navigateByUrl('/auth/login');
-            return;
-          }
-          this.toastService.error('Đăng ký thất bại', 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
-          return null;
-        }),
-        catchError(err => {
-          this.handleRegisterError(err);
-          return of(null);
-        })
-      );
+    return this.requestService.post<void>(this.REGISTER_API_URL, request, options).pipe(
+      map(res => {
+        if (res.statusCode === StatusCode.SUCCESS || res.statusCode === StatusCode.CREATED) {
+          this.toastService.success('Đăng ký thành công', 'Chúc mừng bạn đã đăng ký thành công!');
+          this.router.navigateByUrl('/auth/login');
+          return;
+        }
+        this.toastService.error('Đăng ký thất bại', 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
+        return null;
+      }),
+      catchError(err => {
+        this.handleRegisterError(err);
+        return of(null);
+      })
+    );
   }
 
   login(request: LoginRequest, options?: RequestOptions): Observable<AuthTokenResponse | null> {
