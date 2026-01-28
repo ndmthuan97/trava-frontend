@@ -1,11 +1,11 @@
 <aside
-  class="bg-sidebar text-sidebar-foreground border-sidebar-border flex flex-col overflow-y-auto border-r transition-all duration-300"
+  class="flex flex-col overflow-y-auto border-r border-gray-200 bg-white text-gray-900 transition-all duration-300"
   [ngClass]="open ? 'w-64' : 'w-20'">
   <!-- Logo -->
-  <div class="border-sidebar-border border-b p-6">
+  <div class="border-b border-gray-200 p-6">
     <div class="flex items-center gap-3">
       <div
-        class="bg-primary flex h-8 w-8 items-center justify-center rounded-lg font-bold text-white">
+        class="flex h-8 w-8 items-center justify-center rounded-lg bg-black font-bold text-white">
         T
       </div>
       <span *ngIf="open" class="text-lg font-bold"> Trava </span>
@@ -16,12 +16,10 @@
   <nav class="flex-1 space-y-2 p-4">
     <!-- Menu -->
     <div>
-      <h3 *ngIf="open" class="text-sidebar-foreground/60 px-3 py-2 text-xs font-semibold uppercase">
-        Menu
-      </h3>
+      <h3 *ngIf="open" class="px-3 py-2 text-xs font-semibold uppercase text-gray-500/60">Menu</h3>
 
       <button
-        class="bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent/80 flex w-full items-center gap-3 rounded-lg px-3 py-2">
+        class="flex w-full items-center gap-3 rounded-lg bg-gray-100 px-3 py-2 text-gray-900 hover:bg-gray-200">
         <i class="pi pi-home text-lg"></i>
         <span *ngIf="open">Dashboard</span>
       </button>
@@ -29,22 +27,20 @@
 
     <!-- Pages -->
     <div class="pt-2">
-      <h3 *ngIf="open" class="text-sidebar-foreground/60 px-3 py-2 text-xs font-semibold uppercase">
-        Pages
-      </h3>
+      <h3 *ngIf="open" class="px-3 py-2 text-xs font-semibold uppercase text-gray-500/60">Pages</h3>
 
       <div class="space-y-1">
-        <button class="hover:bg-sidebar-accent flex w-full items-center gap-3 rounded-lg px-3 py-2">
+        <button class="flex w-full items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-200">
           <i class="pi pi-lock text-lg"></i>
           <span *ngIf="open" class="text-sm">Authentication</span>
         </button>
 
-        <button class="hover:bg-sidebar-accent flex w-full items-center gap-3 rounded-lg px-3 py-2">
+        <button class="flex w-full items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-200">
           <i class="pi pi-exclamation-circle text-lg"></i>
           <span *ngIf="open" class="text-sm">Error Pages</span>
         </button>
 
-        <button class="hover:bg-sidebar-accent flex w-full items-center gap-3 rounded-lg px-3 py-2">
+        <button class="flex w-full items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-200">
           <i class="pi pi-cog text-lg"></i>
           <span *ngIf="open" class="text-sm">Settings</span>
         </button>

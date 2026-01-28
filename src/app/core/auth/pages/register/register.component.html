@@ -63,6 +63,7 @@
           type="submit"
           label="Sign Up"
           [disabled]="!registerForm.valid"
+          [loading]="isLoading()"
           styleClass="w-full"
           severity="primary" />
 

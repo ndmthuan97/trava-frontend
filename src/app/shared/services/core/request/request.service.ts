@@ -13,21 +13,13 @@ export interface ApiResponse<T = null | undefined> {
  * Các tùy chọn bổ sung cho mỗi Request để cấu hình behavior của Interceptors.
  */
 export interface RequestOptions {
-  /** true: Không gửi kèm Access Token (dùng cho Login/Register) */
-  bypassAuth?: boolean;
-  /** true: Không hiển thị thông báo lỗi 401/403 tự động */
-  bypassAuthError?: boolean;
-  /** true: Không hiển thị thông báo lỗi 404 tự động */
-  bypassNotFoundError?: boolean;
-  /** true (mặc định): Hiển thị Loading Overlay trong khi chờ request */
   showLoading?: boolean;
-  /** Định danh vùng loading nếu muốn hiển thị loading cục bộ thay vì toàn trang */
   loadingKey?: string;
 }
 
 /**
  * Service trung tâm để thực hiện tất cả các luồng gọi API HTTP.
- * 
+ *
  * Flow hoạt động:
  * 1. Nhận URL và tham số từ Component/Service khác.
  * 2. Sử dụng `request-utils` để:

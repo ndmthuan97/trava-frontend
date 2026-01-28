@@ -36,6 +36,7 @@
         <p-button
           type="submit"
           label="Sign In"
+          [loading]="loading"
           [disabled]="!loginForm.valid"
           styleClass="w-full"
           severity="primary" />

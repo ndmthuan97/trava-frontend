@@ -11,11 +11,13 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { AuthService } from './core/auth/services/auth/auth.service';
 import { firstValueFrom } from 'rxjs';
 
+import { loadingInterceptor } from './core/interceptors/loading.interceptor';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor])),
     provideAnimationsAsync(),
     MessageService,
     providePrimeNG({

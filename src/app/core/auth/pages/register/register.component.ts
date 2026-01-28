@@ -32,9 +32,10 @@ export class RegisterComponent {
   private readonly loadingService = inject(LoadingService);
   private readonly authService = inject(AuthService);
 
-  registerForm: FormGroup;
-  isLoading = this.loadingService.isLoading;
+  // Use computed to check loading state for 'register' key
+  isLoading = () => this.loadingService.isLoading('register');
   submitted = signal<boolean>(false);
+  registerForm: FormGroup;
 
   constructor() {
     this.registerForm = this.fb.group(
@@ -60,19 +61,8 @@ export class RegisterComponent {
 
     if (this.registerForm.invalid) return;
 
-    this.loadingService.setLoading(true);
     const request: RegisterRequest = this.registerForm.value;
 
-    this.authService.register(request).subscribe({
-      next: () => {
-        this.loadingService.setLoading(false);
-      },
-      error: () => {
-        this.loadingService.setLoading(false);
-      },
-      complete: () => {
-        this.loadingService.setLoading(false);
-      },
-    });
+    this.authService.register(request, { loadingKey: 'register' }).subscribe();
   }
 }
