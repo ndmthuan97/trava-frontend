@@ -1,1 +1,20 @@
-<p>information works!</p>
+<div class="relative">
+  <button
+    (click)="menu.toggle($event)"
+    class="hover:bg-muted flex items-center gap-4 rounded-lg py-2 transition-colors">
+    <span class="text-foreground hidden text-sm font-medium sm:inline">
+      {{ user()?.fullName || 'User' }}
+    </span>
+
+    <div class="relative">
+      <img
+        [src]="
+          user()?.avatarUrl ||
+          'https://static.wikia.nocookie.net/party-animals/images/1/1a/NemoAvatar.png'
+        "
+        alt="User avatar"
+        class="h-8 w-8 rounded-full object-cover" />
+    </div>
+  </button>
+  <p-menu #menu [model]="items" [popup]="true" appendTo="body" />
+</div>
