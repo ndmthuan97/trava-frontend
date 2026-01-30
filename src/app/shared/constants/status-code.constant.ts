@@ -1,46 +1,45 @@
 export enum StatusCode {
-  // Positive
-  SUCCESS = 2000,
-  CREATED = 2001,
-  UPDATED = 2002,
-  DELETED = 2003,
-  NO_CONTENT = 2004,
+  Success = 2000,
+  Created = 2001,
+  Updated = 2002,
+  Deleted = 2003,
+  NoContent = 2004,
 
   // Error
-  MODEL_INVALID = 4000,
-  UNAUTHORIZED = 4001,
-  FORBIDDEN = 4003,
-  SYSTEM_ERROR = 5000,
+  ModelInvalid = 4000,
+  Unauthorized = 4001,
+  Forbidden = 4003,
+  SystemError = 5000,
 
-  INVALID_TOKEN = 4004,
-  EMAIL_ALREADY_EXISTS = 4005,
-  PROVIDED_INFORMATION_IS_INVALID = 4006,
-  USER_NOT_EXISTS = 4007,
-  USER_NOT_CONFIRMED = 4008,
-  INVALID_CREDENTIALS = 4009,
-  USER_ACCOUNT_LOCKED = 4010,
-  CONFIRM_EMAIL_TOKEN_INVALID_OR_EXPIRED = 4011,
-  USER_ALREADY_CONFIRMED = 4012,
-  NEW_PASSWORD_SAME_AS_OLD = 4013,
-  OTP_INVALID_OR_EXPIRED = 4014,
-  TWO_FACTOR_IS_ALREADY_ENABLED = 4015,
-  TWO_FACTOR_IS_ALREADY_DISABLED = 4016,
-  USER_ID_NOT_FOUND = 4017,
-  ACCESS_TOKEN_INVALID_OR_EXPIRED = 4018,
-  UNAUTHORIZED_ACTION = 4019,
+  InvalidToken = 4004,
+  EmailAlreadyExists = 4005,
+  ProvidedInformationIsInValid = 4006,
+  UserNotExists = 4007,
+  UserNotConfirmed = 4008,
+  InvalidCredentials = 4009,
+  UserAccountLocked = 4010,
+  ConfirmEmailTokenInvalidOrExpired = 4011,
+  UserAlreadyConfirmed = 4012,
+  NewPasswordSameAsOld = 4013,
+  OtpInvalidOrExpired = 4014,
+  TwoFactorIsAlreadyEnabled = 4015,
+  TwoFactorIsAlreadyDisabled = 4016,
+  UserIdNotFound = 4017,
+  AccessTokenInvalidOrExpired = 4018,
+  UnauthorizedAction = 4019,
 
-  // Space Error
-  SPACE_NOT_FOUND = 4100,
-  SPACE_NAME_ALREADY_EXISTS = 4101,
+  //Space Error
+  SpaceNotFound = 4100,
+  SpaceNameAlreadyExists = 4101,
 
-  // TaskItem Error
-  TASK_ITEM_NOT_FOUND = 4200,
-  PARENT_TASK_ITEM_NOT_FOUND = 4201,
-  TASK_ITEM_TITLE_ALREADY_EXISTS = 4202,
-  PARENT_TASK_ITEM_NOT_EXIST_IN_SPACE = 4203,
-  ASSIGNED_USER_NOT_IN_SPACE = 4204,
+  //TaskItem Error
+  TaskItemNotFound = 4200,
+  ParentTaskItemNotFound = 4201,
+  TaskItemTitleAlreadyExists = 4202,
+  ParentTaskItemNotExistInSpace = 4203,
+  AssignedUserNotInSpace = 4204,
 
-  // Space Invitation Error
-  SPACE_INVITATION_NOT_FOUND = 4300,
-  INVALID_INVITATION_STATUS_TRANSITION = 4301,
+  //Space Invitation Error
+  SpaceInvitationNotFound = 4300,
+  InvalidInvitationStatusTransition = 4301,
 }

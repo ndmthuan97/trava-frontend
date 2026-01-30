@@ -1,0 +1,42 @@
+<app-dialog
+  header="Create Space"
+  [(visible)]="visible"
+  confirmLabel="Create"
+  cancelLabel="Cancel"
+  (confirm)="confirmAddSpace()"
+  (cancel)="cancelAddSpace()">
+  <div class="flex flex-col gap-6 py-2">
+    <div class="flex flex-col gap-2">
+      <label for="name" class="text-sm font-bold text-slate-700">Name</label>
+      <input
+        pInputText
+        id="name"
+        [(ngModel)]="spaceData().name"
+        placeholder="e.g. Project Alpha"
+        class="w-full !border-gray-200 !rounded-lg focus:!border-emerald-500 focus:!ring-1 focus:!ring-emerald-500" />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="type" class="text-sm font-bold text-slate-700">Type</label>
+      <p-select
+        id="type"
+        [options]="typeOptions"
+        [(ngModel)]="spaceData().spaceType"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select a type"
+        styleClass="w-full !border-gray-200 !rounded-lg focus:!border-emerald-500"></p-select>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="description" class="text-sm font-bold text-slate-700">Description</label>
+      <textarea
+        pInputTextarea
+        id="description"
+        [(ngModel)]="spaceData().description"
+        placeholder="What's this space for?"
+        class="w-full !border-gray-200 !rounded-lg focus:!border-emerald-500 focus:!ring-1 focus:!ring-emerald-500"
+        rows="3"></textarea>
+    </div>
+  </div>
+</app-dialog>

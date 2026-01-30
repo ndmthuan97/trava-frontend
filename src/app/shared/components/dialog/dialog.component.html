@@ -1,0 +1,26 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  dismissableMask="true"
+  [style]="{ width: '25rem' }"
+  [appendTo]="'body'"
+  [contentStyleClass]="customeClass()">
+  <ng-template pTemplate="header">
+    <h2 class="text-xl font-bold">{{ header() }}</h2>
+  </ng-template>
+  @if (description()) {
+    <span class="dark:text-dark-100 mb-4 mt-2 block text-gray-600">{{ description() }}</span>
+  }
+  <ng-content select="[dialog-body],:not([footer])"></ng-content>
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button
+        *ngIf="cancelLabel()"
+        [label]="cancelLabel()"
+        severity="secondary"
+        (click)="onCancel()" />
+      <p-button *ngIf="confirmLabel()" [label]="confirmLabel()" (click)="onConfirm()" />
+    </div>
+    <ng-content select="[footer]"></ng-content>
+  </ng-template>
+</p-dialog>

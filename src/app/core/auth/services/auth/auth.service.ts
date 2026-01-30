@@ -11,13 +11,12 @@ import {
   RequestService,
 } from '../../../../shared/services/core/request/request.service';
 import { ToastService } from '../../../../shared/services/core/toast/toast.service';
-
-import { StatusCode } from '../../../../shared/constants/status-code.constant';
 import { RegisterRequest } from '../../models/request/register-request.model';
 import { LoginRequest } from '../../models/request/login-request.model';
 import { AuthTokenResponse } from '../../models/response/auth-response.model';
 import { JwtService } from '../jwt/jwt.service';
 import { UserService } from '../../../../shared/services/api/user/user.service';
+import { StatusCode } from '../../../../shared/constants/status-code.constant';
 
 @Injectable({
   providedIn: 'root',
@@ -54,7 +53,7 @@ export class AuthService {
   register(request: RegisterRequest, options?: RequestOptions): Observable<void | null> {
     return this.requestService.post<void>(this.REGISTER_API_URL, request, options).pipe(
       map(res => {
-        if (res.statusCode === StatusCode.SUCCESS || res.statusCode === StatusCode.CREATED) {
+        if (res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Created) {
           this.toastService.success('Đăng ký thành công', 'Chúc mừng bạn đã đăng ký thành công!');
           this.router.navigateByUrl('/auth/login');
           return;
@@ -78,7 +77,7 @@ export class AuthService {
         }
 
         switch (res.statusCode) {
-          case StatusCode.SUCCESS:
+          case StatusCode.Success:
             this.handleLoginSuccess(res.data);
             return res.data;
           default:
@@ -113,11 +112,11 @@ export class AuthService {
     const statusCode = err.error?.statusCode;
 
     switch (statusCode) {
-      case StatusCode.MODEL_INVALID:
-      case StatusCode.PROVIDED_INFORMATION_IS_INVALID:
+      case StatusCode.ModelInvalid:
+      case StatusCode.ProvidedInformationIsInValid:
         this.toastService.error('Đăng ký thất bại', 'Dữ liệu đăng ký không hợp lệ.');
         break;
-      case StatusCode.EMAIL_ALREADY_EXISTS:
+      case StatusCode.EmailAlreadyExists:
         this.toastService.error('Đăng ký thất bại', 'Email này đã được sử dụng.');
         break;
       default:
@@ -129,13 +128,13 @@ export class AuthService {
     const statusCode = err.error?.statusCode;
 
     switch (statusCode) {
-      case StatusCode.INVALID_CREDENTIALS:
+      case StatusCode.InvalidCredentials:
         this.toastService.error('Đăng nhập thất bại', 'Email hoặc mật khẩu không chính xác.');
         break;
-      case StatusCode.USER_NOT_EXISTS:
+      case StatusCode.UserNotExists:
         this.toastService.error('Đăng nhập thất bại', 'Tài khoản không tồn tại.');
         break;
-      case StatusCode.USER_ACCOUNT_LOCKED:
+      case StatusCode.UserAccountLocked:
         this.toastService.error('Đăng nhập thất bại', 'Tài khoản đã bị khóa.');
         break;
       default:

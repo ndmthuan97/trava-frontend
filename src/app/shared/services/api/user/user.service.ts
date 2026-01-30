@@ -4,7 +4,6 @@ import { ToastService } from '../../core/toast/toast.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { User } from '../../../models/entities/user.model';
-
 import { StatusCode } from '../../../constants/status-code.constant';
 
 @Injectable({
@@ -32,7 +31,7 @@ export class UserService {
   }
 
   private handleGetProfileSideEffect(res: any): void {
-    if (res.statusCode === StatusCode.SUCCESS && res.data) {
+    if (res.statusCode === StatusCode.Success && res.data) {
       this.setCurrentUser(res.data);
     } else {
       this.toastService.error('Lấy thông tin người dùng thất bại', 'Vui lòng thử lại sau.');
@@ -49,7 +48,7 @@ export class UserService {
   }
 
   private extractUserFromResponse(res: any): User | null {
-    if (res.statusCode === StatusCode.SUCCESS && res.data) {
+    if (res.statusCode === StatusCode.Success && res.data) {
       return res.data;
     }
     return null;
