@@ -4,25 +4,46 @@ import { RequestService } from './../../core/request/request.service';
 import { inject, Injectable } from '@angular/core';
 import { Space } from '../../../models/entities/space.model';
 import { CreateSpaceRequest } from '../../../models/request/space-request.model';
+import { ToastService } from '../../core/toast/toast.service';
+import { StatusCode } from '../../../constants/status-code.constant';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SpaceService {
   private readonly requestService = inject(RequestService);
+  private readonly toastService = inject(ToastService);
 
   private readonly BASE_API_URL = environment.baseApiUrl;
   private readonly SPACE_API_URL = `${this.BASE_API_URL}/spaces`;
 
   getSpacesByUserId(): Observable<Space[]> {
     return this.requestService
-      .get<Space[] | null>(`${this.SPACE_API_URL}/my-spaces`)
-      .pipe(map(res => res.data || []));
+      .get<Space[]>(`${this.SPACE_API_URL}/my-spaces`, {}, { showLoading: true })
+      .pipe(
+        map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : []),
+        catchError(() => {
+          this.toastService.error(
+            'Lấy danh sách không gian làm việc thất bại',
+            'Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.'
+          );
+          return of([]);
+        })
+      );
   }
 
   createSpace(space: CreateSpaceRequest): Observable<Space | null> {
     return this.requestService
-      .post<Space | null>(this.SPACE_API_URL, space)
-      .pipe(map(res => res.data ?? null));
+      .post<Space>(this.SPACE_API_URL, space, { showLoading: true })
+      .pipe(
+        map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : null),
+        catchError(() => {
+          this.toastService.error(
+            'Tạo không gian làm việc thất bại',
+            'Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.'
+          );
+          return of(null);
+        })
+      );
   }
 }

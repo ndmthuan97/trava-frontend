@@ -1,0 +1,36 @@
+<div class="max-w-7xl w-full mx-auto pb-20">
+  <!-- Mockup style header -->
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+      Workspaces
+    </h2>
+    <!-- <button 
+      (click)="addSpace()" 
+      class="flex items-center justify-center w-6 h-6 rounded-md hover:bg-gray-100 transition-colors text-gray-500 hover:text-black">
+      <i class="pi pi-plus text-xs"></i>
+    </button> -->
+    <p-button label="Add" icon="pi pi-plus" (click)="addSpace()" iconPos="right" size="small" />
+  </div>
+
+  <!-- Space cards grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <app-space-card
+      *ngFor="let space of spaces()"
+      [space]="space"
+      [open]="true"
+      (click)="onSpaceSelect(space)"
+      class="hover:scale-[1.02] transition-transform duration-200 cursor-pointer"
+    />
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="spaces().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-100 mt-4">
+    <i class="pi pi-box text-5xl text-gray-200 mb-4"></i>
+    <p class="text-gray-400 font-medium">No workspaces found</p>
+    <button (click)="addSpace()" class="mt-4 text-black font-bold hover:underline">
+      Create your first workspace
+    </button>
+  </div>
+</div>
+
+<app-create-space [(visible)]="showAddSpaceDialog" (created)="loadSpaces()" />

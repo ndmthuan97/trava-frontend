@@ -6,4 +6,5 @@ export interface Space {
   description?: string;
   spaceType: SpaceType;
   createBy: string;
+  memberCount?: number;
 }

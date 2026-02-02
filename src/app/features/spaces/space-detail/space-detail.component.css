@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  background-color: #fafafa;
+  min-height: 100vh;
+}
+
+/* Custom padding for table cells */
+.py-4\.5 {
+  padding-top: 1.125rem;
+  padding-bottom: 1.125rem;
+}
+
+/* Table container styling */
+table {
+  border-spacing: 0;
+}
+
+thead th {
+  letter-spacing: 0.05em;
+}
+
+/* Hover effect for name cells */
+tr:hover .group-hover\:border-green-400 {
+  border-color: #4ade80 !important;
+}
+
+tr:hover .group-hover\:opacity-100 {
+  opacity: 1 !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+tr:not(thead tr) {
+  opacity: 0;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+tr:nth-child(1) { animation-delay: 0.1s; }
+tr:nth-child(2) { animation-delay: 0.15s; }
+tr:nth-child(3) { animation-delay: 0.2s; }
+tr:nth-child(4) { animation-delay: 0.25s; }
+tr:nth-child(5) { animation-delay: 0.3s; }

@@ -34,9 +34,9 @@ import { FooterComponent } from './footer/footer.component';
         <app-header (menuClick)="toggleSidebar()"></app-header>
 
         <!-- Dynamic Content -->
-        <!-- <main class="flex-1 overflow-y-auto p-8">
+        <main class="flex-1 overflow-y-auto p-8">
           <router-outlet></router-outlet>
-        </main> -->
+        </main>
 
         <!-- Footer -->
         <app-footer></app-footer>

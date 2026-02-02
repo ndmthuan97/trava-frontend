@@ -14,11 +14,14 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'dashboard',
+    path: '',
     component: LayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', loadComponent: () => import('./core/auth/pages/login/login.component').then(m => m.LoginComponent) }
+      { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'users', loadComponent: () => import('./features/user/user.component').then(m => m.UserComponent) },
+      { path: 'spaces', loadComponent: () => import('./features/spaces/spaces-list/spaces-list.component').then(m => m.SpacesListComponent) },
+      { path: 'spaces/:id', loadComponent: () => import('./features/spaces/space-detail/space-detail.component').then(m => m.SpaceDetailComponent) }
     ]
   }
 ];
