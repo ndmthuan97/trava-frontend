@@ -1,0 +1,19 @@
+:host ::ng-deep .p-button-outlined {
+    background-color: #64748b !important; 
+    color: white !important;
+    border: none !important;
+}
+
+:host ::ng-deep .p-button-outlined:hover {
+    background-color: #475569 !important; 
+}
+
+:host ::ng-deep .p-avatar {
+    border: 4px solid #f1f5f9;
+}
+
+:host ::ng-deep .p-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

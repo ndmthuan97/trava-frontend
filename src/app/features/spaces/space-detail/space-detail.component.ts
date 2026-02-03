@@ -11,6 +11,9 @@ import { BadgeComponent, BadgeVariant } from '../../../shared/components/badge/b
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { TooltipModule } from 'primeng/tooltip';
+import { SpaceService } from '../../../shared/services/api/space/space.service';
+import { TaskItemService } from '../../../shared/services/api/task-item/task-item.service';
+import { Space } from '../../../shared/models/entities/space.model';
 
 @Component({
   selector: 'app-space-detail',
@@ -21,80 +24,53 @@ import { TooltipModule } from 'primeng/tooltip';
 })
 export class SpaceDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly spaceService = inject(SpaceService);
+  private readonly taskItemService = inject(TaskItemService);
 
   spaceId = signal<string | null>(null);
-
+  spaceInfo = signal<Space>(null as any);
   // Mock tasks for the space
-  tasks = signal<Task[]>([
-    {
-      id: '1',
-      spaceId: 'space-1',
-      title: 'Practice Project',
-      description: 'Build a small project to practice Angular',
-      status: TaskStatus.ToDo,
-      priority: TaskPriority.High,
-      point: 5,
-      startDate: 'Today, 2:30pm',
-      dueDate: 'Tomorrow, 5:00pm',
-      type: TaskType.Personal,
-      assignedUser: {
-        id: 'u1',
-        email: 'alex@example.com',
-        fullName: 'Alex Johnson',
-        avatarUrl: 'https://i.pravatar.cc/150?u=u1',
-        role: 'USER' as any,
-        status: 'Active' as any,
-        password: '',
-      },
-    },
-    {
-      id: '2',
-      spaceId: 'space-1',
-      title: 'Angular Full Course',
-      description: 'Watch the full course on YouTube',
-      status: TaskStatus.InProgress,
-      priority: TaskPriority.Medium,
-      point: 8,
-      startDate: 'Today, 4:15pm',
-      type: TaskType.Personal,
-      assignedUser: {
-        id: 'u2',
-        email: 'sarah@example.com',
-        fullName: 'Sarah Wilson',
-        avatarUrl: 'https://i.pravatar.cc/150?u=u2',
-        role: 'USER' as any,
-        status: 'Active' as any,
-        password: '',
-      },
-    },
-    {
-      id: '3',
-      spaceId: 'space-1',
-      title: 'Daily Listening',
-      description: 'Listen to English podcast',
-      status: TaskStatus.Done,
-      priority: TaskPriority.Low,
-      point: 3,
-      startDate: 'Today, 9:30pm',
-      type: TaskType.Personal,
-    },
-    {
-      id: '4',
-      spaceId: 'space-1',
-      title: 'Reading Book',
-      description: 'Read 20 pages of Clean Code',
-      status: TaskStatus.ToDo,
-      priority: TaskPriority.Medium,
-      point: 2,
-      startDate: 'Today, 10:15pm',
-      type: TaskType.Personal,
-    },
-  ]);
+  tasks = signal<Task[]>([]);
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.spaceId.set(params.get('id'));
-      console.log('Viewing space:', this.spaceId());
+      const id = this.spaceId();
+      if (id) {
+        this.getSpaceInfo(id);
+        this.getTasksBySpace(id);
+      }
+    });
+  }
+
+  getSpaceInfo(spaceId: string): void {
+    this.spaceService.getSpaceById(spaceId).subscribe({
+      next: space => {
+        if (space) {
+          this.spaceInfo.set(space);
+        }
+      },
+      error: error => {
+        console.error('Error fetching space info:', error);
+      },
+    });
+  }
+
+  getTasksBySpace(spaceId: string): void {
+    const params = {
+      SpaceId: spaceId,
+      PageIndex: 1,
+      PageSize: 12,
+      IsPagingEnabled: true,
+    } as any;
+
+    this.taskItemService.getTasksBySpace(params).subscribe({
+      next: tasks => {
+        this.tasks.set(tasks ?? []);
+      },
+      error: err => {
+        console.error('Error fetching tasks for space:', err);
+      },
     });
   }
 

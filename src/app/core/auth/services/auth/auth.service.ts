@@ -15,6 +15,7 @@ import { RegisterRequest } from '../../models/request/register-request.model';
 import { LoginRequest } from '../../models/request/login-request.model';
 import { AuthTokenResponse } from '../../models/response/auth-response.model';
 import { RefreshTokenRequest } from '../../models/request/refresh-token-request.model';
+import { ChangePasswordRequest } from '../../models/request/change-password-request.model';
 import { JwtService } from '../jwt/jwt.service';
 import { UserService } from '../../../../shared/services/api/user/user.service';
 import { StatusCode } from '../../../../shared/constants/status-code.constant';
@@ -33,6 +34,7 @@ export class AuthService {
   private readonly REGISTER_API_URL = `${this.BASE_API_URL}/auths/register`;
   private readonly LOGIN_API_URL = `${this.BASE_API_URL}/auths/login`;
   private readonly REFRESH_TOKEN_API_URL = `${this.BASE_API_URL}/auths/refresh-token`;
+  private readonly CHANGE_PASSWORD_API_URL = `${this.BASE_API_URL}/auths/change-password`;
 
   private readonly isLoggedInSignal = signal<boolean>(!!this.jwtService.getAccessToken());
   readonly isLoggedIn = this.isLoggedInSignal.asReadonly();
@@ -56,11 +58,11 @@ export class AuthService {
     return this.requestService.post<void>(this.REGISTER_API_URL, request, options).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Created) {
-          this.toastService.success('Đăng ký thành công', 'Chúc mừng bạn đã đăng ký thành công!');
+          this.toastService.success('Registration successful', 'Congratulations! You have registered successfully.');
           this.router.navigateByUrl('/auth/login');
           return;
         }
-        this.toastService.error('Đăng ký thất bại', 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
+        this.toastService.error('Registration failed', 'An error occurred, please try again later.');
         return null;
       }),
       catchError(err => {
@@ -74,7 +76,7 @@ export class AuthService {
     return this.requestService.post<AuthTokenResponse>(this.LOGIN_API_URL, request, options).pipe(
       map(res => {
         if (!res.statusCode || !res.data) {
-          this.toastService.error('Đăng nhập thất bại', 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
+          this.toastService.error('Login failed', 'An error occurred, please try again later.');
           return null;
         }
 
@@ -84,8 +86,8 @@ export class AuthService {
             return res.data;
           default:
             this.toastService.error(
-              'Đăng nhập thất bại',
-              'Đã có lỗi xảy ra, vui lòng thử lại sau.'
+              'Login failed',
+              'An error occurred, please try again later.'
             );
             return null;
         }
@@ -138,7 +140,7 @@ export class AuthService {
 
   handleLoginSuccess(data: AuthTokenResponse): void {
     this.handleTokenStorage(data);
-    this.toastService.success('Đăng nhập thành công', 'Chào mừng bạn quay trở lại!');
+    this.toastService.success('Login successful', 'Welcome back!');
     this.redirectUserAfterLogin();
   }
 
@@ -148,13 +150,13 @@ export class AuthService {
     switch (statusCode) {
       case StatusCode.ModelInvalid:
       case StatusCode.ProvidedInformationIsInValid:
-        this.toastService.error('Đăng ký thất bại', 'Dữ liệu đăng ký không hợp lệ.');
+        this.toastService.error('Registration failed', 'Invalid registration data.');
         break;
       case StatusCode.EmailAlreadyExists:
-        this.toastService.error('Đăng ký thất bại', 'Email này đã được sử dụng.');
+        this.toastService.error('Registration failed', 'This email is already in use.');
         break;
       default:
-        this.toastService.error('Đăng ký thất bại', 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
+        this.toastService.error('Registration failed', 'An error occurred, please try again later.');
     }
   }
 
@@ -163,23 +165,23 @@ export class AuthService {
 
     switch (statusCode) {
       case StatusCode.InvalidCredentials:
-        this.toastService.error('Đăng nhập thất bại', 'Email hoặc mật khẩu không chính xác.');
+        this.toastService.error('Login failed', 'Incorrect email or password.');
         break;
       case StatusCode.UserNotExists:
-        this.toastService.error('Đăng nhập thất bại', 'Tài khoản không tồn tại.');
+        this.toastService.error('Login failed', 'Account does not exist.');
         break;
       case StatusCode.UserAccountLocked:
-        this.toastService.error('Đăng nhập thất bại', 'Tài khoản đã bị khóa.');
+        this.toastService.error('Login failed', 'Account has been locked.');
         break;
       default:
-        this.toastService.error('Đăng nhập thất bại', 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
+        this.toastService.error('Login failed', 'An error occurred, please try again later.');
     }
   }
 
   redirectUserAfterLogin(): void {
     this.userService.getCurrentUserProfile().subscribe(user => {
       if (!user) {
-        this.toastService.error('Lỗi hệ thống.', 'Không thể lấy thông tin người dùng.');
+        this.toastService.error('System error.', 'Could not retrieve user information.');
         return;
       }
 
@@ -192,5 +194,22 @@ export class AuthService {
     this.jwtService.clearAll();
     this.isLoggedInSignal.set(false);
     this.router.navigateByUrl('/auth/login');
+  }
+
+  changePassword(request: ChangePasswordRequest): Observable<boolean> {
+    return this.requestService.post<any>(this.CHANGE_PASSWORD_API_URL, request).pipe(
+      map(res => {
+        if (res.statusCode === StatusCode.Success) {
+          this.toastService.success('Password changed successfully', 'Your password has been changed.');
+          return true;
+        }
+        return false;
+      }),
+      catchError(err => {
+        const message = err.error?.message || 'An error occurred, please try again later.';
+        this.toastService.error('Password change failed', message);
+        return of(false);
+      })
+    );
   }
 }

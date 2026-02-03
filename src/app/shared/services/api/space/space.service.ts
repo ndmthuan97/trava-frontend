@@ -21,11 +21,11 @@ export class SpaceService {
     return this.requestService
       .get<Space[]>(`${this.SPACE_API_URL}/my-spaces`, {}, { showLoading: true })
       .pipe(
-        map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : []),
+        map(res => (res.statusCode === StatusCode.Success && res.data ? res.data : [])),
         catchError(() => {
           this.toastService.error(
-            'Lấy danh sách không gian làm việc thất bại',
-            'Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.'
+            'Failed to load workspaces',
+            'An error occurred during processing. Please try again later.'
           );
           return of([]);
         })
@@ -33,14 +33,27 @@ export class SpaceService {
   }
 
   createSpace(space: CreateSpaceRequest): Observable<Space | null> {
+    return this.requestService.post<Space>(this.SPACE_API_URL, space, { showLoading: true }).pipe(
+      map(res => (res.statusCode === StatusCode.Success && res.data ? res.data : null)),
+      catchError(() => {
+        this.toastService.error(
+          'Failed to create workspace',
+          'An error occurred during processing. Please try again later.'
+        );
+        return of(null);
+      })
+    );
+  }
+
+  getSpaceById(spaceId: string): Observable<Space | null> {
     return this.requestService
-      .post<Space>(this.SPACE_API_URL, space, { showLoading: true })
+      .get<Space>(`${this.SPACE_API_URL}/${spaceId}`, {}, { showLoading: true })
       .pipe(
-        map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : null),
+        map(res => (res.statusCode === StatusCode.Success && res.data ? res.data : null)),
         catchError(() => {
           this.toastService.error(
-            'Tạo không gian làm việc thất bại',
-            'Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.'
+            'Failed to load workspace information',
+            'An error occurred during processing. Please try again later.'
           );
           return of(null);
         })

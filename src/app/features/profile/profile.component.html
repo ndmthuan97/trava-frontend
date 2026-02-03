@@ -1,0 +1,126 @@
+<div class="min-h-[calc(100vh-64px)] bg-slate-50 p-8">
+  <div class="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row" [formGroup]="profileForm">
+    <!-- Left Column: Profile Overview -->
+    <div class="flex w-full shrink-0 flex-col rounded-xl bg-white p-8 shadow-sm lg:w-[350px]">
+      <div class="mb-8 border-b border-slate-100 pb-8 text-center">
+        <div class="mb-6 flex justify-center">
+          <p-avatar 
+            [image]="currentUser?.avatarUrl || 'https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png'" 
+            shape="circle" 
+            [style]="{ 'width': '120px', 'height': '120px' }">
+          </p-avatar>
+        </div>
+        <h2 class="mb-2 text-2xl font-bold text-slate-900">{{ profileForm.get('personalDetails.fullName')?.value || 'User' }}</h2>
+        <p class="text-base text-slate-500">{{ profileForm.get('personalDetails.email')?.value || 'No email' }}</p>
+      </div>
+      <div class="mt-auto flex justify-center border-t border-slate-100 pt-4" *ngIf="!isReadOnly">
+        <p-button 
+          label="Change Password" 
+          icon="pi pi-lock" 
+          styleClass="p-button-outlined w-full"
+          (onClick)="showChangePasswordDialog()">
+        </p-button>
+      </div>
+    </div>
+
+    <!-- Right Column: Profile Form -->
+    <div class="flex flex-1 flex-col rounded-xl bg-white p-8 shadow-sm">
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="flex h-full flex-col">
+        <!-- Personal Details Section -->
+        <div class="mb-10 grow">
+          <h3 class="mb-6 text-xl font-semibold text-blue-600">Personal Details</h3>
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2" formGroupName="personalDetails">
+            <div class="flex flex-col gap-2">
+              <label for="fullName" class="text-sm font-medium text-slate-900">Full Name</label>
+              <input pInputText id="fullName" formControlName="fullName" placeholder="Enter full name" class="w-full rounded-md border border-slate-300 p-3" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="email" class="text-sm font-medium text-slate-900">Email</label>
+              <input pInputText id="email" formControlName="email" placeholder="Enter email ID" class="w-full rounded-md border border-slate-300 p-3" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="phone" class="text-sm font-medium text-slate-900">Phone</label>
+              <input pInputText id="phone" formControlName="phone" placeholder="Enter phone number" class="w-full rounded-md border border-slate-300 p-3" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="dob" class="text-sm font-medium text-slate-900">Date of Birth</label>
+              <p-datepicker 
+                id="dob" 
+                formControlName="dob" 
+                placeholder="Select date of birth" 
+                dateFormat="dd/mm/yy"
+                [showIcon]="true"
+                [iconDisplay]="'input'"
+                styleClass="w-full"
+                inputStyleClass="w-full rounded-md border-slate-300 p-3 shadow-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+              </p-datepicker>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="mt-auto flex justify-end gap-4 border-t border-slate-100 pt-4" *ngIf="!isReadOnly">
+          <p-button label="Cancel" severity="secondary" (onClick)="onCancel()" styleClass="p-button-outlined"></p-button>
+          <p-button label="Update" (onClick)="onSubmit()" styleClass="p-button-primary"></p-button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Password Dialog -->
+  <p-dialog 
+    header="Change Password" 
+    [(visible)]="displayChangePasswordDialog" 
+    [modal]="true" 
+    [style]="{ width: '450px' }" 
+    [draggable]="false" 
+    [resizable]="false">
+    <form [formGroup]="changePasswordForm" (ngSubmit)="onChangePassword()" class="flex flex-col gap-6">
+      <div class="flex flex-col gap-2">
+        <label for="currentPassword" class="text-sm font-medium text-slate-700">Current Password</label>
+        <p-password 
+          id="currentPassword" 
+          formControlName="currentPassword" 
+          [toggleMask]="true" 
+          [feedback]="false"
+          styleClass="w-full"
+          inputStyleClass="w-full rounded-md border-slate-300">
+        </p-password>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="newPassword" class="text-sm font-medium text-slate-700">New Password</label>
+        <p-password 
+          id="newPassword" 
+          formControlName="newPassword" 
+          [toggleMask]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full rounded-md border-slate-300">
+        </p-password>
+        <small class="text-xs text-red-500" *ngIf="changePasswordForm.get('newPassword')?.hasError('minlength')">
+          Password must be at least 6 characters.
+        </small>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="confirmPassword" class="text-sm font-medium text-slate-700">Confirm Password</label>
+        <p-password 
+          id="confirmPassword" 
+          formControlName="confirmPassword" 
+          [toggleMask]="true" 
+          [feedback]="false"
+          styleClass="w-full"
+          inputStyleClass="w-full rounded-md border-slate-300">
+        </p-password>
+        <small class="text-xs text-red-500" *ngIf="changePasswordForm.hasError('mismatch') && changePasswordForm.get('confirmPassword')?.touched">
+          Passwords do not match.
+        </small>
+      </div>
+
+      <div class="mt-4 flex justify-end gap-3">
+        <p-button label="Cancel" severity="secondary" (onClick)="displayChangePasswordDialog = false" styleClass="p-button-text p-button-secondary"></p-button>
+        <p-button label="Change Password" [disabled]="changePasswordForm.invalid" (onClick)="onChangePassword()" styleClass="p-button-primary"></p-button>
+      </div>
+    </form>
+  </p-dialog>
+</div>

@@ -4,6 +4,7 @@ import { ToastService } from '../../core/toast/toast.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { User } from '../../../models/entities/user.model';
+import { UserStatus } from '../../../models/enum/user-status.enum';
 import { StatusCode } from '../../../constants/status-code.constant';
 
 @Injectable({
@@ -16,6 +17,7 @@ export class UserService {
   private readonly BASE_API_URL = environment.baseApiUrl;
   private readonly USER_API_URL = `${this.BASE_API_URL}/users`;
   private readonly USER_PROFILE_API_URL = `${this.USER_API_URL}/profile`;
+  private readonly USER_PROFILE_BY_ID_API_URL = `${this.USER_API_URL}/profile`;
 
   private readonly LOCAL_STORAGE_KEY = 'trava_user';
 
@@ -28,8 +30,8 @@ export class UserService {
       map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : null),
       catchError(() => {
         this.toastService.error(
-          'Lấy thông tin người dùng thất bại',
-          'Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.'
+          'Failed to load user profile',
+          'An error occurred during processing. Please try again later.'
         );
         return of(null);
       })
@@ -38,13 +40,55 @@ export class UserService {
 
   getAllUsers(): Observable<User[]> {
     return this.requestService.get<any>(this.USER_API_URL, {}, { showLoading: true }).pipe(
-      map(res => (res.statusCode === StatusCode.Success && res.data?.data) ? res.data.data : []),
+      map(res => {
+        if (res.statusCode === StatusCode.Success && res.data?.data) {
+          return res.data.data.map((user: any) => ({
+            ...user,
+            status: user.status === 'Active' || user.status === 0 ? UserStatus.Active : UserStatus.Inactive
+          }));
+        }
+        return [];
+      }),
       catchError(() => {
         this.toastService.error(
-          'Lấy danh sách người dùng thất bại',
-          'Đã xảy ra lỗi trong quá trình xử lý. Vui lòng thử lại sau.'
+          'Failed to load user list',
+          'An error occurred during processing. Please try again later.'
         );
         return of([]);
+      })
+    );
+  }
+
+  getUserProfileById(userId: string): Observable<User | null> {
+    return this.requestService.get<User>(`${this.USER_PROFILE_BY_ID_API_URL}/${userId}`).pipe(
+      map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : null),
+      catchError(() => {
+        this.toastService.error(
+          'Failed to load user profile',
+          'An error occurred during processing. Please try again later.'
+        );
+        return of(null);
+      })
+    );
+  }
+
+  updateUserStatus(userId: string, status: UserStatus): Observable<boolean> {
+    return this.requestService.put<any>(`${this.USER_API_URL}/status/${userId}`, { status }).pipe(
+      map(res => {
+        const isSuccess = res.statusCode === StatusCode.Success || 
+                         res.statusCode === StatusCode.Updated || 
+                         res.statusCode === 2000 || 
+                         res.statusCode === 2002;
+        
+        if (isSuccess) {
+          this.toastService.success('Status updated successfully', 'User status has been changed.');
+          return true;
+        }
+        return false;
+      }),
+      catchError(() => {
+        this.toastService.error('Failed to update status', 'An error occurred. Please try again later.');
+        return of(false);
       })
     );
   }
@@ -59,7 +103,7 @@ export class UserService {
         localStorage.removeItem(this.LOCAL_STORAGE_KEY);
       }
     } else {
-      this.toastService.error('Lấy thông tin người dùng thất bại', 'Vui lòng thử lại sau.');
+      this.toastService.error('Failed to load user profile', 'Please try again later.');
     }
   }
 }

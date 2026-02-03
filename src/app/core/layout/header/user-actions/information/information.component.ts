@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../../auth/services/auth/auth.service';
 import { UserService } from '../../../../../shared/services/api/user/user.service';
 
@@ -15,6 +16,7 @@ import { UserService } from '../../../../../shared/services/api/user/user.servic
 export class InformationComponent {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
+  private readonly router = inject(Router);
 
   readonly user = this.userService.currentUser;
 
@@ -23,7 +25,7 @@ export class InformationComponent {
       label: 'Profile',
       icon: 'pi pi-user',
       command: () => {
-        // TODO: Navigate to profile
+        this.router.navigate(['/profile']);
       },
     },
     {
