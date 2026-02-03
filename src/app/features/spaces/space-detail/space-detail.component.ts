@@ -15,49 +15,42 @@ import { TooltipModule } from 'primeng/tooltip';
 @Component({
   selector: 'app-space-detail',
   standalone: true,
-  imports: [
-    CommonModule, 
-    TableModule, 
-    BadgeComponent, 
-    ButtonModule, 
-    AvatarModule,
-    TooltipModule
-  ],
+  imports: [CommonModule, TableModule, BadgeComponent, ButtonModule, AvatarModule, TooltipModule],
   templateUrl: './space-detail.component.html',
-  styleUrl: './space-detail.component.css'
+  styleUrl: './space-detail.component.css',
 })
 export class SpaceDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  
+
   spaceId = signal<string | null>(null);
-  
+
   // Mock tasks for the space
   tasks = signal<Task[]>([
-    { 
+    {
       id: '1',
-      spaceId: 'space-1', 
+      spaceId: 'space-1',
       title: 'Practice Project',
       description: 'Build a small project to practice Angular',
-      status: TaskStatus.ToDo, 
+      status: TaskStatus.ToDo,
       priority: TaskPriority.High,
       point: 5,
       startDate: 'Today, 2:30pm',
       dueDate: 'Tomorrow, 5:00pm',
       type: TaskType.Personal,
       assignedUser: {
-          id: 'u1',
-          email: 'alex@example.com',
-          fullName: 'Alex Johnson',
-          avatarUrl: 'https://i.pravatar.cc/150?u=u1',
-          role: 'USER' as any,
-          status: 'Active' as any,
-          password: ''
-      }
+        id: 'u1',
+        email: 'alex@example.com',
+        fullName: 'Alex Johnson',
+        avatarUrl: 'https://i.pravatar.cc/150?u=u1',
+        role: 'USER' as any,
+        status: 'Active' as any,
+        password: '',
+      },
     },
-    { 
+    {
       id: '2',
-      spaceId: 'space-1', 
-      title: 'Angular Full Course', 
+      spaceId: 'space-1',
+      title: 'Angular Full Course',
       description: 'Watch the full course on YouTube',
       status: TaskStatus.InProgress,
       priority: TaskPriority.Medium,
@@ -71,31 +64,31 @@ export class SpaceDetailComponent implements OnInit {
         avatarUrl: 'https://i.pravatar.cc/150?u=u2',
         role: 'USER' as any,
         status: 'Active' as any,
-        password: ''
-        }
+        password: '',
+      },
     },
-    { 
+    {
       id: '3',
-      spaceId: 'space-1', 
-      title: 'Daily Listening', 
+      spaceId: 'space-1',
+      title: 'Daily Listening',
       description: 'Listen to English podcast',
-      status: TaskStatus.Done, 
+      status: TaskStatus.Done,
       priority: TaskPriority.Low,
       point: 3,
-      startDate: 'Today, 9:30pm', 
-      type: TaskType.Personal
+      startDate: 'Today, 9:30pm',
+      type: TaskType.Personal,
     },
-    { 
+    {
       id: '4',
-      spaceId: 'space-1', 
-      title: 'Reading Book', 
+      spaceId: 'space-1',
+      title: 'Reading Book',
       description: 'Read 20 pages of Clean Code',
-      status: TaskStatus.ToDo, 
+      status: TaskStatus.ToDo,
       priority: TaskPriority.Medium,
       point: 2,
-      startDate: 'Today, 10:15pm', 
-      type: TaskType.Personal
-    }
+      startDate: 'Today, 10:15pm',
+      type: TaskType.Personal,
+    },
   ]);
 
   ngOnInit(): void {
@@ -119,15 +112,15 @@ export class SpaceDetailComponent implements OnInit {
   }
 
   getPrioritySeverity(priority: TaskPriority): BadgeVariant {
-        switch (priority) {
-            case TaskPriority.High:
-                return 'danger';
-            case TaskPriority.Medium:
-                return 'warning';
-            case TaskPriority.Low:
-                return 'info';
-            default:
-                return 'default';
-        }
+    switch (priority) {
+      case TaskPriority.High:
+        return 'danger';
+      case TaskPriority.Medium:
+        return 'warning';
+      case TaskPriority.Low:
+        return 'info';
+      default:
+        return 'default';
+    }
   }
 }

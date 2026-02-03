@@ -14,6 +14,7 @@ import { ToastService } from '../../../../shared/services/core/toast/toast.servi
 import { RegisterRequest } from '../../models/request/register-request.model';
 import { LoginRequest } from '../../models/request/login-request.model';
 import { AuthTokenResponse } from '../../models/response/auth-response.model';
+import { RefreshTokenRequest } from '../../models/request/refresh-token-request.model';
 import { JwtService } from '../jwt/jwt.service';
 import { UserService } from '../../../../shared/services/api/user/user.service';
 import { StatusCode } from '../../../../shared/constants/status-code.constant';
@@ -31,6 +32,7 @@ export class AuthService {
   private readonly BASE_API_URL = environment.baseApiUrl;
   private readonly REGISTER_API_URL = `${this.BASE_API_URL}/auths/register`;
   private readonly LOGIN_API_URL = `${this.BASE_API_URL}/auths/login`;
+  private readonly REFRESH_TOKEN_API_URL = `${this.BASE_API_URL}/auths/refresh-token`;
 
   private readonly isLoggedInSignal = signal<boolean>(!!this.jwtService.getAccessToken());
   readonly isLoggedIn = this.isLoggedInSignal.asReadonly();
@@ -93,6 +95,38 @@ export class AuthService {
         return of(null);
       })
     );
+  }
+
+  refreshToken(): Observable<AuthTokenResponse | null> {
+    const accessToken = this.jwtService.getAccessToken();
+    const refreshToken = this.jwtService.getRefreshToken();
+
+    if (!accessToken || !refreshToken) {
+      return of(null);
+    }
+
+    const request: RefreshTokenRequest = { accessToken, refreshToken };
+
+    return this.requestService
+      .post<AuthTokenResponse>(this.REFRESH_TOKEN_API_URL, request)
+      .pipe(
+        map(res => {
+          if (!res.statusCode || !res.data) {
+            return null;
+          }
+
+          if (res.statusCode === StatusCode.Success) {
+            this.handleTokenStorage(res.data);
+            return res.data;
+          }
+
+          return null;
+        }),
+        catchError(() => {
+          this.logout();
+          return of(null);
+        })
+      );
   }
 
   private handleTokenStorage(data: AuthTokenResponse): void {
