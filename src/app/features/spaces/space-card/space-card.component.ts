@@ -16,6 +16,6 @@ export class SpaceCardComponent {
   open = input<boolean>(true);
 
   spaceTypeLabel = computed(() => {
-    return this.space().spaceType === SpaceType.Personal ? 'Personal' : 'Team';
+    return this.space().spaceType;
   });
 }

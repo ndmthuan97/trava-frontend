@@ -1,5 +1,7 @@
 export interface CreateSpaceRequest {
   name: string;
-  description: string;
-  type: string;
+  // Backend accepts null for description
+  description?: string | null;
+  // Use numeric spaceType (0 = Personal, 1 = Team)
+  spaceType: number;
 }

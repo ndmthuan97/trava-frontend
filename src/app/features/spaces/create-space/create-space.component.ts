@@ -13,14 +13,7 @@ import { ToastService } from '../../../shared/services/core/toast/toast.service'
 @Component({
   selector: 'app-create-space',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    InputText,
-    InputTextarea,
-    Select,
-    DialogComponent
-  ],
+  imports: [CommonModule, FormsModule, InputText, InputTextarea, Select, DialogComponent],
   templateUrl: './create-space.component.html',
 })
 export class CreateSpaceComponent {
@@ -44,24 +37,25 @@ export class CreateSpaceComponent {
   confirmAddSpace() {
     const request: CreateSpaceRequest = {
       name: this.spaceData().name,
-      description: this.spaceData().description,
-      type: this.spaceData().spaceType === SpaceType.Personal ? 'Personal' : 'Team'
+      // send null when description is empty to match backend expectations
+      description: this.spaceData().description || null,
+      spaceType: this.spaceData().spaceType === SpaceType.Personal ? 0 : 1,
     };
 
     this.spaceService.createSpace(request).subscribe({
-      next: (res) => {
+      next: res => {
         if (res) {
-          this.toastService.success('Success','Space created successfully');
+          this.toastService.success('Success', 'Space created successfully');
           this.visible.set(false);
           this.created.emit();
           this.resetSpaceForm();
         } else {
-          this.toastService.error('Error','Failed to create space');
+          this.toastService.error('Error', 'Failed to create space');
         }
       },
       error: () => {
-        this.toastService.error('Error','Failed to create space');
-      }
+        this.toastService.error('Error', 'Failed to create space');
+      },
     });
   }
 

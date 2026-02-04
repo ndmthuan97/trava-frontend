@@ -34,7 +34,14 @@ export class SpaceService {
 
   createSpace(space: CreateSpaceRequest): Observable<Space | null> {
     return this.requestService.post<Space>(this.SPACE_API_URL, space, { showLoading: true }).pipe(
-      map(res => (res.statusCode === StatusCode.Success && res.data ? res.data : null)),
+      map(res => {
+        // Backend may return 2000 (Success) or 2001 (Created) for create endpoints.
+        // Treat both as success when `data` is present.
+        const code = Number(res.statusCode);
+        return (code === StatusCode.Success || code === StatusCode.Created) && res.data
+          ? res.data
+          : null;
+      }),
       catchError(() => {
         this.toastService.error(
           'Failed to create workspace',

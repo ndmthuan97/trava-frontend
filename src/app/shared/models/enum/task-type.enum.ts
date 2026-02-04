@@ -1,4 +1,4 @@
 export enum TaskType {
   Personal = 'Personal',
-  Team = 'Team'
+  Team = 'Team',
 }
