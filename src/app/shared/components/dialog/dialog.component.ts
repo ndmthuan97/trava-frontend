@@ -16,6 +16,7 @@ export class DialogComponent {
   description = input<string>('');
   visible = model<boolean>(false);
   customeClass = input<string>('');
+  width = input<string>('25rem');
 
   confirmLabel = input<string>('');
   cancelLabel = input<string>('');

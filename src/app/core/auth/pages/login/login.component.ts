@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -33,12 +33,13 @@ export class LoginComponent {
   private readonly toastService = inject(ToastService);
   private readonly loadingService = inject(LoadingService);
 
-  loginForm: FormGroup;
-
-  // Use computed property or getters if using signal, but here direct method access is fine for template binding if checking changes
-  get loading() {
+  get isLoading() {
     return this.loadingService.isLoading('login');
   }
+
+  submitted = signal<boolean>(false);
+
+  loginForm: FormGroup;
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -48,22 +49,12 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
+    this.submitted.set(true);
+    this.loginForm.markAllAsTouched();
+
     if (this.loginForm.invalid) return;
 
     const loginRequest: LoginRequest = this.loginForm.value;
-
-    this.authService
-      .login(loginRequest, { loadingKey: 'login' })
-      .pipe(
-        timeout(15000),
-        finalize(() => this.loadingService.setLoading(false, 'login'))
-      )
-      .subscribe({
-        error: err => {
-          if (err instanceof TimeoutError) {
-            this.toastService.error('Đăng nhập thất bại', 'Kết nối quá hạn, vui lòng thử lại.');
-          }
-        },
-      });
+    this.authService.login(loginRequest).subscribe();
   }
 }

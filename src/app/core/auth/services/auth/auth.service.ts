@@ -19,6 +19,7 @@ import { ChangePasswordRequest } from '../../models/request/change-password-requ
 import { JwtService } from '../jwt/jwt.service';
 import { UserService } from '../../../../shared/services/api/user/user.service';
 import { StatusCode } from '../../../../shared/constants/status-code.constant';
+import { UserRoles } from '../../../../shared/models/enum/user-role.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -58,11 +59,17 @@ export class AuthService {
     return this.requestService.post<void>(this.REGISTER_API_URL, request, options).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Created) {
-          this.toastService.success('Registration successful', 'Congratulations! You have registered successfully.');
+          this.toastService.success(
+            'Registration successful',
+            'Congratulations! You have registered successfully.'
+          );
           this.router.navigateByUrl('/auth/login');
           return;
         }
-        this.toastService.error('Registration failed', 'An error occurred, please try again later.');
+        this.toastService.error(
+          'Registration failed',
+          'An error occurred, please try again later.'
+        );
         return null;
       }),
       catchError(err => {
@@ -72,7 +79,10 @@ export class AuthService {
     );
   }
 
-  login(request: LoginRequest, options?: RequestOptions): Observable<AuthTokenResponse | null> {
+  login(
+    request: LoginRequest,
+    options: RequestOptions = { loadingKey: 'login' }
+  ): Observable<AuthTokenResponse | null> {
     return this.requestService.post<AuthTokenResponse>(this.LOGIN_API_URL, request, options).pipe(
       map(res => {
         if (!res.statusCode || !res.data) {
@@ -85,10 +95,7 @@ export class AuthService {
             this.handleLoginSuccess(res.data);
             return res.data;
           default:
-            this.toastService.error(
-              'Login failed',
-              'An error occurred, please try again later.'
-            );
+            this.toastService.error('Login failed', 'An error occurred, please try again later.');
             return null;
         }
       }),
@@ -109,26 +116,24 @@ export class AuthService {
 
     const request: RefreshTokenRequest = { accessToken, refreshToken };
 
-    return this.requestService
-      .post<AuthTokenResponse>(this.REFRESH_TOKEN_API_URL, request)
-      .pipe(
-        map(res => {
-          if (!res.statusCode || !res.data) {
-            return null;
-          }
-
-          if (res.statusCode === StatusCode.Success) {
-            this.handleTokenStorage(res.data);
-            return res.data;
-          }
-
+    return this.requestService.post<AuthTokenResponse>(this.REFRESH_TOKEN_API_URL, request).pipe(
+      map(res => {
+        if (!res.statusCode || !res.data) {
           return null;
-        }),
-        catchError(() => {
-          this.logout();
-          return of(null);
-        })
-      );
+        }
+
+        if (res.statusCode === StatusCode.Success) {
+          this.handleTokenStorage(res.data);
+          return res.data;
+        }
+
+        return null;
+      }),
+      catchError(() => {
+        this.logout();
+        return of(null);
+      })
+    );
   }
 
   private handleTokenStorage(data: AuthTokenResponse): void {
@@ -140,8 +145,8 @@ export class AuthService {
 
   handleLoginSuccess(data: AuthTokenResponse): void {
     this.handleTokenStorage(data);
-    this.toastService.success('Login successful', 'Welcome back!');
     this.redirectUserAfterLogin();
+    this.toastService.success('Login successful', 'Welcome back!');
   }
 
   private handleRegisterError(err: HttpErrorResponse): void {
@@ -156,7 +161,10 @@ export class AuthService {
         this.toastService.error('Registration failed', 'This email is already in use.');
         break;
       default:
-        this.toastService.error('Registration failed', 'An error occurred, please try again later.');
+        this.toastService.error(
+          'Registration failed',
+          'An error occurred, please try again later.'
+        );
     }
   }
 
@@ -186,7 +194,8 @@ export class AuthService {
       }
 
       this.isLoggedInSignal.set(true);
-      this.router.navigateByUrl('/', { replaceUrl: true });
+      const targetUrl = user.role === UserRoles.SYSTEM_ADMIN ? '/dashboard' : '/spaces';
+      this.router.navigateByUrl(targetUrl, { replaceUrl: true });
     });
   }
 
@@ -200,7 +209,10 @@ export class AuthService {
     return this.requestService.post<any>(this.CHANGE_PASSWORD_API_URL, request).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success) {
-          this.toastService.success('Password changed successfully', 'Your password has been changed.');
+          this.toastService.success(
+            'Password changed successfully',
+            'Your password has been changed.'
+          );
           return true;
         }
         return false;

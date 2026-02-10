@@ -5,7 +5,7 @@ import { LayoutComponent } from './core/layout/layout.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'spaces', pathMatch: 'full' },
   {
     path: 'auth',
     children: [

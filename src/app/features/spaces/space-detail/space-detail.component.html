@@ -12,12 +12,20 @@
         <i class="pi pi-filter text-lg"></i>
       </button>
       <button
-        class="ml-2 flex items-center gap-2 rounded-xl bg-black px-5 py-2.5 text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95">
+        class="ml-2 flex items-center gap-2 rounded-xl bg-black px-5 py-2.5 text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95"
+        (click)="openCreateTaskDialog()">
         <i class="pi pi-plus text-xs"></i>
         <span class="text-sm font-bold">New Task</span>
       </button>
     </div>
   </div>
+
+  <app-create-task
+    *ngIf="spaceId()"
+    [spaceId]="spaceId()!"
+    [(visible)]="createTaskVisible"
+    [taskToEdit]="taskToEdit()"
+  (created)="onTaskCreated()"></app-create-task>
 
   <!-- Task Table -->
   <div class="card overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -32,7 +40,7 @@
       <ng-template pTemplate="header">
         <tr class="bg-gray-50">
           <th
-            class="w-[25%] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
             Title
           </th>
           <th
@@ -44,6 +52,7 @@
             Priority
           </th>
           <th
+            *ngIf="isSpaceOwner()"
             class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
             Assigned
           </th>
@@ -52,10 +61,11 @@
             Start Date
           </th>
           <th
-            class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
             Due Date
           </th>
           <th
+            *ngIf="isSpaceOwner()"
             class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
             Actions
           </th>
@@ -65,40 +75,62 @@
       <ng-template pTemplate="body" let-task>
         <tr
           class="group cursor-pointer border-b border-gray-100 transition-colors hover:bg-gray-50/50">
-          <!-- Title & Description -->
+          <!-- Title -->
           <td class="px-4 py-4">
-            <div class="flex items-start gap-3">
-              <div class="flex flex-col">
-                <span
-                  class="text-sm font-medium text-gray-700 transition-colors group-hover:text-black"
-                  >{{ task.title }}</span
-                >
-              </div>
-            </div>
+            <span class="text-sm font-medium text-gray-700">{{ task.title }}</span>
           </td>
 
           <!-- Status -->
           <td class="px-4 py-4">
-            <app-badge [variant]="getStatusSeverity(task.status)">{{ task.status }}</app-badge>
+            <ng-container *ngIf="!isSpaceOwner(); else readOnlyStatus">
+              <div class="cursor-pointer inline-block" (click)="statusOverlay.toggle($event)">
+                <app-badge [variant]="getStatusSeverity(task.status)">
+                  {{ task.status === 'NotStart' ? 'Not Start' : task.status === 'InProgress' ? 'In Progress' : 'Completed' }}
+                </app-badge>
+              </div>
+              <p-overlayPanel #statusOverlay>
+                <div class="flex flex-col gap-2 p-2">
+                  <button 
+                    *ngFor="let option of statusOptions"
+                    (click)="onStatusChange(task, option.value); statusOverlay.hide()"
+                    class="px-4 py-2 text-left text-sm hover:bg-gray-100 rounded transition-colors"
+                    [class.bg-gray-50]="task.status === option.value">
+                    {{ option.label }}
+                  </button>
+                </div>
+              </p-overlayPanel>
+            </ng-container>
+            <ng-template #readOnlyStatus>
+              <app-badge [variant]="getStatusSeverity(task.status)">
+                {{ task.status === 'NotStart' ? 'Not Start' : task.status === 'InProgress' ? 'In Progress' : 'Completed' }}
+              </app-badge>
+            </ng-template>
           </td>
 
           <!-- Priority -->
           <td class="px-4 py-4">
-            <app-badge [variant]="getPrioritySeverity(task.priority)">{{
-              task.priority
-            }}</app-badge>
+            <app-badge [variant]="getPrioritySeverity(task.priority)">
+              {{
+                task.priority === 'Low'
+                  ? 'Low'
+                  : task.priority === 'Medium'
+                    ? 'Medium'
+                    : task.priority === 'High'
+                      ? 'High'
+                      : 'Urgent'
+              }}
+            </app-badge>
           </td>
 
-          <!-- Assigned To -->
-          <td class="px-4 py-4">
+          <!-- Assigned -->
+          <td class="px-4 py-4" *ngIf="isSpaceOwner()">
             <div
-              class="flex items-center justify-center gap-2"
+              class="flex items-center gap-2"
               *ngIf="task.assignedUser; else unassigned">
               <p-avatar
                 [image]="task.assignedUser.avatarUrl"
                 shape="circle"
-                size="normal"
-                styleClass="w-6 h-6 border border-gray-100"
+                styleClass="w-6 h-6"
                 [pTooltip]="task.assignedUser.fullName"
                 tooltipPosition="top">
               </p-avatar>
@@ -112,7 +144,7 @@
           <td class="px-4 py-4">
             <div class="flex items-center gap-2 text-gray-500" *ngIf="task.startDate; else noDate">
               <i class="pi pi-calendar text-xs"></i>
-              <span class="text-xs">{{ task.startDate }}</span>
+              <span class="text-xs">{{ task.startDate | date: 'dd/MM/yyyy HH:mm' }}</span>
             </div>
             <ng-template #noDate>
               <span class="text-xs text-gray-300">-</span>
@@ -123,7 +155,7 @@
           <td class="px-4 py-4">
             <div class="flex items-center gap-2 text-gray-500" *ngIf="task.dueDate; else noDate">
               <i class="pi pi-calendar text-xs"></i>
-              <span class="text-xs">{{ task.dueDate }}</span>
+              <span class="text-xs">{{ task.dueDate | date: 'dd/MM/yyyy HH:mm' }}</span>
             </div>
             <ng-template #noDate>
               <span class="text-xs text-gray-300">-</span>
@@ -131,11 +163,30 @@
           </td>
 
           <!-- Actions -->
-          <td class="px-4 py-4 text-right">
-            <button
-              class="rounded-lg p-1.5 text-gray-300 opacity-0 transition-all hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100">
-              <i class="pi pi-ellipsis-h"></i>
-            </button>
+          <td class="text-right px-4 py-4" *ngIf="isSpaceOwner()">
+            <div class="flex justify-end gap-2">
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                severity="secondary"
+                pTooltip="Edit"
+                tooltipPosition="top"
+                (click)="onEditTask(task)" />
+              <p-button
+                icon="pi pi-trash"
+                [text]="true"
+                severity="danger"
+                pTooltip="Delete"
+                tooltipPosition="top"
+                (click)="onDeleteTask($event, task)" />
+              <p-button
+                icon="pi pi-user-plus"
+                [text]="true"
+                severity="info"
+                pTooltip="Assign"
+                tooltipPosition="top"
+                (click)="onAssignTask($event, task)" />
+            </div>
           </td>
         </tr>
       </ng-template>
@@ -146,7 +197,9 @@
             <div class="flex flex-col items-center gap-2">
               <i class="pi pi-list text-4xl text-gray-300"></i>
               <span class="text-lg">No tasks found</span>
-              <button class="mt-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700">
+              <button
+                class="mt-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                (click)="openCreateTaskDialog()">
                 Create your first task
               </button>
             </div>
@@ -158,7 +211,8 @@
         <tr>
           <td colspan="7" class="p-2">
             <button
-              class="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800">
+              class="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
+              (click)="openCreateTaskDialog()">
               <i class="pi pi-plus ml-2"></i>
               <span>New Task</span>
             </button>
@@ -167,4 +221,38 @@
       </ng-template>
     </p-table>
   </div>
+
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Member Selection Dialog for Assignment -->
+  <p-dialog
+    header="Select Assignee"
+    [(visible)]="showAssignDialog"
+    [modal]="true"
+    [style]="{ width: '25rem' }"
+    [draggable]="false"
+    [resizable]="false">
+    <div class="flex flex-col gap-4 py-2">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-bold text-slate-700">Choose a member</label>
+        <p-select
+          [options]="spaceMembers()"
+          optionLabel="fullName"
+          optionValue="id"
+          placeholder="Select a user"
+          #userSelect
+          class="w-full"></p-select>
+      </div>
+      <div class="flex justify-end gap-2">
+        <p-button
+          label="Cancel"
+          [text]="true"
+          severity="secondary"
+          (click)="showAssignDialog.set(false)" />
+        <p-button
+          label="Assign"
+          (click)="confirmAssign(userSelect.value)" />
+      </div>
+    </div>
+  </p-dialog>
 </div>

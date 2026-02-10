@@ -6,7 +6,7 @@ import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
 import { MyPreset } from './preset.theme';
 
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { AuthService } from './core/auth/services/auth/auth.service';
 import { firstValueFrom } from 'rxjs';
@@ -20,6 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, loadingInterceptor])),
     provideAnimationsAsync(),
     MessageService,
+    ConfirmationService,
     providePrimeNG({
       theme: {
         preset: MyPreset,

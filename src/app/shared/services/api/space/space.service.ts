@@ -3,6 +3,7 @@ import { environment } from '../../../../../environments/environment';
 import { RequestService } from './../../core/request/request.service';
 import { inject, Injectable } from '@angular/core';
 import { Space } from '../../../models/entities/space.model';
+import { User } from '../../../models/entities/user.model';
 import { CreateSpaceRequest } from '../../../models/request/space-request.model';
 import { ToastService } from '../../core/toast/toast.service';
 import { StatusCode } from '../../../constants/status-code.constant';
@@ -19,9 +20,16 @@ export class SpaceService {
 
   getSpacesByUserId(): Observable<Space[]> {
     return this.requestService
-      .get<Space[]>(`${this.SPACE_API_URL}/my-spaces`, {}, { showLoading: true })
+      .get<any>(`${this.SPACE_API_URL}/my-spaces`, {}, { showLoading: true })
       .pipe(
-        map(res => (res.statusCode === StatusCode.Success && res.data ? res.data : [])),
+        map(res => {
+          if (res.statusCode !== StatusCode.Success || !res.data) return [];
+          const data = res.data;
+          if (Array.isArray(data)) return data as Space[];
+          if (Array.isArray(data.items)) return data.items as Space[];
+          if (Array.isArray(data.data)) return data.data as Space[];
+          return [];
+        }),
         catchError(() => {
           this.toastService.error(
             'Failed to load workspaces',
@@ -65,5 +73,24 @@ export class SpaceService {
           return of(null);
         })
       );
+  }
+
+  getSpaceMembers(params: any): Observable<User[]> {
+    return this.requestService.get<any>(`${this.SPACE_API_URL}/members`, params, { showLoading: true }).pipe(
+      map(res => {
+        if (res.statusCode === StatusCode.Success && res.data) {
+          // The backend response structure provided in the image shows data.data as the array
+          return res.data.data || [];
+        }
+        return [];
+      }),
+      catchError(() => {
+        this.toastService.error(
+          'Failed to load space members',
+          'An error occurred while fetching members. Please try again later.'
+        );
+        return of([]);
+      })
+    );
   }
 }

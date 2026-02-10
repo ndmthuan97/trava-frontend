@@ -1,0 +1,121 @@
+<app-dialog
+  [header]="taskToEdit() ? 'Edit Task' : 'Create New Task'"
+  [(visible)]="visible"
+  [confirmLabel]="taskToEdit() ? 'Update Task' : 'Create Task'"
+  cancelLabel="Cancel"
+  width="50rem"
+  (confirm)="confirmCreate()"
+  (cancel)="cancelCreate()">
+  <div class="flex flex-col gap-4 py-2">
+    <!-- Title -->
+    <div class="flex flex-col gap-2">
+      <label for="title" class="text-sm font-bold text-slate-700">
+        Title <span class="text-red-500">*</span>
+      </label>
+      <input
+        pInputText
+        id="title"
+        [(ngModel)]="taskData().title"
+        placeholder="Enter task title"
+        class="w-full" />
+    </div>
+
+    <!-- Description -->
+    <div class="flex flex-col gap-2">
+      <label for="description" class="text-sm font-bold text-slate-700">Description</label>
+      <textarea
+        pTextarea
+        id="description"
+        [(ngModel)]="taskData().description"
+        placeholder="Enter task description"
+        rows="3"
+        class="w-full"></textarea>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+      <!-- Status -->
+      <div class="flex flex-col gap-2">
+        <label for="status" class="text-sm font-bold text-slate-700">
+          Status <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          id="status"
+          [options]="statusOptions"
+          [(ngModel)]="taskData().status"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select status"
+          styleClass="w-full"></p-select>
+      </div>
+
+      <!-- Priority -->
+      <div class="flex flex-col gap-2">
+        <label for="priority" class="text-sm font-bold text-slate-700">
+          Priority <span class="text-red-500">*</span>
+        </label>
+        <p-select
+          id="priority"
+          [options]="priorityOptions"
+          [(ngModel)]="taskData().priority"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select priority"
+          styleClass="w-full"></p-select>
+      </div>
+
+      <!-- Points -->
+      <div class="flex flex-col gap-2">
+        <label for="point" class="text-sm font-bold text-slate-700">
+          Points <span class="text-red-500">*</span>
+        </label>
+        <p-inputNumber
+          id="point"
+          [(ngModel)]="taskData().point"
+          [min]="1"
+          [max]="10"
+          [showButtons]="true"
+          buttonLayout="horizontal"
+          inputId="horizontal"
+          spinnerMode="horizontal"
+          [step]="1"
+          decrementButtonClass="p-button-secondary"
+          incrementButtonClass="p-button-secondary"
+          incrementButtonIcon="pi pi-plus"
+          decrementButtonIcon="pi pi-minus"
+          class="w-full"></p-inputNumber>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Start Date -->
+      <div class="flex flex-col gap-2">
+        <label for="startDate" class="text-sm font-bold text-slate-700">Start Date</label>
+        <p-datepicker
+          id="startDate"
+          [(ngModel)]="taskData().startDate"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          [showTime]="true"
+          hourFormat="24"
+          placeholder="Select start date"
+          appendTo="body"
+          styleClass="w-full"></p-datepicker>
+      </div>
+
+      <!-- Due Date -->
+      <div class="flex flex-col gap-2">
+        <label for="dueDate" class="text-sm font-bold text-slate-700">Due Date</label>
+        <p-datepicker
+          id="dueDate"
+          [(ngModel)]="taskData().dueDate"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          [showTime]="true"
+          hourFormat="24"
+          placeholder="Select due date"
+          appendTo="body"
+          styleClass="w-full"></p-datepicker>
+      </div>
+    </div>
+  </div>
+</app-dialog>

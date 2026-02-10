@@ -80,6 +80,19 @@ export class RequestService {
   }
 
   /**
+   * Thực hiện request phương thức PATCH.
+   * @param url Đường dẫn API
+   * @param body Dữ liệu cập nhật
+   * @param options Cấu hình interceptor
+   */
+  patch<T>(url: string, body?: any, options?: RequestOptions): Observable<ApiResponse<T>> {
+    return this.http.patch<ApiResponse<T>>(url, JSON.stringify(body ?? {}), {
+      headers: { 'Content-Type': 'application/json' },
+      context: buildHttpContext(options),
+    });
+  }
+
+  /**
    * Thực hiện request phương thức DELETE.
    * @param url Đường dẫn API
    * @param options Cấu hình interceptor

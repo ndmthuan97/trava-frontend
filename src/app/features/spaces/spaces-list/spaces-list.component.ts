@@ -28,6 +28,10 @@ export class SpacesListComponent implements OnInit {
   loadSpaces(): void {
     this.spaceService.getSpacesByUserId().subscribe({
       next: spaces => {
+        if (!Array.isArray(spaces)) {
+          this.spaces.set([]);
+          return;
+        }
         // Add a default member count for visual verification
         const spacesWithMembers = spaces.map(s => ({
           ...s,
