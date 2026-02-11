@@ -3,13 +3,23 @@
     <div>
       <h1 class="text-2xl font-bold text-gray-900">User Management</h1>
     </div>
-    <p-button
-      label="Add"
-      icon="pi pi-plus"
-      iconPos="right"
-      size="small"
-      [raised]="true"
-      severity="primary"></p-button>
+    <div class="flex items-center gap-3">
+      <!-- Search UI mimicking header -->
+      <div class="flex h-[40px] items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 transition-all focus-within:border-gray-400 focus-within:bg-white">
+        <i class="pi pi-search text-gray-400 text-xs"></i>
+        <input
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchTriggered($event)"
+          placeholder="Search users..."
+          class="w-48 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none" />
+      </div>
+      <button
+        class="ml-2 flex h-[40px] items-center gap-2 rounded-xl bg-black px-5 text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95">
+        <i class="pi pi-plus text-xs"></i>
+        <span class="text-sm font-bold">Add</span>
+      </button>
+    </div>
   </div>
 
   <div class="card h-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -60,14 +70,16 @@
                 shape="circle"
                 size="normal"
                 *ngIf="!user.avatarUrl"></p-avatar>
-              <span class="font-medium text-slate-700">{{ user.fullName || 'User' }}</span>
+              <span class="max-w-[150px] truncate font-medium text-slate-700" [pTooltip]="user.fullName || 'User'" tooltipPosition="top">{{ user.fullName || 'User' }}</span>
             </div>
           </td>
           <td class="px-4 py-4 text-center text-slate-600">
-            <span>{{ user.email }}</span>
+            <div class="max-w-[200px] truncate mx-auto" [pTooltip]="user.email" tooltipPosition="top">
+              {{ user.email }}
+            </div>
           </td>
           <td class="px-4 py-4 text-center">
-            <app-badge [variant]="getRoleSeverity(user.role)">{{ user.role }}</app-badge>
+            <app-badge [variant]="getRoleSeverity(user.role)">{{ getRoleLabel(user.role) }}</app-badge>
           </td>
           <td class="px-4 py-4 text-center">
             <app-badge [variant]="getStatusSeverity(user.status)">{{ getStatusLabel(user.status) }}</app-badge>

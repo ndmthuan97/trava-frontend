@@ -1,4 +1,9 @@
 export enum SpaceType {
-  Personal = 'Personal',
-  Team = 'Team',
+  Personal = 0,
+  Team = 1,
 }
+
+export const SpaceTypeLabels: Record<SpaceType, string> = {
+  [SpaceType.Personal]: 'Personal',
+  [SpaceType.Team]: 'Team',
+};

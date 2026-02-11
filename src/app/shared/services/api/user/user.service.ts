@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { RequestService, ApiResponse } from '../../core/request/request.service';
 import { ToastService } from '../../core/toast/toast.service';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { User } from '../../../models/entities/user.model';
 import { UserStatus } from '../../../models/enum/user-status.enum';
 import { StatusCode } from '../../../constants/status-code.constant';
@@ -24,8 +24,14 @@ export class UserService {
   private readonly currentUserSignal = signal<User | null>(null);
   readonly currentUser = this.currentUserSignal.asReadonly();
 
+  private profileRequest$: Observable<User | null> | null = null;
+
   getCurrentUserProfile(): Observable<User | null> {
-    return this.requestService.get<User>(this.USER_PROFILE_API_URL).pipe(
+    if (this.profileRequest$) {
+      return this.profileRequest$;
+    }
+
+    this.profileRequest$ = this.requestService.get<User>(this.USER_PROFILE_API_URL).pipe(
       tap(res => this.handleSetCurrentUser(res)),
       map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : null),
       catchError(() => {
@@ -34,12 +40,19 @@ export class UserService {
           'An error occurred during processing. Please try again later.'
         );
         return of(null);
-      })
+      }),
+      finalize(() => {
+        this.profileRequest$ = null;
+      }),
+      shareReplay(1)
     );
+
+    return this.profileRequest$;
   }
 
-  getAllUsers(): Observable<User[]> {
-    return this.requestService.get<any>(this.USER_API_URL, {}, { showLoading: true }).pipe(
+  getAllUsers(searchTerm?: string): Observable<User[]> {
+    const params = searchTerm ? { SearchTerm: searchTerm } : {};
+    return this.requestService.get<any>(this.USER_API_URL, params, { showLoading: true }).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success && res.data?.data) {
           return res.data.data.map((user: any) => ({

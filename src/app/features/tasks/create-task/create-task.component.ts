@@ -8,13 +8,16 @@ import { SelectModule } from 'primeng/select';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
-import { TaskStatus } from '../../../shared/models/enum/task-status.enum';
-import { TaskPriority } from '../../../shared/models/enum/task-priority.enum';
+import { TaskPriority, TaskPriorityLabels } from '../../../shared/models/enum/task-priority.enum';
+import { TaskStatus, TaskStatusLabels } from '../../../shared/models/enum/task-status.enum';
 import { TaskItemService } from '../../../shared/services/api/task-item/task-item.service';
 import { CreateTaskItemRequest } from '../../../shared/models/request/create-task-item-request.model';
 import { UpdateTaskItemRequest } from '../../../shared/models/request/update-task-item-request.model';
 import { ToastService } from '../../../shared/services/core/toast/toast.service';
 import { Task } from '../../../shared/models/entities/task.model';
+import { SpaceService } from '../../../shared/services/api/space/space.service';
+import { User } from '../../../shared/models/entities/user.model';
+
 
 @Component({
   selector: 'app-create-task',
@@ -36,6 +39,8 @@ import { Task } from '../../../shared/models/entities/task.model';
 export class CreateTaskComponent {
   private readonly taskService = inject(TaskItemService);
   private readonly toastService = inject(ToastService);
+  private readonly spaceService = inject(SpaceService);
+
 
   spaceId = input.required<string>();
   visible = model<boolean>(false);
@@ -50,7 +55,11 @@ export class CreateTaskComponent {
     point: 1,
     startDate: null as Date | null,
     dueDate: null as Date | null,
+    assignedUserId: null as string | null,
   });
+
+  spaceMembers = input<User[]>([]);
+
 
   constructor() {
     effect(() => {
@@ -64,6 +73,7 @@ export class CreateTaskComponent {
           point: task.point,
           startDate: task.startDate ? new Date(task.startDate) : null,
           dueDate: task.dueDate ? new Date(task.dueDate) : null,
+          assignedUserId: task.assignedUserId || null,
         });
       } else {
         this.resetForm();
@@ -71,17 +81,19 @@ export class CreateTaskComponent {
     }, { allowSignalWrites: true });
   }
 
+
+
   statusOptions = [
-    { label: 'Not Start', value: TaskStatus.NotStart },
-    { label: 'In Progress', value: TaskStatus.InProgress },
-    { label: 'Completed', value: TaskStatus.Completed },
+    { label: TaskStatusLabels[TaskStatus.NotStart], value: TaskStatus.NotStart },
+    { label: TaskStatusLabels[TaskStatus.InProgress], value: TaskStatus.InProgress },
+    { label: TaskStatusLabels[TaskStatus.Completed], value: TaskStatus.Completed },
   ];
 
   priorityOptions = [
-    { label: 'Low', value: TaskPriority.Low },
-    { label: 'Medium', value: TaskPriority.Medium },
-    { label: 'High', value: TaskPriority.High },
-    { label: 'Urgent', value: TaskPriority.Urgent },
+    { label: TaskPriorityLabels[TaskPriority.Low], value: TaskPriority.Low },
+    { label: TaskPriorityLabels[TaskPriority.Medium], value: TaskPriority.Medium },
+    { label: TaskPriorityLabels[TaskPriority.High], value: TaskPriority.High },
+    { label: TaskPriorityLabels[TaskPriority.Urgent], value: TaskPriority.Urgent },
   ];
 
   confirmCreate() {
@@ -102,8 +114,9 @@ export class CreateTaskComponent {
         point: data.point,
         startDate: data.startDate ? data.startDate.toISOString() : null,
         dueDate: data.dueDate ? data.dueDate.toISOString() : null,
-        assignedUserId: taskToEdit.assignedUserId || null,
+        assignedUserId: data.assignedUserId || null,
       };
+
 
       this.taskService.updateTask(taskToEdit.id, request).subscribe({
         next: res => {
@@ -124,8 +137,9 @@ export class CreateTaskComponent {
         point: data.point,
         startDate: data.startDate ? data.startDate.toISOString() : null,
         dueDate: data.dueDate ? data.dueDate.toISOString() : null,
-        assignedUserId: null,
+        assignedUserId: data.assignedUserId || null,
       };
+
 
       this.taskService.createTask(request).subscribe({
         next: res => {
@@ -153,6 +167,8 @@ export class CreateTaskComponent {
       point: 1,
       startDate: null,
       dueDate: null,
+      assignedUserId: null,
     });
   }
+
 }

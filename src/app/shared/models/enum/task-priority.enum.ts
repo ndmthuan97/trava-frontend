@@ -1,6 +1,13 @@
 export enum TaskPriority {
-  Low = 'Low',
-  Medium = 'Medium',
-  High = 'High',
-  Urgent = 'Urgent',
+  Low = 0,
+  Medium = 1,
+  High = 2,
+  Urgent = 3,
 }
+
+export const TaskPriorityLabels: Record<TaskPriority, string> = {
+  [TaskPriority.Low]: 'Low',
+  [TaskPriority.Medium]: 'Medium',
+  [TaskPriority.High]: 'High',
+  [TaskPriority.Urgent]: 'Urgent',
+};

@@ -1,12 +1,13 @@
 import { Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Space } from '../../../shared/models/entities/space.model';
-import { SpaceType } from '../../../shared/models/enum/space-type.enum';
+import { SpaceType, SpaceTypeLabels } from '../../../shared/models/enum/space-type.enum';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-space-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TooltipModule],
   templateUrl: './space-card.component.html',
   styleUrl: './space-card.component.css'
 })
@@ -16,6 +17,6 @@ export class SpaceCardComponent {
   open = input<boolean>(true);
 
   spaceTypeLabel = computed(() => {
-    return this.space().spaceType;
+    return SpaceTypeLabels[this.space().spaceType] || 'Unknown';
   });
 }

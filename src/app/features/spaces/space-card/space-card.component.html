@@ -9,14 +9,14 @@
         <i class="pi pi-folder text-xl"></i>
       </div>
       <div class="min-w-0">
-        <h3 class="text-base font-bold text-gray-900 truncate leading-tight">{{ space().name }}</h3>
+        <h3 class="text-base font-bold text-gray-900 truncate leading-tight" [pTooltip]="space().name" tooltipPosition="top">{{ space().name }}</h3>
       </div>
     </div>
   </div>
 
   <!-- Description -->
   <div class="mb-2 flex-grow">
-    <p class="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+    <p class="text-sm text-gray-500 line-clamp-2 leading-relaxed" [pTooltip]="space().description || 'Manage your team tasks and collaboration in this workspace.'" tooltipPosition="top">
       {{ space().description || 'Manage your team tasks and collaboration in this workspace.' }}
     </p>
   </div>

@@ -1,8 +1,6 @@
 import { TaskStatus } from './../enum/task-status.enum';
-import { TaskType } from './../enum/task-type.enum';
 import { TaskPriority } from '../enum/task-priority.enum';
 import { User } from './user.model';
-import { Space } from './space.model';
 
 export interface Task {
   id: string;
@@ -15,6 +13,7 @@ export interface Task {
   startDate?: string;
   dueDate?: string;
   assignedUserId?: string;
+  assignedUser?: User;
   assignedAt?: string;
   completedAt?: string;
 }

@@ -1,0 +1,116 @@
+﻿
+> frontend@0.0.0 build
+> npm run config-env && ng build
+
+
+> frontend@0.0.0 config-env
+> ts-node scripts/set-env.ts
+
+[dotenv@17.2.3] injecting env (1) from .env -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+npm : (node:19056) 
+[MODULE_TYPELESS_PA
+CKAGE_JSON] 
+Warning: Module 
+type of file:///D:/
+Private_Space/Work_
+Space/Trava/Trava_F
+rontend/frontend/sc
+ripts/set-env.ts 
+is not specified 
+and it doesn't 
+parse as CommonJS.
+At line:1 char:1
++ npm run build > 
+build_log_2.txt 
+2>&1
++ ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo 
+             : No  
+  tSpecified: ((   
+ node:19056) [M    
+...se as Commo    
+nJS.:String) [    
+], RemoteExcep    
+tion
+    + FullyQualifi 
+   edErrorId : Na  
+  tiveCommandErr   
+ or
+ 
+Reparsing as ES 
+module because 
+module syntax was 
+detected. This 
+incurs a 
+performance 
+overhead.
+To eliminate this 
+warning, add 
+"type": "module" 
+to D:\Private_Space
+\Work_Space\Trava\T
+rava_Frontend\front
+end\package.json.
+(Use `node 
+--trace-warnings 
+...` to show where 
+the warning was 
+created)
+- Generating 
+browser 
+application 
+bundles (phase: 
+setup)...
+Γ£ö Browser 
+application bundle 
+generation 
+complete.
+Γ£ö Browser 
+application bundle 
+generation 
+complete.
+[1m[31m
+Error: [96msrc/app
+/features/tasks/tas
+k-detail/task-detai
+l.component.html[0
+m:[93m53[0m:[93m
+41[0m - [91merror
+[0m[90m TS2551: 
+[0mProperty 
+'avatarUser' does 
+not exist on type 
+'User'. Did you 
+mean 'avatarUrl'?
+
+[7m53[0m         
+        [icon]="!t.
+assignedUser.avatar
+User ? 'pi 
+pi-user' : ''"
+[7m  [0m [91m   
+                   
+                  
+~~~~~~~~~~[0m
+
+  [96msrc/app/feat
+ures/tasks/task-det
+ail/task-detail.com
+ponent.ts[0m:[93m
+15[0m:[93m16[0m
+    [7m15[0m   
+templateUrl: './tas
+k-detail.component.
+html',
+    [7m  [0m 
+[96m              
+ ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~[0m
+    Error occurs 
+in the template of 
+component TaskDetai
+lComponent.
+
+
+[39m[22m

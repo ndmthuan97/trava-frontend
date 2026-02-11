@@ -1,0 +1,141 @@
+﻿
+> frontend@0.0.0 build
+> npm run config-env && ng build
+
+
+> frontend@0.0.0 config-env
+> ts-node scripts/set-env.ts
+
+[dotenv@17.2.3] injecting env (1) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+npm : (node:10836) 
+[MODULE_TYPELESS_PA
+CKAGE_JSON] 
+Warning: Module 
+type of file:///D:/
+Private_Space/Work_
+Space/Trava/Trava_F
+rontend/frontend/sc
+ripts/set-env.ts 
+is not specified 
+and it doesn't 
+parse as CommonJS.
+At line:1 char:1
++ npm run build > 
+build_log.txt 2>&1
++ ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo 
+             : No  
+  tSpecified: ((   
+ node:10836) [M    
+...se as Commo    
+nJS.:String) [    
+], RemoteExcep    
+tion
+    + FullyQualifi 
+   edErrorId : Na  
+  tiveCommandErr   
+ or
+ 
+Reparsing as ES 
+module because 
+module syntax was 
+detected. This 
+incurs a 
+performance 
+overhead.
+To eliminate this 
+warning, add 
+"type": "module" 
+to D:\Private_Space
+\Work_Space\Trava\T
+rava_Frontend\front
+end\package.json.
+(Use `node 
+--trace-warnings 
+...` to show where 
+the warning was 
+created)
+- Generating 
+browser 
+application 
+bundles (phase: 
+setup)...
+Γ£ö Browser 
+application bundle 
+generation 
+complete.
+Γ£ö Browser 
+application bundle 
+generation 
+complete.
+[1m[33m
+Warning: Γû▓ 
+[WARNING] Comments 
+in CSS use "/* ... 
+*/" instead of 
+"//" 
+[js-comment-in-css]
+
+    D:/Private_Spac
+e/Work_Space/Trava/
+Trava_Frontend/fron
+tend/src/app/featur
+es/tasks/task-detai
+l/task-detail.compo
+nent.css:1:18:
+      1 Γöé 
+/******/ (() => { 
+// webpackBootstrap
+        Γò╡        
+           ~~
+
+
+
+Warning: Γû▓ 
+[WARNING] 
+Unexpected "(" 
+[css-syntax-error]
+
+    D:/Private_Spac
+e/Work_Space/Trava/
+Trava_Frontend/fron
+tend/src/app/featur
+es/tasks/task-detai
+l/task-detail.compo
+nent.css:1:9:
+      1 Γöé 
+/******/ (() => { 
+// webpackBootstrap
+        Γò╡        
+  ^
+
+
+
+[39m[22m
+[1m[31m
+Error: Module not 
+found: Error: 
+Can't resolve 'D:/P
+rivate_Space/Work_S
+pace/Trava/Trava_Fr
+ontend/frontend/src
+/app/features/tasks
+/task-detail/task-d
+etail.component.css
+?ngResource' in 'D:
+\Private_Space\Work
+_Space\Trava\Trava_
+Frontend\frontend'
+
+Error: The loader "
+D:/Private_Space/Wo
+rk_Space/Trava/Trav
+a_Frontend/frontend
+/src/app/features/t
+asks/task-detail/ta
+sk-detail.component
+.css" didn't 
+return a string.
+
+[39m[22m

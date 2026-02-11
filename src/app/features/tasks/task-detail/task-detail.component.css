@@ -1,0 +1,55 @@
+/* Premium Dialog Overrides */
+::ng-deep .task-detail-premium-dialog .p-dialog-header {
+  display: none !important;
+}
+
+:host ::ng-deep .task-detail-premium-dialog {
+  .p-dialog-content {
+    border-radius: 1rem !important; /* Changed from 2rem */
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #000;
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+
+/* Animations enhanced */
+@keyframes in {
+  from {
+    opacity: var(--tw-enter-opacity, 0);
+    transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), 1) rotate(var(--tw-enter-rotate, 0));
+  }
+}
+
+.animate-in {
+  animation-name: in;
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-in {
+  --tw-enter-opacity: 0;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.font-black {
+  font-weight: 900;
+}

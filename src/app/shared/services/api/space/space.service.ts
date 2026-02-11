@@ -17,10 +17,12 @@ export class SpaceService {
 
   private readonly BASE_API_URL = environment.baseApiUrl;
   private readonly SPACE_API_URL = `${this.BASE_API_URL}/spaces`;
+  private readonly USER_API_URL = `${this.BASE_API_URL}/users`;
 
-  getSpacesByUserId(): Observable<Space[]> {
+  getSpacesByUserId(searchTerm?: string): Observable<Space[]> {
+    const params = searchTerm ? { SearchTerm: searchTerm } : {};
     return this.requestService
-      .get<any>(`${this.SPACE_API_URL}/my-spaces`, {}, { showLoading: true })
+      .get<any>(`${this.SPACE_API_URL}/my-spaces`, params, { showLoading: true })
       .pipe(
         map(res => {
           if (res.statusCode !== StatusCode.Success || !res.data) return [];
@@ -43,17 +45,17 @@ export class SpaceService {
   createSpace(space: CreateSpaceRequest): Observable<Space | null> {
     return this.requestService.post<Space>(this.SPACE_API_URL, space, { showLoading: true }).pipe(
       map(res => {
-        // Backend may return 2000 (Success) or 2001 (Created) for create endpoints.
-        // Treat both as success when `data` is present.
         const code = Number(res.statusCode);
-        return (code === StatusCode.Success || code === StatusCode.Created) && res.data
-          ? res.data
-          : null;
+        if (code >= 2000 && code < 3000 && res.data) {
+          this.toastService.success('Success', 'Workspace created successfully');
+          return res.data;
+        }
+        return null;
       }),
       catchError(() => {
         this.toastService.error(
-          'Failed to create workspace',
-          'An error occurred during processing. Please try again later.'
+          'Error',
+          'Failed to create workspace. Please try again later.'
         );
         return of(null);
       })
@@ -92,5 +94,27 @@ export class SpaceService {
         return of([]);
       })
     );
+  }
+
+  removeMemberFromSpace(spaceId: string, userId: string): Observable<boolean> {
+    return this.requestService
+      .delete<any>(`${this.SPACE_API_URL}/${spaceId}/members/${userId}`, { showLoading: true })
+      .pipe(
+        map(res => {
+          const code = Number(res.statusCode);
+          if (code >= 2000 && code < 3000) {
+            this.toastService.success('Success', 'Member removed successfully');
+            return true;
+          }
+          return false;
+        }),
+        catchError(() => {
+          this.toastService.error(
+            'Error',
+            'Failed to remove member. Please try again later.'
+          );
+          return of(false);
+        })
+      );
   }
 }

@@ -4,12 +4,25 @@
     <h2 class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
       Workspaces
     </h2>
-    <!-- <button 
-      (click)="addSpace()" 
-      class="flex items-center justify-center w-6 h-6 rounded-md hover:bg-gray-100 transition-colors text-gray-500 hover:text-black">
-      <i class="pi pi-plus text-xs"></i>
-    </button> -->
-    <p-button label="Add" icon="pi pi-plus" (click)="addSpace()" iconPos="right" size="small" />
+    
+    <!-- Search UI mimicking header -->
+    <div class="flex items-center gap-3">
+      <div class="flex h-[40px] items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 transition-all focus-within:border-gray-400 focus-within:bg-white">
+        <i class="pi pi-search text-gray-400 text-xs"></i>
+        <input
+          type="text"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchTriggered($event)"
+          placeholder="Search spaces..."
+          class="w-48 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none" />
+      </div>
+      <button
+        class="ml-2 flex h-[40px] items-center gap-2 rounded-xl bg-black px-5 text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95"
+        (click)="addSpace()">
+        <i class="pi pi-plus text-xs"></i>
+        <span class="text-sm font-bold">Add</span>
+      </button>
+    </div>
   </div>
 
   <!-- Space cards grid -->

@@ -1,0 +1,130 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '50rem' }"
+  [contentStyle]="{ padding: '0' }"
+  [showHeader]="false"
+  [closable]="false"
+  styleClass="task-detail-premium-dialog"
+>
+  <div class="relative flex flex-col h-full bg-white rounded-2xl overflow-hidden px-10 pb-10 pt-6" *ngIf="task() as t">
+    <!-- Close Button - Explicitly Manual and Unique -->
+    <button (click)="close()" class="absolute top-4 right-4 p-2 hover:bg-gray-50 rounded-lg transition-all active:scale-95 text-black z-20" title="Close">
+      <i class="pi pi-times"></i>
+    </button>
+
+    <div class="flex-1 overflow-y-auto custom-scrollbar">
+      <!-- Title restored inside content area -->
+      <h1 class="text-3xl font-extrabold text-black mb-10 leading-tight tracking-tight px-1 break-words whitespace-normal">{{ t.title }}</h1>
+
+      <!-- Metadata - Structured 2-Column Layout -->
+      <div class="flex flex-col gap-4 px-1">
+        
+        <!-- Row 1: Status & Priority -->
+        <div class="grid grid-cols-2 gap-4 pb-2">
+          <!-- Status -->
+          <div class="flex items-center gap-6 group">
+            <div class="flex items-center gap-2 text-black w-6">
+              <i class="pi pi-circle text-[14px]"></i>
+            </div>
+            <div class="flex items-center gap-1">
+              <div class="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded hover:border-black transition-all cursor-pointer shadow-sm">
+                <span class="text-[11px] font-black uppercase tracking-wider text-black">{{ getStatusLabel(t.status) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Priority -->
+          <div class="flex items-center gap-6 group">
+            <div class="flex items-center gap-2 text-black w-6">
+              <i class="pi pi-flag text-[14px]"></i>
+            </div>
+            <div class="flex items-center gap-2">
+               <span *ngIf="t.priority !== undefined; else priorityEmpty">
+                 <app-badge [variant]="getPrioritySeverity(t.priority)">{{ getPriorityLabel(t.priority) }}</app-badge>
+               </span>
+               <ng-template #priorityEmpty><span class="text-[12px] text-black italic font-bold">Empty</span></ng-template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Estimate & Assignee -->
+        <div class="grid grid-cols-2 gap-4 pb-2">
+          <!-- Estimate -->
+          <div class="flex items-center gap-6 group">
+            <div class="flex items-center gap-2 text-black w-6">
+              <i class="pi pi-bolt text-[14px]"></i>
+            </div>
+            <div class="text-[14px] font-black text-black">
+              <span *ngIf="t.point; else estimateEmpty">{{ t.point }} pts</span>
+              <ng-template #estimateEmpty><span class="text-[12px] text-black italic font-bold">Empty</span></ng-template>
+            </div>
+          </div>
+
+          <!-- Assignee -->
+          <div class="flex items-center gap-6 group">
+            <div class="flex items-center gap-2 text-black w-6">
+              <i class="pi pi-user text-[14px]"></i>
+            </div>
+            <div class="flex items-center gap-2" *ngIf="t.assignedUser; else assigneesEmpty">
+              <div class="flex items-center gap-3 px-2 py-1 hover:bg-gray-50 rounded-lg transition-all cursor-pointer border border-transparent hover:border-black">
+                <p-avatar 
+                  [image]="t.assignedUser.avatarUrl" 
+                  [icon]="!t.assignedUser.avatarUrl ? 'pi pi-user' : ''" 
+                  shape="circle" 
+                  styleClass="w-7 h-7 border-2 border-black shadow-sm"
+                ></p-avatar>
+                <span class="text-[14px] font-black text-black">{{ t.assignedUser.fullName }}</span>
+              </div>
+            </div>
+            <ng-template #assigneesEmpty><span class="text-[12px] text-black italic font-bold px-2">Unassigned</span></ng-template>
+          </div>
+        </div>
+
+        <!-- Row 3: Start Date & Due Date -->
+        <div class="grid grid-cols-2 gap-4 pb-2">
+          <!-- Start Date -->
+          <div class="flex items-center gap-6 group">
+            <div class="flex items-center gap-2 text-black w-6">
+              <i class="pi pi-calendar text-[16px]"></i>
+            </div>
+            <div class="flex items-center text-black">
+               <span *ngIf="t.startDate; else noStart" class="text-[13px] font-black">{{ t.startDate | date: 'dd/MM/yyyy, HH:mm' }}</span>
+               <ng-template #noStart><span class="text-[12px] text-black italic font-bold">No Start Date</span></ng-template>
+            </div>
+          </div>
+
+          <!-- Due Date -->
+          <div class="flex items-center gap-6 group">
+            <div class="flex items-center gap-2 text-black w-6">
+              <i class="pi pi-calendar-plus text-[16px]"></i>
+            </div>
+            <div class="flex items-center text-black">
+              <span *ngIf="t.dueDate; else noDue" class="text-[13px] font-black">{{ t.dueDate | date: 'dd/MM/yyyy, HH:mm' }}</span>
+              <ng-template #noDue><span class="text-[12px] text-black italic font-bold">No Due Date</span></ng-template>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Row 4: Description -->
+      <div class="mt-8 animate-in fade-in duration-500 delay-200">
+        <div class="flex items-center gap-4 text-black mb-2">
+          <i class="pi pi-align-left text-lg opacity-80"></i>
+          <span class="text-[12px] font-black uppercase tracking-[0.2em]">Description</span>
+        </div>
+        <div class="flex flex-col gap-4 px-1">
+          <div class="text-[15px] leading-relaxed text-black italic px-8 py-12 rounded-2xl border-2 border-gray-100 border-dashed hover:border-black hover:bg-gray-50/20 transition-all cursor-text" *ngIf="!t.description">
+            Write or type '/' for commands and AI actions
+          </div>
+          <div class="text-[17px] leading-[1.7] text-black whitespace-pre-wrap font-bold opacity-90" *ngIf="t.description">
+            {{ t.description }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>

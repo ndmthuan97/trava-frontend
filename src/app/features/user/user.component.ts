@@ -1,21 +1,27 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableModule } from 'primeng/table';
 import { BadgeComponent, BadgeVariant } from '../../shared/components/badge/badge.component';
-import { UserRoles } from '../../shared/models/enum/user-role.enum';
-import { UserStatus } from '../../shared/models/enum/user-status.enum';
+import { UserRoles, UserRoleLabels } from '../../shared/models/enum/user-role.enum';
+import { UserStatus, UserStatusLabels } from '../../shared/models/enum/user-status.enum';
 import { User } from '../../shared/models/entities/user.model';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
+import { InputTextModule } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { UserService } from '../../shared/services/api/user/user.service';
 
+import { TooltipModule } from 'primeng/tooltip';
+
 @Component({
   selector: 'app-user',
   standalone: true,
-  imports: [CommonModule, TableModule, BadgeComponent, ButtonModule, AvatarModule, ConfirmDialogModule],
+  imports: [CommonModule, TableModule, BadgeComponent, ButtonModule, AvatarModule, InputTextModule, FormsModule, ConfirmDialogModule, TooltipModule],
   providers: [ConfirmationService],
   templateUrl: './user.component.html',
   styleUrl: './user.component.css'
@@ -23,6 +29,8 @@ import { UserService } from '../../shared/services/api/user/user.service';
 export class UserComponent {
   protected readonly UserRoles = UserRoles;
   protected readonly UserStatus = UserStatus;
+  protected readonly UserRoleLabels = UserRoleLabels;
+  protected readonly UserStatusLabels = UserStatusLabels;
 
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
@@ -31,13 +39,33 @@ export class UserComponent {
   currentUser = this.userService.currentUser;
 
   users = signal<User[]>([]);
+  searchTerm = signal<string>('');
+  private readonly searchSubject = new Subject<string>();
+  private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.loadUsers();
+    this.setupSearch();
+  }
+
+  private setupSearch(): void {
+    this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(term => {
+      this.searchTerm.set(term);
+      this.loadUsers();
+    });
+  }
+
+  onSearchTriggered(term: string) {
+    this.searchSubject.next(term);
   }
 
   private loadUsers(): void {
-    this.userService.getAllUsers().subscribe(users => this.users.set(users));
+    const term = this.searchTerm();
+    this.userService.getAllUsers(term).subscribe(users => this.users.set(users));
   }
 
   getRoleSeverity(role: UserRoles): BadgeVariant {
@@ -63,7 +91,11 @@ export class UserComponent {
   }
 
   getStatusLabel(status: UserStatus): string {
-    return status === UserStatus.Active ? 'Active' : 'Inactive';
+    return UserStatusLabels[status] || 'Unknown';
+  }
+
+  getRoleLabel(role: UserRoles): string {
+    return UserRoleLabels[role] || 'Unknown';
   }
 
   viewProfile(user: User): void {
