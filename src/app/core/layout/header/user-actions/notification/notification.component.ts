@@ -2,19 +2,23 @@ import { Component, inject, OnInit, signal, OnDestroy, HostListener, ElementRef 
 import { CommonModule, DatePipe } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
+import { AvatarModule } from 'primeng/avatar';
 import { NotificationService } from '../../../../../shared/services/api/notification/notification.service';
 import { Notification } from '../../../../../shared/models/entities/notification.model';
+import { SpaceInvitationService } from '../../../../../shared/services/api/space-invitation/space-invitation.service';
+import { InvitationStatus } from '../../../../../shared/models/enum/invitation-status.enum';
 import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-notification',
   standalone: true,
-  imports: [CommonModule, DatePipe, DialogModule, ButtonModule],
+  imports: [CommonModule, DatePipe, DialogModule, ButtonModule, AvatarModule],
   templateUrl: './notification.component.html',
   styleUrl: './notification.component.css',
 })
 export class NotificationComponent implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
+  private readonly spaceInvitationService = inject(SpaceInvitationService);
   private readonly elementRef = inject(ElementRef);
   
   notifications = signal<Notification[]>([]);
@@ -22,6 +26,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   unreadCount = signal<number>(0);
   isDropdownOpen = signal<boolean>(false);
   activeTab = signal<'unread' | 'all'>('unread');
+  InvitationStatus = InvitationStatus;
 
   // Detail Dialog State
   showDetail = signal<boolean>(false);
@@ -82,6 +87,15 @@ export class NotificationComponent implements OnInit, OnDestroy {
   markAllAsRead(): void {
     this.notificationService.markAllAsRead().subscribe((success: boolean) => {
       if (success) {
+        this.loadNotifications();
+      }
+    });
+  }
+
+  respondToInvitation(invitationId: string, status: InvitationStatus): void {
+    this.spaceInvitationService.updateInvitationStatus(invitationId, status).subscribe((success: boolean) => {
+      if (success) {
+        this.showDetail.set(false);
         this.loadNotifications();
       }
     });

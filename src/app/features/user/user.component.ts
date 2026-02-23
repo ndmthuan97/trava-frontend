@@ -17,11 +17,23 @@ import { ConfirmationService } from 'primeng/api';
 import { UserService } from '../../shared/services/api/user/user.service';
 
 import { TooltipModule } from 'primeng/tooltip';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
 
 @Component({
   selector: 'app-user',
   standalone: true,
-  imports: [CommonModule, TableModule, BadgeComponent, ButtonModule, AvatarModule, InputTextModule, FormsModule, ConfirmDialogModule, TooltipModule],
+  imports: [
+    CommonModule, 
+    TableModule, 
+    BadgeComponent, 
+    ButtonModule, 
+    AvatarModule, 
+    InputTextModule, 
+    FormsModule, 
+    ConfirmDialogModule, 
+    TooltipModule,
+    OverlayPanelModule
+  ],
   providers: [ConfirmationService],
   templateUrl: './user.component.html',
   styleUrl: './user.component.css'
@@ -40,6 +52,7 @@ export class UserComponent {
 
   users = signal<User[]>([]);
   searchTerm = signal<string>('');
+  filterStatus = signal<UserStatus | null>(null);
   private readonly searchSubject = new Subject<string>();
   private readonly destroyRef = inject(DestroyRef);
 
@@ -65,7 +78,13 @@ export class UserComponent {
 
   private loadUsers(): void {
     const term = this.searchTerm();
-    this.userService.getAllUsers(term).subscribe(users => this.users.set(users));
+    const status = this.filterStatus();
+    this.userService.getAllUsers(term, status || undefined).subscribe(users => this.users.set(users));
+  }
+
+  onFilterStatusChange(status: UserStatus | null) {
+    this.filterStatus.set(status);
+    this.loadUsers();
   }
 
   getRoleSeverity(role: UserRoles): BadgeVariant {

@@ -1,133 +1,219 @@
-<div class="mx-auto max-w-7xl p-8">
+<div class="px-4 py-8 max-w-7xl mx-auto">
   <!-- Header -->
-  <div class="mb-10 flex items-center justify-between" *ngIf="spaceInfo() as space">
-    <div>
-      <h1 class="text-2xl font-bold leading-tight text-gray-900">{{ space.name }}</h1>
+  <div class="mb-4" *ngIf="spaceInfo() as space">
+    <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+      <span class="hover:text-blue-600 cursor-pointer transition-colors">Spaces</span>
+      <i class="pi pi-chevron-right text-[8px] opacity-40"></i>
+      <span class="font-medium text-gray-900">{{ space.name }}</span>
     </div>
-      <div class="flex items-center gap-3">
-        <!-- Search UI mimicking header -->
-        <div class="flex h-[40px] items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 transition-all focus-within:border-gray-400 focus-within:bg-white">
-          <i class="pi pi-search text-gray-400 text-xs"></i>
-          <input
-            type="text"
-            *ngIf="!showMembers()"
-            [ngModel]="taskSearchTerm()"
-            (ngModelChange)="onTaskSearch($event)"
-            placeholder="Search tasks..."
-            class="w-48 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none" />
-          <input
-            type="text"
-            *ngIf="showMembers()"
-            [ngModel]="memberSearchTerm()"
-            (ngModelChange)="onMemberSearch($event)"
-            placeholder="Search members..."
-            class="w-48 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none" />
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-200">
+          <i class="pi pi-folder-fill text-[20px]"></i>
         </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ space.name }}</h1>
+          <p class="text-xs text-gray-500 mt-0.5">{{ space.description || 'No description provided for this space' }}</p>
+        </div>
+      </div>
+    </div>
 
-        <button
-          class="ml-2 flex h-[40px] items-center gap-2 rounded-xl bg-black px-5 text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95"
+    <!-- Navigation & Action Bar -->
+    <div class="flex items-center justify-between mt-4 border-b border-gray-100">
+      <!-- Tabs (Left) -->
+      <div class="flex items-center gap-6">
+        <button 
+          class="pb-2 text-sm font-medium transition-all" 
+          [class.text-blue-600]="!showMembers()" 
+          [class.border-b-2]="!showMembers()" 
+          [class.border-blue-600]="!showMembers()"
+          [class.text-gray-500]="showMembers()"
+          (click)="showTasks()">
+          <i class="pi pi-list mr-1.5 text-xs"></i>List
+        </button>
+        <button 
+          class="pb-2 text-sm font-medium transition-all" 
+          [class.text-blue-600]="showMembers()" 
+          [class.border-b-2]="showMembers()" 
+          [class.border-blue-600]="showMembers()"
+          [class.text-gray-500]="!showMembers()"
           (click)="toggleView()">
-          <i [class]="showMembers() ? 'pi pi-list' : 'pi pi-users'" class="text-xs"></i>
-          <span class="text-sm font-bold">{{ showMembers() ? 'Tasks' : 'Members' }}</span>
+          <i class="pi pi-users mr-1.5 text-xs"></i>Members
         </button>
       </div>
+
+      <!-- Actions (Right) -->
+      <div class="flex items-center gap-3 pb-2">
+        <!-- Task Actions -->
+        <ng-container *ngIf="!showMembers()">
+          <div class="relative">
+            <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]"></i>
+            <input
+              type="text"
+              [ngModel]="taskSearchTerm()"
+              (ngModelChange)="onTaskSearch($event)"
+              placeholder="Search tasks..."
+              class="h-8 w-48 rounded-lg bg-gray-50 pl-8 pr-4 text-xs text-gray-900 border border-gray-100 focus:border-blue-400 focus:bg-white focus:outline-none transition-all" />
+          </div>
+          <button 
+            (click)="opFilters.toggle($event)"
+            class="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95">
+            <i class="pi pi-filter text-[10px]"></i>
+            <span>Filter</span>
+            <span *ngIf="filterStatus() !== null || filterPriority() !== null" class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[8px] text-white">
+              {{ (filterStatus() !== null ? 1 : 0) + (filterPriority() !== null ? 1 : 0) }}
+            </span>
+            <i class="pi pi-chevron-down text-[8px] ml-1 opacity-50"></i>
+          </button>
+
+          <p-overlayPanel #opFilters styleClass="filter-overlay-premium">
+            <div class="w-64 p-4 flex flex-col gap-4">
+              <div class="flex items-center justify-between border-b border-gray-100 pb-2 mb-2">
+                <span class="text-xs font-bold text-gray-900 uppercase tracking-widest">Filters</span>
+                <button 
+                  (click)="onFilterStatusChange(null); onFilterPriorityChange(null); opFilters.hide()"
+                  class="text-[10px] font-bold text-blue-600 hover:text-blue-700">Reset</button>
+              </div>
+              
+              <div class="flex flex-col gap-2">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</label>
+                <div class="flex flex-wrap gap-2">
+                  <button 
+                    *ngFor="let opt of statusFilterOptions"
+                    (click)="onFilterStatusChange(opt.value)"
+                    [class]="'px-3 py-1 rounded-full text-[10px] font-bold transition-all border ' + (filterStatus() === opt.value ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300')">
+                    {{ opt.label }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Priority</label>
+                <div class="flex flex-wrap gap-2">
+                  <button 
+                    *ngFor="let opt of priorityFilterOptions"
+                    (click)="onFilterPriorityChange(opt.value)"
+                    [class]="'px-3 py-1 rounded-full text-[10px] font-bold transition-all border ' + (filterPriority() === opt.value ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300')">
+                    {{ opt.label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </p-overlayPanel>
+        </ng-container>
+
+        <!-- Member Actions -->
+        <ng-container *ngIf="showMembers()">
+          <div class="relative">
+            <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input
+              type="text"
+              [ngModel]="memberSearchTerm()"
+              (ngModelChange)="onMemberSearch($event)"
+              placeholder="Search members"
+              class="h-7 w-48 rounded bg-gray-50 pl-8 pr-4 text-xs text-gray-900 border border-transparent focus:border-gray-200 focus:bg-white focus:outline-none" />
+          </div>
+          <button 
+            *ngIf="isSpaceOwner()"
+            class="flex items-center gap-1.5 rounded border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-600 hover:bg-blue-100 transition-colors"
+            (click)="onInviteMember()">
+            <i class="pi pi-user-plus text-[10px]"></i> Invite
+          </button>
+        </ng-container>
+      </div>
+    </div>
   </div>
 
   <!-- Content Area -->
-  <div class="card overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8">
     <!-- Tasks Table -->
     <p-table
       *ngIf="!showMembers()"
       [value]="tasks()"
       [rows]="10"
-      [paginator]="tasks().length > 0"
+      [paginator]="tasks().length > 10"
       [responsiveLayout]="'scroll'"
-      styleClass="p-datatable-sm"
-      stripedRows
-      [tableStyle]="{ 'min-width': '60rem' }">
+      styleClass="p-datatable-sm custom-task-table"
+      [tableStyle]="{ 'min-width': '70rem' }">
       <ng-template pTemplate="header">
-        <tr class="bg-gray-50">
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer hover:text-gray-900" (click)="toggleSort('title')">
-            <div class="flex items-center gap-1">
+        <tr class="!border-y !border-gray-100">
+          <th class="w-[28%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider" (click)="toggleSort('title')">
+            <div class="flex items-center gap-1 cursor-pointer">
               Title
-              <i class="pi" [class.pi-sort-alt]="sortBy() !== 'title'" [class.pi-sort-amount-up]="sortBy() === 'title' && sortDirection() === 'asc'" [class.pi-sort-amount-down]="sortBy() === 'title' && sortDirection() === 'desc'"></i>
+              <i class="pi text-[8px]" [class.pi-sort-alt]="sortBy() !== 'title'" [class.pi-sort-amount-up]="sortBy() === 'title' && sortDirection() === 'asc'" [class.pi-sort-amount-down]="sortBy() === 'title' && sortDirection() === 'desc'"></i>
             </div>
           </th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer hover:text-gray-900" (click)="toggleSort('status')">
-            <div class="flex items-center gap-1">
-              Status
-              <i class="pi" [class.pi-sort-alt]="sortBy() !== 'status'" [class.pi-sort-amount-up]="sortBy() === 'status' && sortDirection() === 'asc'" [class.pi-sort-amount-down]="sortBy() === 'status' && sortDirection() === 'desc'"></i>
-            </div>
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer hover:text-gray-900" (click)="toggleSort('priority')">
-            <div class="flex items-center gap-1">
-              Priority
-              <i class="pi" [class.pi-sort-alt]="sortBy() !== 'priority'" [class.pi-sort-amount-up]="sortBy() === 'priority' && sortDirection() === 'asc'" [class.pi-sort-amount-down]="sortBy() === 'priority' && sortDirection() === 'desc'"></i>
-            </div>
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Assigned</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Start Date</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Due Date</th>
-          <th *ngIf="isSpaceOwner()" class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+          <th class="w-[16%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Status</th>
+          <th class="w-[20%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Assignee</th>
+          <th class="w-[20%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Due date</th>
+          <th class="w-[16%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Priority</th>
         </tr>
       </ng-template>
 
-      <ng-template pTemplate="body" let-task>
-        <tr class="group cursor-pointer border-b border-gray-100 transition-colors hover:bg-gray-50/50" (click)="onViewTask(task)">
-          <td class="px-4 py-4">
-            <div class="max-w-[300px] truncate underline-offset-4 group-hover:underline" [pTooltip]="task.title" tooltipPosition="top">
-              <span class="text-sm font-medium text-gray-700">{{ task.title }}</span>
+      <ng-template pTemplate="body" let-task let-i="rowIndex">
+        <tr class="group !border-b !border-gray-50 hover:bg-gray-50/50 cursor-pointer" (click)="onViewTask(task)">
+          <td class="!py-3">
+            <div class="max-w-[400px] truncate" [pTooltip]="task.title" tooltipPosition="top">
+              <span class="text-xs font-semibold text-gray-700 leading-tight">{{ task.title }}</span>
             </div>
           </td>
-          <td class="px-4 py-4">
-            <ng-container *ngIf="!isSpaceOwner(); else readOnlyStatus">
-              <div class="cursor-pointer inline-block" (click)="statusOverlay.toggle($event); $event.stopPropagation()">
-                <app-badge [variant]="getStatusSeverity(task.status)">{{ getStatusLabel(task.status) }}</app-badge>
+          <td class="!py-3 text-center">
+            <div (click)="isSpaceOwner() ? statusOverlay.toggle($event) : null; $event.stopPropagation()" class="inline-block">
+              <div 
+                [class]="'inline-flex items-center justify-center w-24 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + (task.status === 2 ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-600 border-gray-100')">
+                {{ getStatusLabel(task.status) }}
               </div>
-              <p-overlayPanel #statusOverlay>
-                <div class="flex flex-col gap-2 p-2">
-                  <button *ngFor="let option of statusOptions" (click)="onStatusChange(task, option.value); statusOverlay.hide()" class="px-4 py-2 text-left text-sm hover:bg-gray-100 rounded transition-colors" [class.bg-gray-50]="task.status === option.value">{{ option.label }}</button>
-                </div>
-              </p-overlayPanel>
-            </ng-container>
-            <ng-template #readOnlyStatus>
-              <app-badge [variant]="getStatusSeverity(task.status)">{{ getStatusLabel(task.status) }}</app-badge>
-            </ng-template>
-          </td>
-          <td class="px-4 py-4"><app-badge [variant]="getPrioritySeverity(task.priority)">{{ getPriorityLabel(task.priority) }}</app-badge></td>
-          <td class="px-4 py-4">
-            <div class="flex items-center gap-2" *ngIf="task.assignedUser; else unassigned">
-              <p-avatar *ngIf="task.assignedUser.avatarUrl; else noAvatar" [image]="task.assignedUser.avatarUrl" shape="circle" styleClass="w-6 h-6 border border-gray-100 shadow-sm" [pTooltip]="task.assignedUser.fullName" tooltipPosition="top"></p-avatar>
-              <ng-template #noAvatar><p-avatar icon="pi pi-user" shape="circle" styleClass="w-6 h-6 border border-gray-100 shadow-sm" [pTooltip]="task.assignedUser.fullName" tooltipPosition="top"></p-avatar></ng-template>
             </div>
-            <ng-template #unassigned><span class="text-xs italic text-gray-300">-</span></ng-template>
+            <p-overlayPanel #statusOverlay>
+              <div class="flex flex-col gap-1 p-1">
+                <button *ngFor="let option of statusOptions" (click)="onStatusChange(task, option.value); statusOverlay.hide()" class="px-3 py-1.5 text-left text-xs hover:bg-gray-100 rounded transition-colors" [class.bg-gray-50]="task.status === option.value">{{ option.label }}</button>
+              </div>
+            </p-overlayPanel>
           </td>
-          <td class="px-4 py-4">
-            <div class="flex items-center gap-2 text-gray-500" *ngIf="task.startDate; else noDate"><i class="pi pi-calendar text-xs"></i><span class="text-xs">{{ task.startDate | date: 'dd/MM/yyyy HH:mm' }}</span></div>
+          <td class="!py-3">
+            <div class="flex items-center gap-2" *ngIf="task.assignedUser; else unassigned">
+              <p-avatar [image]="task.assignedUser.avatarUrl" shape="circle" styleClass="w-5 h-5 border border-gray-100 shadow-sm"></p-avatar>
+              <span class="text-xs text-gray-600 truncate max-w-[140px]">{{ task.assignedUser.fullName }}</span>
+            </div>
+            <ng-template #unassigned><span class="text-xs text-gray-300 italic">Unassigned</span></ng-template>
+          </td>
+          <td class="!py-3">
+            <div *ngIf="task.dueDate; else noDate" class="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-orange-100 bg-orange-50/50 text-orange-700">
+              <i class="pi pi-clock text-[9px]"></i>
+              <span class="text-[10px] whitespace-nowrap font-medium">{{ task.dueDate | date: 'dd/MM/yyyy, HH:mm' }}</span>
+            </div>
             <ng-template #noDate><span class="text-xs text-gray-300">-</span></ng-template>
           </td>
-          <td class="px-4 py-4">
-            <div class="flex items-center gap-2 text-gray-500" *ngIf="task.dueDate; else noDate"><i class="pi pi-calendar text-xs"></i><span class="text-xs">{{ task.dueDate | date: 'dd/MM/yyyy HH:mm' }}</span></div>
-            <ng-template #noDate><span class="text-xs text-gray-300">-</span></ng-template>
-          </td>
-          <td class="text-right px-4 py-4" *ngIf="isSpaceOwner()">
-            <div class="flex justify-end gap-2">
-              <p-button icon="pi pi-eye" [text]="true" severity="secondary" pTooltip="View" tooltipPosition="top" (click)="onViewTask(task); $event.stopPropagation()" />
-              <p-button icon="pi pi-pencil" [text]="true" severity="secondary" pTooltip="Edit" tooltipPosition="top" (click)="onEditTask(task, $event)" />
-              <p-button icon="pi pi-trash" [text]="true" severity="danger" pTooltip="Delete" tooltipPosition="top" (click)="onDeleteTask($event, task)" />
+          <td class="!py-3">
+            <div class="flex justify-center">
+              <div [class]="'inline-flex items-center justify-center w-24 gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + 
+                (task.priority === 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 
+                 task.priority === 2 ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                 task.priority === 1 ? 'bg-blue-50 text-blue-600 border-blue-100' : 
+                 'bg-gray-50 text-gray-500 border-gray-100')">
+                <i class="pi pi-bolt text-[8px]" *ngIf="task.priority === 3"></i>
+                <i class="pi pi-chevron-up text-[8px]" *ngIf="task.priority === 2"></i>
+                <i class="pi pi-minus text-[8px]" *ngIf="task.priority === 1"></i>
+                <i class="pi pi-chevron-down text-[8px]" *ngIf="task.priority === 0"></i>
+                <span>{{ getPriorityLabel(task.priority) }}</span>
+              </div>
             </div>
           </td>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="emptymessage">
-        <tr><td colspan="7" class="py-12 text-center text-gray-500"><div class="flex flex-col items-center gap-2"><i class="pi pi-list text-4xl text-gray-300"></i><span class="text-lg">No tasks found</span><button class="mt-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700" (click)="openCreateTaskDialog()">Create your first task</button></div></td></tr>
-      </ng-template>
-
-      <ng-template pTemplate="footer">
-        <tr><td colspan="7" class="p-2"><button class="flex w-full items-center gap-2 rounded-lg p-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800" (click)="openCreateTaskDialog()"><i class="pi pi-plus ml-2"></i><span>New Task</span></button></td></tr>
+        <tr><td colspan="10" class="py-12 text-center text-gray-500"><div class="flex flex-col items-center gap-2"><i class="pi pi-list text-4xl text-gray-300"></i><span class="text-lg">No tasks found</span><button class="mt-2 text-sm font-medium text-blue-600 hover:text-blue-700" (click)="openCreateTaskDialog()">Create your first task</button></div></td></tr>
       </ng-template>
     </p-table>
+    
+    <!-- Custom Footer for Table -->
+    <div class="border-t border-gray-50 p-2" *ngIf="!showMembers()">
+      <button class="flex items-center gap-2 rounded px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors" (click)="openCreateTaskDialog()">
+        <i class="pi pi-plus text-[10px]"></i>
+        <span>Create</span>
+      </button>
+    </div>
 
     <!-- Members Table -->
     <p-table
@@ -136,51 +222,44 @@
       [rows]="10"
       [paginator]="spaceMembers().length > 10"
       [responsiveLayout]="'scroll'"
-      styleClass="p-datatable-sm"
-      stripedRows
+      styleClass="p-datatable-sm custom-task-table"
       [tableStyle]="{ 'min-width': '60rem' }">
       <ng-template pTemplate="header">
-        <tr class="bg-gray-50">
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">FullName</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-          <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Role</th>
-          <th *ngIf="isSpaceOwner()" class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+        <tr class="!border-y !border-gray-100">
+          <th class="w-[40%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">FullName</th>
+          <th class="w-[40%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Email</th>
+          <th class="w-[20%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Role</th>
+          <th *ngIf="isSpaceOwner()" class="w-20 !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-right pr-6">Actions</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-member>
-        <tr class="border-b border-gray-100 transition-colors hover:bg-gray-50/50">
-          <td class="px-4 py-4">
-            <div class="flex items-center gap-2">
-              <p-avatar [image]="member.avatarUrl" [icon]="!member.avatarUrl ? 'pi pi-user' : ''" shape="circle" styleClass="w-8 h-8 border border-gray-100 shadow-sm"></p-avatar>
-              <span class="max-w-[150px] truncate text-sm font-medium text-gray-700" [pTooltip]="member.fullName || 'User'" tooltipPosition="top">{{ member.fullName || 'User' }}</span>
+        <tr class="group !border-b !border-gray-50 hover:bg-gray-50/50 transition-all">
+          <td class="!py-4">
+            <div class="flex items-center gap-3">
+              <p-avatar 
+                [image]="member.avatarUrl" 
+                [label]="!member.avatarUrl ? (member.fullName?.substring(0, 1) || 'U') : ''" 
+                shape="circle" 
+                styleClass="w-8 h-8 border border-gray-100 shadow-sm text-xs font-bold bg-blue-50 text-blue-600"></p-avatar>
+              <div class="flex flex-col min-w-0 text-left">
+                <span class="text-xs font-bold text-gray-900 truncate">{{ member.fullName || 'User' }}</span>
+                <span class="text-[10px] text-gray-400 font-medium lowercase">&#64;{{ (member.fullName || 'user').split(' ').join('') }}</span>
+              </div>
             </div>
           </td>
-          <td class="px-4 py-4 text-sm text-gray-600">
-            <div class="max-w-[200px] truncate" [pTooltip]="member.email" tooltipPosition="top">
-              {{ member.email }}
-            </div>
+          <td class="!py-4">
+            <span class="text-xs text-gray-600 font-medium">{{ member.email }}</span>
           </td>
-          <td class="px-4 py-4 text-sm text-gray-600">
-            <app-badge [variant]="member.role === 0 ? 'success' : 'info'">
+          <td class="!py-4">
+            <div 
+              [class]="'inline-flex items-center justify-center w-24 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + (member.role === 0 ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-100 text-gray-600 border-gray-200')">
               {{ getSpaceRoleLabel(member.role) }}
-            </app-badge>
-          </td>
-          <td *ngIf="isSpaceOwner()" class="text-right px-4 py-4">
-            <div class="flex justify-start gap-2">
-              <p-button 
-                *ngIf="member.id !== currentUser()?.id"
-                icon="pi pi-user-minus" 
-                [text]="true" 
-                severity="danger"
-                pTooltip="Remove Member"
-                tooltipPosition="top"
-                (click)="onRemoveMember(member)" />
             </div>
           </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
-        <tr><td colspan="3" class="py-12 text-center text-gray-500">No members found</td></tr>
+        <tr><td colspan="5" class="py-12 text-center text-gray-500">No members found</td></tr>
       </ng-template>
     </p-table>
   </div>
@@ -195,8 +274,67 @@
 
   <app-task-detail
     [(visible)]="taskDetailVisible"
-    [task]="selectedTask()"></app-task-detail>
+    [task]="selectedTask()"
+    [spaceMembers]="spaceMembers()"
+    (edit)="onEditTask($event)"
+    (delete)="onDeleteTask($event)"
+    (save)="onSaveTask($event)"></app-task-detail>
 
   <p-confirmDialog></p-confirmDialog>
 
+  <!-- Invite Member Dialog -->
+  <p-dialog
+    [(visible)]="inviteMemberVisible"
+    header="Invite Member"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '450px' }"
+    styleClass="invite-member-dialog"
+  >
+    <div class="flex flex-col gap-6 py-2">
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold uppercase tracking-widest text-gray-400">Search User</label>
+        <div class="flex h-[44px] items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 transition-all focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-50">
+          <i class="pi pi-search text-gray-400"></i>
+          <input
+            type="text"
+            [ngModel]="userSearchTerm()"
+            (ngModelChange)="userSearchTerm.set($event)"
+            placeholder="Search by name or email..."
+            class="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+          {{ potentialMembers().length > 0 ? 'Results' : userSearchTerm().length >= 2 ? 'No users found' : 'Enter at least 2 characters' }}
+        </h5>
+        
+        <div class="max-h-[300px] overflow-y-auto pr-1">
+          <div class="flex flex-col gap-2">
+            @for (user of potentialMembers(); track user.id) {
+            <div class="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-3 transition-all hover:border-blue-200 hover:bg-blue-50/30 group">
+              <div class="flex items-center gap-3">
+                <p-avatar [image]="user.avatarUrl" icon="pi pi-user" shape="circle" styleClass="w-10 h-10 border border-gray-100 shadow-sm"></p-avatar>
+                <div class="flex flex-col">
+                  <span class="text-sm font-bold text-gray-900">{{ user.fullName || 'User' }}</span>
+                  <span class="text-xs text-gray-500">{{ user.email }}</span>
+                </div>
+              </div>
+              <button
+                pButton
+                icon="pi pi-plus"
+                label="Invite"
+                class="p-button-sm p-button-rounded p-button-outlined transition-all active:scale-95 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600"
+                (click)="sendInvitation(user)"
+              ></button>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </p-dialog>
 </div>

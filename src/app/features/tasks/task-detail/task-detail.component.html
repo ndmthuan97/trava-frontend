@@ -3,125 +3,256 @@
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
-  [style]="{ width: '50rem' }"
+  [style]="{ height: '100vh', width: '120vw', maxWidth: '1400px' }"
   [contentStyle]="{ padding: '0' }"
   [showHeader]="false"
   [closable]="false"
   styleClass="task-detail-premium-dialog"
 >
-  <div class="relative flex flex-col h-full bg-white rounded-2xl overflow-hidden px-10 pb-10 pt-6" *ngIf="task() as t">
-    <!-- Close Button - Explicitly Manual and Unique -->
-    <button (click)="close()" class="absolute top-4 right-4 p-2 hover:bg-gray-50 rounded-lg transition-all active:scale-95 text-black z-20" title="Close">
-      <i class="pi pi-times"></i>
-    </button>
+  <div class="flex flex-col max-h-[90vh] h-auto bg-white text-slate-900" *ngIf="task() as t">
+    <!-- Header Actions -->
+    <div class="flex items-center justify-end px-8 pt-4 bg-white">
+      <div class="flex items-center gap-2" *ngIf="!isEditing()">
+        <button class="action-btn" (click)="onEdit()" pTooltip="Edit Task"><i class="pi pi-pencil text-xs text-blue-600"></i></button>
+        <button class="action-btn" (click)="onDelete()" pTooltip="Delete Task"><i class="pi pi-trash text-xs text-rose-500"></i></button>
+        <div class="h-4 w-[1px] bg-gray-200 mx-1"></div>
+        <button (click)="close()" class="action-btn hover:bg-rose-50 hover:text-rose-600">
+          <i class="pi pi-times text-sm"></i>
+        </button>
+      </div>
+      <div class="flex items-center gap-2" *ngIf="isEditing()">
+        <button class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-bold hover:bg-blue-700 transition-all" (click)="onSave()">
+          <i class="pi pi-check text-[10px]"></i> Save
+        </button>
+        <button class="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-xs font-bold hover:bg-gray-200 transition-all" (click)="onCancel()">
+          <i class="pi pi-times text-[10px]"></i> Cancel
+        </button>
+      </div>
+    </div>
 
-    <div class="flex-1 overflow-y-auto custom-scrollbar">
-      <!-- Title restored inside content area -->
-      <h1 class="text-3xl font-extrabold text-black mb-10 leading-tight tracking-tight px-1 break-words whitespace-normal">{{ t.title }}</h1>
-
-      <!-- Metadata - Structured 2-Column Layout -->
-      <div class="flex flex-col gap-4 px-1">
+    <!-- Task Content Wrapper (Wrapped Left + Right) -->
+    <div class="flex flex-1 overflow-hidden border-t border-gray-50 mt-2">
+      <!-- Left Column: Content (70%) -->
+      <div class="flex-[0.65] overflow-y-auto p-8 custom-scrollbar">
+        <!-- Title -->
+        <ng-container *ngIf="!isEditing(); else editTitle">
+          <div class="flex items-start gap-3 mb-8">
+            <i class="pi pi-credit-card text-slate-400 mt-1.5 text-lg"></i>
+            <h1 class="text-2xl font-bold tracking-tight">{{ t.title }}</h1>
+          </div>
+        </ng-container>
+        <ng-template #editTitle>
+          <div class="flex items-center gap-3 mb-8">
+            <i class="pi pi-credit-card text-blue-600 text-lg"></i>
+            <input pInputText [(ngModel)]="editedTask().title" class="flex-1 text-2xl font-bold tracking-tight border-none focus:ring-2 focus:ring-blue-100 p-1 rounded" placeholder="Task Title"/>
+          </div>
+        </ng-template>
         
-        <!-- Row 1: Status & Priority -->
-        <div class="grid grid-cols-2 gap-4 pb-2">
-          <!-- Status -->
-          <div class="flex items-center gap-6 group">
-            <div class="flex items-center gap-2 text-black w-6">
-              <i class="pi pi-circle text-[14px]"></i>
+        <!-- Description -->
+        <div class="mb-10">
+          <h2 class="section-label"><i class="pi pi-align-left mr-2"></i>Description</h2>
+          <ng-container *ngIf="!isEditing(); else editDescription">
+            <div *ngIf="!t.description" class="text-slate-400 text-sm italic py-2 hover:bg-gray-50 rounded cursor-pointer transition-colors px-2 -ml-2" (click)="onEdit()">
+              Add a description...
             </div>
-            <div class="flex items-center gap-1">
-              <div class="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded hover:border-black transition-all cursor-pointer shadow-sm">
-                <span class="text-[11px] font-black uppercase tracking-wider text-black">{{ getStatusLabel(t.status) }}</span>
+            <p *ngIf="t.description" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{{ t.description }}</p>
+          </ng-container>
+          <ng-template #editDescription>
+            <textarea 
+              pTextarea 
+              [(ngModel)]="editedTask().description" 
+              class="w-full text-sm text-slate-700 leading-relaxed border border-gray-100 rounded-lg p-3 min-h-[150px] focus:ring-2 focus:ring-blue-50" 
+              placeholder="Add a detailed description..."></textarea>
+          </ng-template>
+        </div>
+
+        <!-- Activity -->
+        <div class="mb-6">
+          <h2 class="section-label mb-4"><i class="pi pi-history mr-2"></i>Activity</h2>
+          <div class="flex border-b border-gray-100 mb-6 font-semibold">
+            <button class="tab-btn active">All</button>
+            <button class="tab-btn">Comments</button>
+          </div>
+          
+          <div class="flex gap-4">
+            <p-avatar 
+              [image]="t.assignedUser?.avatarUrl" 
+              [label]="!t.assignedUser?.avatarUrl ? (t.assignedUser?.fullName?.substring(0, 1) || 'U') : ''" 
+              shape="circle" 
+              styleClass="w-8 h-8 bg-blue-600 text-white text-xs font-bold"
+            ></p-avatar>
+            <div class="flex-1 flex flex-col gap-2">
+              <div class="border border-gray-200 rounded-lg focus-within:border-blue-500 transition-all">
+                <textarea 
+                  placeholder="Add a comment..." 
+                  class="w-full p-3 text-sm focus:outline-none rounded-t-lg bg-transparent border-none resize-none"
+                  rows="2"
+                ></textarea>
               </div>
             </div>
           </div>
-
-          <!-- Priority -->
-          <div class="flex items-center gap-6 group">
-            <div class="flex items-center gap-2 text-black w-6">
-              <i class="pi pi-flag text-[14px]"></i>
-            </div>
-            <div class="flex items-center gap-2">
-               <span *ngIf="t.priority !== undefined; else priorityEmpty">
-                 <app-badge [variant]="getPrioritySeverity(t.priority)">{{ getPriorityLabel(t.priority) }}</app-badge>
-               </span>
-               <ng-template #priorityEmpty><span class="text-[12px] text-black italic font-bold">Empty</span></ng-template>
-            </div>
-          </div>
         </div>
-
-        <!-- Row 2: Estimate & Assignee -->
-        <div class="grid grid-cols-2 gap-4 pb-2">
-          <!-- Estimate -->
-          <div class="flex items-center gap-6 group">
-            <div class="flex items-center gap-2 text-black w-6">
-              <i class="pi pi-bolt text-[14px]"></i>
-            </div>
-            <div class="text-[14px] font-black text-black">
-              <span *ngIf="t.point; else estimateEmpty">{{ t.point }} pts</span>
-              <ng-template #estimateEmpty><span class="text-[12px] text-black italic font-bold">Empty</span></ng-template>
-            </div>
-          </div>
-
-          <!-- Assignee -->
-          <div class="flex items-center gap-6 group">
-            <div class="flex items-center gap-2 text-black w-6">
-              <i class="pi pi-user text-[14px]"></i>
-            </div>
-            <div class="flex items-center gap-2" *ngIf="t.assignedUser; else assigneesEmpty">
-              <div class="flex items-center gap-3 px-2 py-1 hover:bg-gray-50 rounded-lg transition-all cursor-pointer border border-transparent hover:border-black">
-                <p-avatar 
-                  [image]="t.assignedUser.avatarUrl" 
-                  [icon]="!t.assignedUser.avatarUrl ? 'pi pi-user' : ''" 
-                  shape="circle" 
-                  styleClass="w-7 h-7 border-2 border-black shadow-sm"
-                ></p-avatar>
-                <span class="text-[14px] font-black text-black">{{ t.assignedUser.fullName }}</span>
-              </div>
-            </div>
-            <ng-template #assigneesEmpty><span class="text-[12px] text-black italic font-bold px-2">Unassigned</span></ng-template>
-          </div>
-        </div>
-
-        <!-- Row 3: Start Date & Due Date -->
-        <div class="grid grid-cols-2 gap-4 pb-2">
-          <!-- Start Date -->
-          <div class="flex items-center gap-6 group">
-            <div class="flex items-center gap-2 text-black w-6">
-              <i class="pi pi-calendar text-[16px]"></i>
-            </div>
-            <div class="flex items-center text-black">
-               <span *ngIf="t.startDate; else noStart" class="text-[13px] font-black">{{ t.startDate | date: 'dd/MM/yyyy, HH:mm' }}</span>
-               <ng-template #noStart><span class="text-[12px] text-black italic font-bold">No Start Date</span></ng-template>
-            </div>
-          </div>
-
-          <!-- Due Date -->
-          <div class="flex items-center gap-6 group">
-            <div class="flex items-center gap-2 text-black w-6">
-              <i class="pi pi-calendar-plus text-[16px]"></i>
-            </div>
-            <div class="flex items-center text-black">
-              <span *ngIf="t.dueDate; else noDue" class="text-[13px] font-black">{{ t.dueDate | date: 'dd/MM/yyyy, HH:mm' }}</span>
-              <ng-template #noDue><span class="text-[12px] text-black italic font-bold">No Due Date</span></ng-template>
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      <!-- Row 4: Description -->
-      <div class="mt-8 animate-in fade-in duration-500 delay-200">
-        <div class="flex items-center gap-4 text-black mb-2">
-          <i class="pi pi-align-left text-lg opacity-80"></i>
-          <span class="text-[12px] font-black uppercase tracking-[0.2em]">Description</span>
-        </div>
-        <div class="flex flex-col gap-4 px-1">
-          <div class="text-[15px] leading-relaxed text-black italic px-8 py-12 rounded-2xl border-2 border-gray-100 border-dashed hover:border-black hover:bg-gray-50/20 transition-all cursor-text" *ngIf="!t.description">
-            Write or type '/' for commands and AI actions
+      <!-- Right Column: Sidebar (30%) -->
+      <div class="flex-[0.35] bg-white p-4 overflow-y-auto custom-scrollbar">
+        <!-- Details Accordion -->
+        <div class="border border-gray-100 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2 text-slate-900 font-bold text-sm">
+              <i class="pi pi-info-circle text-[10px] text-slate-400"></i>
+              <span>Details</span>
+            </div>
           </div>
-          <div class="text-[17px] leading-[1.7] text-black whitespace-pre-wrap font-bold opacity-90" *ngIf="t.description">
-            {{ t.description }}
+
+          <div class="space-y-4">
+            <!-- Assignee -->
+            <div class="detail-row">
+              <span class="detail-label"><i class="pi pi-user mr-2 text-[10px]"></i>Assignee</span>
+              <div class="detail-value flex flex-col gap-1">
+                <ng-container *ngIf="!isEditing(); else editAssignee">
+                  <div class="flex items-center gap-2">
+                    <ng-container *ngIf="t.assignedUser; else unassigned">
+                      <p-avatar [image]="t.assignedUser.avatarUrl" shape="circle" styleClass="w-6 h-6"></p-avatar>
+                      <span class="text-sm font-medium">{{ t.assignedUser.fullName }}</span>
+                    </ng-container>
+                  </div>
+                </ng-container>
+                <ng-template #editAssignee>
+                  <p-select 
+                    [options]="spaceMembers()" 
+                    [(ngModel)]="editedTask().assignedUserId" 
+                    optionLabel="fullName" 
+                    optionValue="id" 
+                    [showClear]="true"
+                    appendTo="body" 
+                    styleClass="w-full text-xs h-8">
+                    <ng-template pTemplate="selectedItem" let-selectedOption>
+                      <div class="flex items-center gap-2" *ngIf="selectedOption">
+                        <img [src]="selectedOption.avatarUrl" class="w-5 h-5 rounded-full" *ngIf="selectedOption.avatarUrl" />
+                        <div class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center" *ngIf="!selectedOption.avatarUrl">
+                          <i class="pi pi-user text-[10px]"></i>
+                        </div>
+                        <span class="text-xs">{{ selectedOption.fullName }}</span>
+                      </div>
+                    </ng-template>
+                    <ng-template pTemplate="item" let-member>
+                      <div class="flex items-center gap-2">
+                        <img [src]="member.avatarUrl" class="w-5 h-5 rounded-full" *ngIf="member.avatarUrl" />
+                        <div class="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center" *ngIf="!member.avatarUrl">
+                          <i class="pi pi-user text-[10px]"></i>
+                        </div>
+                        <span class="text-xs">{{ member.fullName }}</span>
+                      </div>
+                    </ng-template>
+                  </p-select>
+                </ng-template>
+                <ng-template #unassigned>
+                  <div class="flex items-center gap-2 text-slate-400">
+                    <i class="pi pi-user-circle text-xl"></i>
+                    <span>Unassigned</span>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="detail-row">
+              <span class="detail-label"><i class="pi pi-tag mr-2 text-[10px]"></i>Status</span>
+              <div class="detail-value">
+                <ng-container *ngIf="!isEditing(); else editStatus">
+                  <div [class]="'inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + (t.status === 2 ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-600 border-gray-100')">
+                    {{ getStatusLabel(t.status) }}
+                  </div>
+                </ng-container>
+                <ng-template #editStatus>
+                  <p-select [options]="statusOptions" [(ngModel)]="editedTask().status" optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full text-xs h-8"></p-select>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Priority -->
+            <div class="detail-row">
+              <span class="detail-label"><i class="pi pi-bookmark mr-2 text-[10px]"></i>Priority</span>
+              <div class="detail-value flex items-center gap-2">
+                <ng-container *ngIf="!isEditing(); else editPriority">
+                  <div [class]="'inline-flex items-center justify-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + 
+                    (t.priority === 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 
+                     t.priority === 2 ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                     t.priority === 1 ? 'bg-blue-50 text-blue-600 border-blue-100' : 
+                     'bg-gray-50 text-gray-500 border-gray-100')">
+                    <i class="pi pi-bolt text-[8px]" *ngIf="t.priority === 3"></i>
+                    <i class="pi pi-chevron-up text-[8px]" *ngIf="t.priority === 2"></i>
+                    <i class="pi pi-minus text-[8px]" *ngIf="t.priority === 1"></i>
+                    <i class="pi pi-chevron-down text-[8px]" *ngIf="t.priority === 0"></i>
+                    <span>{{ getPriorityLabel(t.priority) }}</span>
+                  </div>
+                </ng-container>
+                <ng-template #editPriority>
+                  <p-select [options]="priorityOptions" [(ngModel)]="editedTask().priority" optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full text-xs h-8"></p-select>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Due Date -->
+            <div class="detail-row">
+              <span class="detail-label"><i class="pi pi-calendar-plus mr-2 text-[10px]"></i>Due date</span>
+              <div class="detail-value">
+                <ng-container *ngIf="!isEditing(); else editDueDate">
+                  <span class="text-sm font-medium" [class.text-slate-400]="!t.dueDate">
+                    {{ t.dueDate ? (t.dueDate | date: 'dd/MM/yyyy, HH:mm') : 'None' }}
+                  </span>
+                </ng-container>
+                <ng-template #editDueDate>
+                  <p-datepicker [(ngModel)]="editedTask().dueDate" [showIcon]="true" [showTime]="true" hourFormat="24" appendTo="body" styleClass="w-full text-xs"></p-datepicker>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Start Date -->
+            <div class="detail-row">
+              <span class="detail-label"><i class="pi pi-calendar mr-2 text-[10px]"></i>Start date</span>
+              <div class="detail-value">
+                <ng-container *ngIf="!isEditing(); else editStartDate">
+                  <span class="text-sm font-medium" [class.text-slate-400]="!t.startDate">
+                    {{ t.startDate ? (t.startDate | date: 'dd/MM/yyyy, HH:mm') : 'None' }}
+                  </span>
+                </ng-container>
+                <ng-template #editStartDate>
+                  <p-datepicker [(ngModel)]="editedTask().startDate" [showIcon]="true" [showTime]="true" hourFormat="24" appendTo="body" styleClass="w-full text-xs"></p-datepicker>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Point -->
+            <div class="detail-row">
+              <span class="detail-label"><i class="pi pi-star mr-2 text-[10px]"></i>Points</span>
+              <div class="detail-value">
+                <ng-container *ngIf="!isEditing(); else editPoint">
+                  <span class="text-sm font-bold text-gray-900">{{ t.point || 0 }}</span>
+                </ng-container>
+                <ng-template #editPoint>
+                  <input type="number" pInputText [(ngModel)]="editedTask().point" class="w-full text-xs h-8" placeholder="Enter points..."/>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Reporter -->
+            <div class="detail-row mt-6 pt-4 border-t border-gray-50">
+              <span class="detail-label"><i class="pi pi-user-plus mr-2 text-[10px]"></i>Reporter</span>
+              <div class="detail-value flex flex-col gap-1">
+                <div class="flex items-center gap-2" *ngIf="t.assignedUser; else reporterUnassigned">
+                  <p-avatar [image]="t.assignedUser.avatarUrl" shape="circle" styleClass="w-6 h-6"></p-avatar>
+                  <span class="text-sm font-medium">{{ t.assignedUser.fullName }}</span>
+                </div>
+                <ng-template #reporterUnassigned>
+                  <div class="flex items-center gap-2 text-slate-400">
+                    <i class="pi pi-user-circle text-xl"></i>
+                    <span>Unassigned</span>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
           </div>
         </div>
       </div>

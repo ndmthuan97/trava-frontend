@@ -15,7 +15,7 @@ import { UserRoles } from '../../../shared/models/enum/user-role.enum';
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent {
-  private readonly userService = inject(UserService);
+  public readonly userService = inject(UserService);
   open = input<boolean>(true);
   isAdmin = signal<boolean>(false);
 

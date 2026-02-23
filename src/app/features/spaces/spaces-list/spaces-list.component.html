@@ -1,14 +1,15 @@
-<div class="max-w-7xl w-full mx-auto pb-20">
-  <!-- Mockup style header -->
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-      Workspaces
-    </h2>
+<div class="px-4 py-8 max-w-7xl mx-auto pb-20">
+  <!-- Standardized Header -->
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Space Management</h1>
+      <p class="text-xs text-gray-500 mt-1">Organize and manage your collaborative work environments</p>
+    </div>
     
-    <!-- Search UI mimicking header -->
-    <div class="flex items-center gap-3">
-      <div class="flex h-[40px] items-center gap-2 rounded-xl border border-gray-200 bg-gray-100 px-4 transition-all focus-within:border-gray-400 focus-within:bg-white">
-        <i class="pi pi-search text-gray-400 text-xs"></i>
+    <div class="flex items-center gap-2">
+      <!-- Standardized Search UI -->
+      <div class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-50">
+        <i class="pi pi-search text-gray-400 text-[10px]"></i>
         <input
           type="text"
           [ngModel]="searchTerm()"
@@ -16,11 +17,13 @@
           placeholder="Search spaces..."
           class="w-48 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none" />
       </div>
+
+      <!-- Add Button -->
       <button
-        class="ml-2 flex h-[40px] items-center gap-2 rounded-xl bg-black px-5 text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95"
+        class="flex h-[36px] items-center gap-2 rounded-lg bg-black px-4 text-white shadow-sm transition-all hover:bg-gray-800 active:scale-95"
         (click)="addSpace()">
-        <i class="pi pi-plus text-xs"></i>
-        <span class="text-sm font-bold">Add</span>
+        <i class="pi pi-plus text-[10px]"></i>
+        <span class="text-xs font-bold">New Space</span>
       </button>
     </div>
   </div>

@@ -16,8 +16,8 @@ export interface GetTasksBySpaceParams {
   SortDirection?: string;
   SearchTerm?: string;
   IsPagingEnabled?: boolean;
-  Status?: number;
-  Priority?: number;
+  Statuses?: number[];
+  Priorities?: number[];
 }
 
 @Injectable({

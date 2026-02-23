@@ -50,8 +50,11 @@ export class UserService {
     return this.profileRequest$;
   }
 
-  getAllUsers(searchTerm?: string): Observable<User[]> {
-    const params = searchTerm ? { SearchTerm: searchTerm } : {};
+  getAllUsers(searchTerm?: string, status?: UserStatus): Observable<User[]> {
+    let params: Record<string, any> = {};
+    if (searchTerm) params['SearchTerm'] = searchTerm;
+    if (status !== undefined && status !== null) params['Status'] = status;
+    
     return this.requestService.get<any>(this.USER_API_URL, params, { showLoading: true }).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success && res.data?.data) {

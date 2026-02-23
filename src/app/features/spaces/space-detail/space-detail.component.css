@@ -1,62 +1,72 @@
 :host {
   display: block;
-  background-color: #fafafa;
+  background-color: #f8fafc;
   min-height: 100vh;
 }
 
-/* Custom padding for table cells */
-.py-4\.5 {
-  padding-top: 1.125rem;
-  padding-bottom: 1.125rem;
+:host ::ng-deep .custom-task-table .p-datatable-thead > tr > th {
+  background-color: white !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  color: #6b7280;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
 }
 
-/* Table container styling */
-table {
-  border-spacing: 0;
+:host ::ng-deep .custom-task-table .p-datatable-tbody > tr {
+  background-color: white !important;
+  transition: background-color 0.2s;
 }
 
-thead th {
-  letter-spacing: 0.05em;
+:host ::ng-deep .custom-task-table .p-datatable-tbody > tr:hover {
+  background-color: #f9fafb !important;
 }
 
-/* Hover effect for name cells */
-tr:hover .group-hover\:border-green-400 {
-  border-color: #4ade80 !important;
+:host ::ng-deep .custom-task-table .p-datatable-tbody > tr > td {
+  border-bottom: 1px solid #f9fafb !important;
+  padding: 0.75rem 1rem;
 }
 
-tr:hover .group-hover\:opacity-100 {
-  opacity: 1 !important;
+:host ::ng-deep .p-checkbox .p-checkbox-box {
+  border-radius: 4px;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #d1d5db;
 }
 
-/* Animations */
+:host ::ng-deep .p-checkbox .p-checkbox-box.p-highlight {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Animations - refined */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 tr:not(thead tr) {
-  opacity: 0;
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fadeIn 0.3s ease-in forwards;
 }
 
-tr:nth-child(1) { animation-delay: 0.1s; }
-tr:nth-child(2) { animation-delay: 0.15s; }
-tr:nth-child(3) { animation-delay: 0.2s; }
-tr:nth-child(4) { animation-delay: 0.25s; }
-tr:nth-child(5) { animation-delay: 0.3s; }
+:host ::ng-deep .filter-overlay-premium {
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
 
-:host ::ng-deep .compact-select .p-select {
-  border: none;
+:host ::ng-deep .filter-overlay-premium .p-overlaypanel-content {
+  padding: 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
-  padding: 0;
-  box-shadow: none;
-  min-width: 0;
 }
 
-:host ::ng-deep .compact-select .p-select-label {
-  padding: 0;
-}
-
-:host ::ng-deep .compact-select .p-select-dropdown {
-  width: 1.5rem;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
 }

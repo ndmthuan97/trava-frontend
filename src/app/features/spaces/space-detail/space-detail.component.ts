@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +30,8 @@ import { SelectModule } from 'primeng/select';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { DialogModule } from 'primeng/dialog';
 import { MenuModule } from 'primeng/menu';
-import { effect } from '@angular/core';
+import { CheckboxModule } from 'primeng/checkbox';
+import { SpaceInvitationService } from '../../../shared/services/api/space-invitation/space-invitation.service';
 
 
 @Component({
@@ -51,6 +52,7 @@ import { effect } from '@angular/core';
     DialogModule,
     MenuModule,
     FormsModule,
+    CheckboxModule,
     TaskDetailComponent,
   ],
   templateUrl: './space-detail.component.html',
@@ -64,6 +66,7 @@ export class SpaceDetailComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly toastService = inject(ToastService);
+  private readonly spaceInvitationService = inject(SpaceInvitationService);
   
   public readonly SpaceRoleLabels = SpaceRoleLabels;
   public readonly TaskStatusLabels = TaskStatusLabels;
@@ -89,6 +92,11 @@ export class SpaceDetailComponent implements OnInit {
   filterStatus = signal<TaskStatus | null>(null);
   filterPriority = signal<TaskPriority | null>(null);
 
+  // Invitation State
+  inviteMemberVisible = signal<boolean>(false);
+  userSearchTerm = signal<string>('');
+  potentialMembers = signal<User[]>([]);
+
   private readonly taskSearchSubject = new Subject<string>();
   private readonly memberSearchSubject = new Subject<string>();
   private readonly destroyRef = inject(DestroyRef);
@@ -111,6 +119,19 @@ export class SpaceDetailComponent implements OnInit {
         this.getTasksBySpace(spaceId);
       }
     }, { allowSignalWrites: true });
+
+    effect(() => {
+      const term = this.userSearchTerm();
+      if (term.length >= 2) {
+        this.userService.getAllUsers(term).subscribe(users => {
+          // Filter out users already in the space
+          const currentMemberIds = new Set(this.spaceMembers().map(m => m.id));
+          this.potentialMembers.set(users.filter(u => !currentMemberIds.has(u.id)));
+        });
+      } else {
+        this.potentialMembers.set([]);
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -206,8 +227,8 @@ export class SpaceDetailComponent implements OnInit {
       SearchTerm: this.taskSearchTerm(),
       SortBy: this.sortBy() || undefined,
       SortDirection: this.sortDirection() || undefined,
-      Status: this.filterStatus() !== null ? (this.filterStatus() as number) : undefined,
-      Priority: this.filterPriority() !== null ? (this.filterPriority() as number) : undefined,
+      Statuses: this.filterStatus() !== null ? [this.filterStatus() as number] : undefined,
+      Priorities: this.filterPriority() !== null ? [this.filterPriority() as number] : undefined,
     } as any;
 
     // Add AssignedUserId for member's task filtering
@@ -267,6 +288,30 @@ export class SpaceDetailComponent implements OnInit {
     this.taskDetailVisible.set(true);
   }
 
+  onSaveTask(updatedData: any) {
+    if (updatedData.id) {
+      // Prepare the payload according to Swagger
+      const payload = {
+        title: updatedData.title,
+        description: updatedData.description,
+        status: updatedData.status,
+        priority: updatedData.priority,
+        point: updatedData.point || 0,
+        startDate: updatedData.startDate instanceof Date ? updatedData.startDate.toISOString() : updatedData.startDate,
+        dueDate: updatedData.dueDate instanceof Date ? updatedData.dueDate.toISOString() : updatedData.dueDate,
+        assignedUserId: updatedData.assignedUserId
+      };
+
+      this.taskItemService.updateTask(updatedData.id, payload).subscribe(result => {
+        if (result) {
+          this.onTaskCreated();
+          // Update the selected task to reflect changes in the detail view
+          this.selectedTask.set(result);
+        }
+      });
+    }
+  }
+
   toggleView() {
     this.showMembers.update(v => !v);
   }
@@ -301,8 +346,28 @@ export class SpaceDetailComponent implements OnInit {
     });
   }
 
-  onDeleteTask(event: Event, task: Task) {
-    event.stopPropagation();
+  onInviteMember() {
+    this.userSearchTerm.set('');
+    this.potentialMembers.set([]);
+    this.inviteMemberVisible.set(true);
+  }
+
+  sendInvitation(user: User) {
+    const spaceId = this.spaceId();
+    if (spaceId) {
+      this.spaceInvitationService.createInvitation({
+        spaceId: spaceId,
+        invitedUserId: user.id
+      }).subscribe(success => {
+        if (success) {
+          // Optionally refresh something or just leave it
+        }
+      });
+    }
+  }
+
+  onDeleteTask(task: Task, event?: Event) {
+    if (event) event.stopPropagation();
     this.confirmationService.confirm({
       message: 'Are you sure you want to delete this task?',
       header: 'Delete Confirmation',
@@ -317,8 +382,8 @@ export class SpaceDetailComponent implements OnInit {
     });
   }
 
-  onCompleteTask(event: Event, task: Task) {
-    event.stopPropagation();
+  onCompleteTask(task: Task, event?: Event) {
+    if (event) event.stopPropagation();
     this.taskItemService.completeTask(task.id).subscribe(success => {
       if (success) {
         this.onTaskCreated();
@@ -396,6 +461,9 @@ export class SpaceDetailComponent implements OnInit {
       this.sortBy.set(field);
       this.sortDirection.set('asc');
     }
+    
+    const id = this.spaceId();
+    if (id) this.getTasksBySpace(id);
   }
 
   priorityFilterOptions = [
@@ -415,9 +483,13 @@ export class SpaceDetailComponent implements OnInit {
 
   onFilterStatusChange(status: TaskStatus | null) {
     this.filterStatus.set(status);
+    const id = this.spaceId();
+    if (id) this.getTasksBySpace(id);
   }
 
   onFilterPriorityChange(priority: TaskPriority | null) {
     this.filterPriority.set(priority);
+    const id = this.spaceId();
+    if (id) this.getTasksBySpace(id);
   }
 }

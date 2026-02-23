@@ -15,6 +15,12 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const jwtService = inject(JwtService);
   const authService = inject(AuthService);
+
+  // Skip auth requests
+  if (req.url.includes('/auths/login') || req.url.includes('/auths/refresh-token')) {
+    return next(req);
+  }
+
   const token = jwtService.getAccessToken();
 
   if (token) {

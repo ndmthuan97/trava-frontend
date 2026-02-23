@@ -13,7 +13,15 @@ export function createRequestParams(paramsObj: Record<string, any> = {}): HttpPa
   let params = new HttpParams();
   for (const [key, value] of Object.entries(paramsObj)) {
     if (value !== null && value !== undefined) {
-      params = params.set(key, String(value));
+      if (Array.isArray(value)) {
+        value.forEach(v => {
+          if (v !== null && v !== undefined) {
+            params = params.append(key, String(v));
+          }
+        });
+      } else {
+        params = params.set(key, String(value));
+      }
     }
   }
   return params;
