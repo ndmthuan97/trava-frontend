@@ -2,6 +2,7 @@ import { Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Space } from '../../../shared/models/entities/space.model';
 import { SpaceType, SpaceTypeLabels } from '../../../shared/models/enum/space-type.enum';
+import { SpaceRoleLabels } from '../../../shared/models/enum/space-role.enum';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
@@ -18,5 +19,13 @@ export class SpaceCardComponent {
 
   spaceTypeLabel = computed(() => {
     return SpaceTypeLabels[this.space().spaceType] || 'Unknown';
+  });
+
+  spaceRoleLabel = computed(() => {
+    const role = this.space().role;
+    if (role !== undefined && role !== null) {
+      return SpaceRoleLabels[role] || 'Unknown';
+    }
+    return 'Unknown';
   });
 }

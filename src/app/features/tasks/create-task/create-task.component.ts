@@ -90,10 +90,11 @@ export class CreateTaskComponent {
   ];
 
   priorityOptions = [
+    { label: TaskPriorityLabels[TaskPriority.Lowest], value: TaskPriority.Lowest },
     { label: TaskPriorityLabels[TaskPriority.Low], value: TaskPriority.Low },
     { label: TaskPriorityLabels[TaskPriority.Medium], value: TaskPriority.Medium },
     { label: TaskPriorityLabels[TaskPriority.High], value: TaskPriority.High },
-    { label: TaskPriorityLabels[TaskPriority.Urgent], value: TaskPriority.Urgent },
+    { label: TaskPriorityLabels[TaskPriority.Highest], value: TaskPriority.Highest },
   ];
 
   confirmCreate() {

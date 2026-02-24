@@ -10,8 +10,17 @@
   styleClass="task-detail-premium-dialog"
 >
   <div class="flex flex-col max-h-[90vh] h-auto bg-white text-slate-900" *ngIf="task() as t">
-    <!-- Header Actions -->
-    <div class="flex items-center justify-end px-8 pt-4 bg-white">
+    <!-- Header Breadcrumb & Actions -->
+    <div class="flex items-center justify-between px-8 pt-6 bg-white">
+      <div class="flex items-center gap-2 text-xs text-gray-500">
+        <span class="hover:text-blue-600 cursor-pointer transition-colors flex items-center gap-1">
+          <i class="pi pi-box text-[10px]"></i>
+          Spaces
+        </span>
+        <i class="pi pi-chevron-right text-[8px] opacity-40"></i>
+        <span class="font-medium text-gray-900">{{ spaceName() || 'Space' }}</span>
+      </div>
+
       <div class="flex items-center gap-2" *ngIf="!isEditing()">
         <button class="action-btn" (click)="onEdit()" pTooltip="Edit Task"><i class="pi pi-pencil text-xs text-blue-600"></i></button>
         <button class="action-btn" (click)="onDelete()" pTooltip="Delete Task"><i class="pi pi-trash text-xs text-rose-500"></i></button>
@@ -161,7 +170,10 @@
               <span class="detail-label"><i class="pi pi-tag mr-2 text-[10px]"></i>Status</span>
               <div class="detail-value">
                 <ng-container *ngIf="!isEditing(); else editStatus">
-                  <div [class]="'inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + (t.status === 2 ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-50 text-gray-600 border-gray-100')">
+                  <div [class]="'inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + 
+                    (t.status === 2 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 
+                     t.status === 1 ? 'bg-blue-50 text-blue-700 border-blue-100' : 
+                     'bg-gray-50 text-gray-600 border-gray-100')">
                     {{ getStatusLabel(t.status) }}
                   </div>
                 </ng-container>
@@ -177,34 +189,21 @@
               <div class="detail-value flex items-center gap-2">
                 <ng-container *ngIf="!isEditing(); else editPriority">
                   <div [class]="'inline-flex items-center justify-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + 
-                    (t.priority === 3 ? 'bg-rose-50 text-rose-600 border-rose-100' : 
-                     t.priority === 2 ? 'bg-orange-50 text-orange-600 border-orange-100' : 
-                     t.priority === 1 ? 'bg-blue-50 text-blue-600 border-blue-100' : 
-                     'bg-gray-50 text-gray-500 border-gray-100')">
-                    <i class="pi pi-bolt text-[8px]" *ngIf="t.priority === 3"></i>
-                    <i class="pi pi-chevron-up text-[8px]" *ngIf="t.priority === 2"></i>
-                    <i class="pi pi-minus text-[8px]" *ngIf="t.priority === 1"></i>
-                    <i class="pi pi-chevron-down text-[8px]" *ngIf="t.priority === 0"></i>
+                    (t.priority === 4 ? 'bg-rose-50 text-rose-600 border-rose-100' : 
+                     t.priority === 3 ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                     t.priority === 2 ? 'bg-blue-50 text-blue-600 border-blue-100' : 
+                     t.priority === 1 ? 'bg-sky-50 text-sky-400 border-sky-100' :
+                     'bg-gray-50 text-gray-400 border-gray-100')">
+                    <i class="pi pi-angle-double-up text-[10px]" *ngIf="t.priority === 4"></i>
+                    <i class="pi pi-angle-up text-[10px]" *ngIf="t.priority === 3"></i>
+                    <i class="pi pi-minus text-[10px]" *ngIf="t.priority === 2"></i>
+                    <i class="pi pi-angle-down text-[10px]" *ngIf="t.priority === 1"></i>
+                    <i class="pi pi-angle-double-down text-[10px]" *ngIf="t.priority === 0"></i>
                     <span>{{ getPriorityLabel(t.priority) }}</span>
                   </div>
                 </ng-container>
                 <ng-template #editPriority>
                   <p-select [options]="priorityOptions" [(ngModel)]="editedTask().priority" optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full text-xs h-8"></p-select>
-                </ng-template>
-              </div>
-            </div>
-
-            <!-- Due Date -->
-            <div class="detail-row">
-              <span class="detail-label"><i class="pi pi-calendar-plus mr-2 text-[10px]"></i>Due date</span>
-              <div class="detail-value">
-                <ng-container *ngIf="!isEditing(); else editDueDate">
-                  <span class="text-sm font-medium" [class.text-slate-400]="!t.dueDate">
-                    {{ t.dueDate ? (t.dueDate | date: 'dd/MM/yyyy, HH:mm') : 'None' }}
-                  </span>
-                </ng-container>
-                <ng-template #editDueDate>
-                  <p-datepicker [(ngModel)]="editedTask().dueDate" [showIcon]="true" [showTime]="true" hourFormat="24" appendTo="body" styleClass="w-full text-xs"></p-datepicker>
                 </ng-template>
               </div>
             </div>
@@ -220,6 +219,21 @@
                 </ng-container>
                 <ng-template #editStartDate>
                   <p-datepicker [(ngModel)]="editedTask().startDate" [showIcon]="true" [showTime]="true" hourFormat="24" appendTo="body" styleClass="w-full text-xs"></p-datepicker>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Due Date -->
+            <div class="detail-row">
+              <span class="detail-label"><i class="pi pi-calendar-plus mr-2 text-[10px]"></i>Due date</span>
+              <div class="detail-value">
+                <ng-container *ngIf="!isEditing(); else editDueDate">
+                  <span class="text-sm font-medium" [class.text-slate-400]="!t.dueDate">
+                    {{ t.dueDate ? (t.dueDate | date: 'dd/MM/yyyy, HH:mm') : 'None' }}
+                  </span>
+                </ng-container>
+                <ng-template #editDueDate>
+                  <p-datepicker [(ngModel)]="editedTask().dueDate" [showIcon]="true" [showTime]="true" hourFormat="24" appendTo="body" styleClass="w-full text-xs"></p-datepicker>
                 </ng-template>
               </div>
             </div>

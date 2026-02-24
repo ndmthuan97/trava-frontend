@@ -22,6 +22,7 @@ export const routes: Routes = [
       { path: 'users', loadComponent: () => import('./features/user/user.component').then(m => m.UserComponent) },
       { path: 'spaces', loadComponent: () => import('./features/spaces/spaces-list/spaces-list.component').then(m => m.SpacesListComponent) },
       { path: 'spaces/:id', loadComponent: () => import('./features/spaces/space-detail/space-detail.component').then(m => m.SpaceDetailComponent) },
+      { path: 'invitations', loadComponent: () => import('./features/invitations/invitations.component').then(m => m.InvitationsComponent) },
       { path: 'profile', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
       { path: 'profile/:id', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) }
     ]

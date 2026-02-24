@@ -75,6 +75,24 @@ export class UserService {
     );
   }
 
+  searchUsers(searchTerm: string): Observable<User[]> {
+    return this.requestService.get<any>(`${this.USER_API_URL}/search`, { searchTerm }, { showLoading: true }).pipe(
+      map(res => {
+        if (res.statusCode === StatusCode.Success && res.data) {
+          return res.data;
+        }
+        return [];
+      }),
+      catchError(() => {
+        this.toastService.error(
+          'Failed to search users',
+          'An error occurred during processing. Please try again later.'
+        );
+        return of([]);
+      })
+    );
+  }
+
   getUserProfileById(userId: string): Observable<User | null> {
     return this.requestService.get<User>(`${this.USER_PROFILE_BY_ID_API_URL}/${userId}`).pipe(
       map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : null),

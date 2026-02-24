@@ -27,7 +27,7 @@ import { SpaceService } from '../../../shared/services/api/space/space.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { PopoverModule } from 'primeng/popover';
 import { DialogModule } from 'primeng/dialog';
 import { MenuModule } from 'primeng/menu';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -48,7 +48,7 @@ import { SpaceInvitationService } from '../../../shared/services/api/space-invit
     DatePipe,
     ConfirmDialogModule,
     SelectModule,
-    OverlayPanelModule,
+    PopoverModule,
     DialogModule,
     MenuModule,
     FormsModule,
@@ -74,7 +74,7 @@ export class SpaceDetailComponent implements OnInit {
 
 
   spaceId = signal<string | null>(null);
-  spaceInfo = signal<Space>(null as any);
+  spaceInfo = signal<Space | null>(null);
   // Mock tasks for the space
   tasks = signal<Task[]>([]);
   
@@ -123,7 +123,7 @@ export class SpaceDetailComponent implements OnInit {
     effect(() => {
       const term = this.userSearchTerm();
       if (term.length >= 2) {
-        this.userService.getAllUsers(term).subscribe(users => {
+        this.userService.searchUsers(term).subscribe(users => {
           // Filter out users already in the space
           const currentMemberIds = new Set(this.spaceMembers().map(m => m.id));
           this.potentialMembers.set(users.filter(u => !currentMemberIds.has(u.id)));
@@ -131,7 +131,7 @@ export class SpaceDetailComponent implements OnInit {
       } else {
         this.potentialMembers.set([]);
       }
-    });
+    }, { allowSignalWrites: true });
   }
 
   ngOnInit(): void {
@@ -153,7 +153,7 @@ export class SpaceDetailComponent implements OnInit {
 
   private setupSearch(): void {
     this.taskSearchSubject.pipe(
-      debounceTime(300),
+      debounceTime(200),
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(term => {
@@ -163,7 +163,7 @@ export class SpaceDetailComponent implements OnInit {
     });
 
     this.memberSearchSubject.pipe(
-      debounceTime(300),
+      debounceTime(200),
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(term => {
@@ -355,12 +355,19 @@ export class SpaceDetailComponent implements OnInit {
   sendInvitation(user: User) {
     const spaceId = this.spaceId();
     if (spaceId) {
+      // Set expiration to 7 days from now
+      const expiredAt = new Date();
+      expiredAt.setDate(expiredAt.getDate() + 7);
+
       this.spaceInvitationService.createInvitation({
         spaceId: spaceId,
-        invitedUserId: user.id
+        invitedUserId: user.id,
+        expiredAt: expiredAt.toISOString()
       }).subscribe(success => {
         if (success) {
-          // Optionally refresh something or just leave it
+          this.inviteMemberVisible.set(false);
+          this.userSearchTerm.set('');
+          this.potentialMembers.set([]);
         }
       });
     }
@@ -391,7 +398,7 @@ export class SpaceDetailComponent implements OnInit {
     });
   }
 
-  getStatusSeverity(status: TaskStatus): BadgeVariant {
+  getStatusSeverity(status: TaskStatus | any): BadgeVariant {
     switch (status) {
       case TaskStatus.Completed:
         return 'success';
@@ -404,15 +411,18 @@ export class SpaceDetailComponent implements OnInit {
     }
   }
 
-  getPrioritySeverity(priority: TaskPriority): BadgeVariant {
+  getPrioritySeverity(priority: TaskPriority | any): BadgeVariant {
     switch (priority) {
-      case TaskPriority.Urgent:
-      case TaskPriority.High:
+      case TaskPriority.Highest:
         return 'danger';
+      case TaskPriority.High:
+        return 'orange';
       case TaskPriority.Medium:
-        return 'warning';
-      case TaskPriority.Low:
         return 'info';
+      case TaskPriority.Low:
+        return 'gray';
+      case TaskPriority.Lowest:
+        return 'default';
       default:
         return 'default';
     }
@@ -467,15 +477,14 @@ export class SpaceDetailComponent implements OnInit {
   }
 
   priorityFilterOptions = [
-    { label: 'All Priorities', value: null },
-    { label: TaskPriorityLabels[TaskPriority.Urgent], value: TaskPriority.Urgent },
+    { label: TaskPriorityLabels[TaskPriority.Highest], value: TaskPriority.Highest },
     { label: TaskPriorityLabels[TaskPriority.High], value: TaskPriority.High },
     { label: TaskPriorityLabels[TaskPriority.Medium], value: TaskPriority.Medium },
     { label: TaskPriorityLabels[TaskPriority.Low], value: TaskPriority.Low },
+    { label: TaskPriorityLabels[TaskPriority.Lowest], value: TaskPriority.Lowest },
   ];
 
   statusFilterOptions = [
-    { label: 'All Statuses', value: null },
     { label: TaskStatusLabels[TaskStatus.NotStart], value: TaskStatus.NotStart },
     { label: TaskStatusLabels[TaskStatus.InProgress], value: TaskStatus.InProgress },
     { label: TaskStatusLabels[TaskStatus.Completed], value: TaskStatus.Completed },

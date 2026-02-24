@@ -112,7 +112,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   getNotificationColor(type: string): string {
     switch (type) {
-      case 'TaskAssigned': return 'text-blue-500 bg-blue-50';
+      case 'TaskAssigned': return 'text-orange-500 bg-orange-50';
       case 'TaskCompleted': return 'text-green-500 bg-green-50';
       case 'TaskUpdated': return 'text-amber-500 bg-amber-50';
       default: return 'text-gray-500 bg-gray-50';
@@ -121,5 +121,29 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   setTab(tab: 'unread' | 'all'): void {
     this.activeTab.set(tab);
+  }
+
+  getTimeAgo(date: string | Date): string {
+    const now = new Date();
+    const past = new Date(date);
+    const diffInMs = now.getTime() - past.getTime();
+    
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInSeconds < 60) {
+      return 'Vừa xong';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} phút trước`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} giờ trước`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays} ngày trước`;
+    } else {
+      // Fallback to formatted date for old notifications
+      return past.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
   }
 }

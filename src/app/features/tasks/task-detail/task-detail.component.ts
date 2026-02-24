@@ -38,6 +38,7 @@ import { TaskPriority, TaskPriorityLabels } from '../../../shared/models/enum/ta
 export class TaskDetailComponent {
   visible = model<boolean>(false);
   task = input<Task | null>(null);
+  spaceName = input<string>("");
   spaceMembers = input<User[]>([]);
   edit = output<Task>();
   save = output<Partial<Task>>();
@@ -73,13 +74,16 @@ export class TaskDetailComponent {
   getPrioritySeverity(priority: TaskPriority | undefined): BadgeVariant {
     if (priority === undefined) return 'default';
     switch (priority) {
-      case TaskPriority.Urgent:
-      case TaskPriority.High:
+      case TaskPriority.Highest:
         return 'danger';
+      case TaskPriority.High:
+        return 'orange';
       case TaskPriority.Medium:
-        return 'warning';
-      case TaskPriority.Low:
         return 'info';
+      case TaskPriority.Low:
+        return 'gray';
+      case TaskPriority.Lowest:
+        return 'default';
       default:
         return 'default';
     }

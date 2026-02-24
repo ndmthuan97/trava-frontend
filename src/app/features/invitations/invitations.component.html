@@ -1,0 +1,102 @@
+<div class="max-w-2xl mx-auto px-4 py-12">
+  <!-- Header Section -->
+  <div class="mb-10 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Invitations</h1>
+      <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Pending workspace requests</p>
+    </div>
+    
+    <button 
+      (click)="goBack()"
+      class="flex h-[36px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+      <i class="pi pi-arrow-left text-[10px]"></i>
+      Back
+    </button>
+  </div>
+
+  <!-- Content Section -->
+  <div class="space-y-4">
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
+      <i class="pi pi-spin pi-spinner text-orange-600 text-3xl mb-4"></i>
+      <p class="text-sm font-medium text-gray-500">Fetching invitations...</p>
+    </div>
+
+    <!-- Invitations List -->
+    <ng-container *ngIf="!isLoading()">
+      <div *ngFor="let item of invitations()" class="invitation-item-card">
+        <div class="p-4 sm:p-5 flex gap-4">
+          <!-- Space Avatar (Initial Letter) -->
+          <div class="flex-shrink-0">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-orange-50 border-2 border-orange-100 flex items-center justify-center shadow-inner">
+              <span class="text-3xl font-extrabold text-orange-500">
+                {{ item.spaceName?.substring(0, 1)?.toUpperCase() || 'S' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Content Info -->
+          <div class="flex-1 min-w-0 pt-1">
+            <!-- Space Name -->
+            <h3 class="text-base font-bold text-gray-900 truncate leading-tight">
+              {{ item.spaceName || 'Workspace' }}
+            </h3>
+
+            <!-- Sender Info row - Name, Email, Avatar -->
+            <div class="mt-3 flex items-center gap-2.5">
+              <!-- Inviter Avatar -->
+              <p-avatar 
+                [image]="item.inviterAvatarUrl || ''" 
+                [icon]="!item.inviterAvatarUrl ? 'pi pi-user' : ''"
+                shape="circle" 
+                styleClass="w-7 h-7 border-2 border-white shadow-sm bg-orange-100 text-orange-600">
+              </p-avatar>
+
+              <!-- Inviter Name + message -->
+              <p class="text-[13px] text-gray-600 leading-snug">
+                <span class="font-bold text-gray-900">{{ item.inviterName || 'Someone' }}</span>
+                <span class="text-gray-400"> invited you to join this space.</span>
+              </p>
+            </div>
+
+            <!-- Expiry info -->
+            <p *ngIf="item.expiredAt" class="text-[11px] text-gray-400 mt-2 flex items-center gap-1">
+              <i class="pi pi-clock text-[9px]"></i>
+              Expires: {{ item.expiredAt | date: 'dd/MM/yyyy, HH:mm' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div class="px-4 pb-4 sm:px-5 sm:pb-5 flex gap-2">
+          <button 
+            (click)="respond(item, InvitationStatus.Accepted)"
+            class="flex-1 h-10 rounded-xl bg-orange-600 text-white text-xs font-bold hover:bg-orange-700 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-orange-100">
+            <i class="pi pi-check text-xs"></i> Chấp nhận
+          </button>
+
+          <button 
+            (click)="respond(item, InvitationStatus.Rejected)"
+            class="w-10 h-10 flex-shrink-0 rounded-xl bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all active:scale-95 flex items-center justify-center"
+            pTooltip="Từ chối" tooltipPosition="top">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="invitations().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm text-center px-6">
+        <div class="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center mb-6">
+          <i class="pi pi-envelope text-orange-200 text-4xl"></i>
+        </div>
+        <h2 class="text-xl font-bold text-gray-900">No Pending Requests</h2>
+        <p class="text-sm text-gray-500 mt-2 max-w-xs mx-auto">When someone invites you to a space, it will appear here for you to accept!</p>
+        <button 
+          (click)="goBack()"
+          class="mt-8 px-6 py-3 rounded-2xl bg-orange-600 text-white text-sm font-bold hover:bg-orange-700 transition-all shadow-lg shadow-orange-100">
+          Go Home
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>

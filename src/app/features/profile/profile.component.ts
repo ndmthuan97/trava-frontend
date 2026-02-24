@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -8,6 +8,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { DialogModule } from 'primeng/dialog';
 import { PasswordModule } from 'primeng/password';
 import { DatePickerModule } from 'primeng/datepicker';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { UserService } from '../../shared/services/api/user/user.service';
 import { AuthService } from '../../core/auth/services/auth/auth.service';
 import { User } from '../../shared/models/entities/user.model';
@@ -24,7 +26,8 @@ import { User } from '../../shared/models/entities/user.model';
     AvatarModule,
     DialogModule,
     PasswordModule,
-    DatePickerModule
+    DatePickerModule,
+    MenuModule
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
@@ -40,6 +43,9 @@ export class ProfileComponent implements OnInit {
   currentUser: User | null = null;
   displayChangePasswordDialog: boolean = false;
   isReadOnly: boolean = false;
+  isEditMode = signal(false);
+  today = new Date();
+  settingsItems: MenuItem[] = [];
 
   constructor() {
     this.profileForm = this.fb.group({
@@ -56,6 +62,45 @@ export class ProfileComponent implements OnInit {
       newPassword: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
+    this.initSettingsMenu();
+  }
+
+  private initSettingsMenu() {
+    const isEditing = this.isEditMode();
+    const canEdit = !this.isReadOnly;
+
+    this.settingsItems = [
+      {
+        label: 'Settings',
+        items: [
+          {
+            label: 'Edit Profile',
+            icon: 'pi pi-user-edit',
+            command: () => this.toggleEditMode(),
+            visible: canEdit && !isEditing
+          },
+          {
+            label: 'Change Password',
+            icon: 'pi pi-lock',
+            command: () => this.showChangePasswordDialog(),
+            visible: canEdit
+          }
+        ]
+      }
+    ];
+  }
+
+  toggleEditMode() {
+    if (this.isReadOnly) return;
+    
+    this.isEditMode.update(v => !v);
+    if (this.isEditMode()) {
+      this.profileForm.enable();
+    } else {
+      this.profileForm.disable();
+      if (this.currentUser) this.patchFormValues(this.currentUser);
+    }
+    this.initSettingsMenu();
   }
 
   private passwordMatchValidator(g: FormGroup) {
@@ -72,7 +117,7 @@ export class ProfileComponent implements OnInit {
         if (user) {
           this.currentUser = user;
           this.patchFormValues(user);
-          this.profileForm.disable(); // Disable entire form in read-only mode
+          this.profileForm.disable();
         }
       });
     } else {
@@ -80,9 +125,11 @@ export class ProfileComponent implements OnInit {
         if (user) {
           this.currentUser = user;
           this.patchFormValues(user);
+          this.profileForm.disable(); // Start in view mode
         }
       });
     }
+    this.initSettingsMenu();
   }
 
   private patchFormValues(user: User) {
@@ -99,6 +146,10 @@ export class ProfileComponent implements OnInit {
   onSubmit() {
     if (this.profileForm.valid) {
       console.log('Form submitted:', this.profileForm.value);
+      // After successful save
+      this.isEditMode.set(false);
+      this.profileForm.disable();
+      this.initSettingsMenu();
     }
   }
 

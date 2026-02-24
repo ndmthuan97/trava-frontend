@@ -19,8 +19,12 @@ export class SpaceService {
   private readonly SPACE_API_URL = `${this.BASE_API_URL}/spaces`;
   private readonly USER_API_URL = `${this.BASE_API_URL}/users`;
 
-  getSpacesByUserId(searchTerm?: string): Observable<Space[]> {
-    const params = searchTerm ? { SearchTerm: searchTerm } : {};
+  getSpacesByUserId(searchTerm?: string, spaceType?: number, role?: number): Observable<Space[]> {
+    const params: any = {};
+    if (searchTerm) params.SearchTerm = searchTerm;
+    if (spaceType !== undefined && spaceType !== null) params.SpaceType = spaceType;
+    if (role !== undefined && role !== null) params.Role = role;
+
     return this.requestService
       .get<any>(`${this.SPACE_API_URL}/my-spaces`, params, { showLoading: true })
       .pipe(

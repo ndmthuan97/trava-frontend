@@ -23,7 +23,7 @@
 }
 
 .filter-option-btn.active {
-  background-color: #eff6ff;
-  color: #2563eb;
+  background-color: #fff7ed; /* orange-50 */
+  color: #f97316; /* orange-500 */
   font-weight: 700;
 }

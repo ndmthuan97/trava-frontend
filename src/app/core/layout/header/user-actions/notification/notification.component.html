@@ -7,7 +7,7 @@
     <i class="pi pi-bell text-gray-700 text-lg"></i>
     @if (unreadCount() > 0) {
     <span
-      class="bg-red-600 absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-white"
+      class="bg-orange-600 absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white ring-2 ring-white"
     >
       {{ unreadCount() > 9 ? '9+' : unreadCount() }}
     </span>
@@ -23,22 +23,19 @@
     <div class="px-5 pt-4 pb-2">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-xl font-extrabold text-gray-900 tracking-tight">Notifications</h3>
-        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
-          <i class="pi pi-ellipsis-h"></i>
-        </button>
       </div>
 
       <!-- Tabs -->
       <div class="flex gap-2 mb-4">
         <button
           (click)="setTab('all')"
-          [class]="'px-4 py-1.5 rounded-full text-sm font-bold transition-all ' + (activeTab() === 'all' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100')"
+          [class]="'px-4 py-1.5 rounded-full text-sm font-bold transition-all ' + (activeTab() === 'all' ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-100')"
         >
           All
         </button>
         <button
           (click)="setTab('unread')"
-          [class]="'px-4 py-1.5 rounded-full text-sm font-bold transition-all ' + (activeTab() === 'unread' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100')"
+          [class]="'px-4 py-1.5 rounded-full text-sm font-bold transition-all ' + (activeTab() === 'unread' ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-100')"
         >
           Unread
         </button>
@@ -59,12 +56,12 @@
             <div class="relative flex-shrink-0">
               <p-avatar 
                 [image]="item.payload.AvatarUrl" 
-                [label]="!item.payload.AvatarUrl ? (item.payload.SenderName?.substring(0, 1) || 'T') : ''" 
+                [label]="!item.payload.AvatarUrl ? (item.payload.SenderName?.substring(0, 1) || '?') : ''" 
                 shape="circle" 
-                styleClass="w-14 h-14 text-lg font-bold bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
+                styleClass="w-14 h-14 text-lg font-bold bg-orange-500 text-white"
               ></p-avatar>
               <!-- Small Badge Icon -->
-              <div class="absolute -right-0.5 -bottom-0.5 w-6 h-6 rounded-full bg-blue-600 border-2 border-white flex items-center justify-center shadow-sm">
+              <div class="absolute -right-0.5 -bottom-0.5 w-6 h-6 rounded-full bg-orange-600 border-2 border-white flex items-center justify-center shadow-sm">
                 <i [class]="getNotificationIcon(item.type) + ' text-[10px] text-white'"></i>
               </div>
             </div>
@@ -72,8 +69,10 @@
             <!-- Content -->
             <div class="flex-1 min-w-0 pr-6">
               <div class="text-[13px] leading-[1.4] text-gray-900">
-                <span class="font-bold">{{ item.payload.SenderName || 'System' }}</span>
-                <span class="ml-1 text-gray-700">{{ item.payload.Message || 'sent a notification to you' }}</span>
+                @if (item.payload.SenderName) {
+                  <span class="font-bold">{{ item.payload.SenderName }}</span>
+                }
+                <span class="ml-1 text-gray-700 line-clamp-3">{{ item.payload.Message || 'sent a notification to you' }}</span>
               </div>
               
               <!-- Quick Actions for Invitations -->
@@ -81,7 +80,7 @@
                 <div class="mt-3 flex gap-2">
                   <button 
                     (click)="$event.stopPropagation(); respondToInvitation(item.payload.InvitationId, InvitationStatus.Accepted)"
-                    class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[10px] font-bold hover:bg-blue-700 transition-all active:scale-95 flex items-center gap-1">
+                    class="px-3 py-1.5 rounded-lg bg-orange-600 text-white text-[10px] font-bold hover:bg-orange-700 transition-all active:scale-95 flex items-center gap-1">
                     <i class="pi pi-check text-[8px]"></i> Accept
                   </button>
                   <button 
@@ -93,14 +92,14 @@
               }
 
               <div class="mt-1 flex items-center gap-2">
-                <span class="text-[11px] font-bold text-blue-600">{{ item.createdAt | date : 'd' }} tuần</span>
+                <span class="text-[11px] font-bold text-orange-600">{{ getTimeAgo(item.createdAt) }}</span>
               </div>
             </div>
 
             <!-- Blue Dot Indicator -->
             @if (!item.isRead) {
             <div class="absolute right-4 top-1/2 -translate-y-1/2">
-              <div class="w-3 h-3 bg-blue-600 rounded-full shadow-[0_0_8px_rgba(37,99,235,0.4)]"></div>
+              <div class="w-2 h-2 bg-orange-600 rounded-full shadow-[0_0_8px_rgba(249,115,22,0.4)]"></div>
             </div>
             }
           </div>
@@ -145,7 +144,7 @@
     </div>
 
     <!-- Main Message -->
-    <div class="bg-blue-50/30 rounded-xl p-4 border border-blue-50">
+    <div class="bg-orange-50/30 rounded-xl p-4 border border-orange-50">
       <h4 class="text-lg font-bold text-gray-900 leading-tight">
         {{ item.payload.Message }}
       </h4>
@@ -164,7 +163,7 @@
       <div class="grid grid-cols-1 gap-2">
         @if (item.payload.SpaceName) {
         <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
-          <i class="pi pi-box text-blue-500"></i>
+          <i class="pi pi-box text-orange-500"></i>
           <div class="flex flex-col">
             <span class="text-[10px] text-gray-400 font-bold uppercase">Space</span>
             <span class="text-sm font-semibold text-gray-800">{{ item.payload.SpaceName }}</span>
@@ -188,7 +187,7 @@
     <!-- Meta -->
     <div class="flex items-center justify-between pt-4 border-t border-gray-100">
       <div class="flex items-center gap-2">
-        <span [class]="'flex h-2 w-2 rounded-full ' + (item.isRead ? 'bg-gray-300' : 'bg-blue-500')"></span>
+        <span [class]="'flex h-2 w-2 rounded-full ' + (item.isRead ? 'bg-gray-300' : 'bg-orange-500')"></span>
         <span class="text-xs font-medium text-gray-500">{{ item.isRead ? 'Read' : 'Just read now' }}</span>
       </div>
     </div>

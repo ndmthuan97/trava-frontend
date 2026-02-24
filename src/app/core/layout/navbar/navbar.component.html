@@ -5,7 +5,7 @@
   <div class="p-6">
     <div class="flex items-center gap-3">
       <div
-        class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-bold text-white shadow-lg shadow-blue-500/20">
+        class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 font-bold text-white shadow-lg shadow-orange-500/20">
         T
       </div>
       <span *ngIf="open()" class="text-lg font-bold text-gray-900 tracking-tight"> Trava </span>
@@ -19,7 +19,7 @@
       <button
         *ngIf="isAdmin()"
         routerLink="/dashboard"
-        routerLinkActive="bg-blue-50/50 text-blue-600"
+        routerLinkActive="bg-orange-50/50 text-orange-600"
         [routerLinkActiveOptions]="{ exact: true }"
         class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900 group">
         <i class="pi pi-home text-lg"></i>
@@ -28,7 +28,7 @@
 
       <button
         routerLink="/spaces"
-        routerLinkActive="bg-blue-50/50 text-blue-600"
+        routerLinkActive="bg-orange-50/50 text-orange-600"
         [routerLinkActiveOptions]="{ exact: true }"
         class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900 group">
         <i class="pi pi-th-large text-lg"></i>
@@ -38,7 +38,7 @@
       <button
         *ngIf="isAdmin()"
         routerLink="/users"
-        routerLinkActive="bg-blue-50/50 text-blue-600"
+        routerLinkActive="bg-orange-50/50 text-orange-600"
         class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900 group">
         <i class="pi pi-users text-lg"></i>
         <span *ngIf="open()" class="text-sm font-semibold">Users</span>
@@ -50,7 +50,7 @@
   <div class="p-4 border-t border-gray-50" *ngIf="open() && userService.currentUser() as user">
     <div class="rounded-xl border border-gray-100 bg-gray-50/50 p-3">
       <div class="flex items-center gap-3">
-        <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600 uppercase">
+        <div class="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-orange-600 uppercase">
           {{ user.fullName ? user.fullName.substring(0, 2) : 'US' }}
         </div>
         <div class="flex flex-col overflow-hidden">

@@ -17,7 +17,7 @@ import { ConfirmationService } from 'primeng/api';
 import { UserService } from '../../shared/services/api/user/user.service';
 
 import { TooltipModule } from 'primeng/tooltip';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { PopoverModule } from 'primeng/popover';
 
 @Component({
   selector: 'app-user',
@@ -32,7 +32,7 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
     FormsModule, 
     ConfirmDialogModule, 
     TooltipModule,
-    OverlayPanelModule
+    PopoverModule
   ],
   providers: [ConfirmationService],
   templateUrl: './user.component.html',
@@ -63,7 +63,7 @@ export class UserComponent {
 
   private setupSearch(): void {
     this.searchSubject.pipe(
-      debounceTime(500),
+      debounceTime(300),
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(term => {

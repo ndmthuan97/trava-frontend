@@ -56,4 +56,15 @@ export class NotificationService {
       catchError(() => of(false))
     );
   }
+
+  getSpaceInvitations(): Observable<Notification[]> {
+    return this.getNotifications({ PageIndex: 1, PageSize: 50 }).pipe(
+      map(res => {
+        if (res && res.data) {
+          return res.data.filter(n => n.type === 'SpaceInvited');
+        }
+        return [];
+      })
+    );
+  }
 }
