@@ -1,0 +1,116 @@
+<div class="max-w-2xl mx-auto px-4 py-12">
+
+  <!-- Header -->
+  <div class="mb-8 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Invitation History</h1>
+      <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Your accepted and rejected space invitations</p>
+    </div>
+    <button
+      (click)="goBack()"
+      class="flex h-[36px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+      <i class="pi pi-arrow-left text-[10px]"></i>
+      Back
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-6">
+    <button
+      (click)="activeTab.set('accepted')"
+      [class]="'flex items-center gap-2 h-9 px-5 rounded-full text-xs font-bold transition-all ' +
+        (activeTab() === 'accepted' ? 'bg-green-500 text-white shadow-md shadow-green-100' : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50')">
+      <i class="pi pi-check-circle text-[11px]"></i>
+      Accepted
+      <span *ngIf="acceptedInvitations().length > 0"
+        class="ml-1 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold"
+        [class]="activeTab() === 'accepted' ? 'bg-white text-green-600' : 'bg-green-100 text-green-600'">
+        {{ acceptedInvitations().length }}
+      </span>
+    </button>
+
+    <button
+      (click)="activeTab.set('rejected')"
+      [class]="'flex items-center gap-2 h-9 px-5 rounded-full text-xs font-bold transition-all ' +
+        (activeTab() === 'rejected' ? 'bg-red-500 text-white shadow-md shadow-red-100' : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-50')">
+      <i class="pi pi-times-circle text-[11px]"></i>
+      Rejected
+      <span *ngIf="rejectedInvitations().length > 0"
+        class="ml-1 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold"
+        [class]="activeTab() === 'rejected' ? 'bg-white text-red-600' : 'bg-red-100 text-red-600'">
+        {{ rejectedInvitations().length }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="space-y-3">
+    <!-- Loading -->
+    <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <i class="pi pi-spin pi-spinner text-orange-600 text-3xl mb-4"></i>
+      <p class="text-sm font-medium text-gray-500">Loading history...</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading()">
+      <div *ngFor="let item of currentList()" class="invitation-item-card">
+        <div class="p-4 flex gap-4 items-center">
+          <!-- Space Initial Avatar -->
+          <div class="flex-shrink-0 w-14 h-14 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center">
+            <span class="text-2xl font-extrabold text-gray-400">
+              {{ item.spaceName?.substring(0, 1)?.toUpperCase() || 'S' }}
+            </span>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <h3 class="text-sm font-bold text-gray-900 truncate">{{ item.spaceName }}</h3>
+
+                <!-- Inviter row -->
+                <div class="mt-1.5 flex items-center gap-1.5">
+                  <p-avatar
+                    [image]="item.inviterAvatarUrl || ''"
+                    [icon]="!item.inviterAvatarUrl ? 'pi pi-user' : ''"
+                    shape="circle"
+                    styleClass="w-5 h-5 bg-orange-100 text-orange-600">
+                  </p-avatar>
+                  <span
+                    class="text-[12px] font-semibold text-gray-700 cursor-default"
+                    [pTooltip]="item.inviterEmail || 'No email available'"
+                    tooltipPosition="top">
+                    {{ item.inviterName || 'Unknown' }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Status Badge -->
+              <div class="flex-shrink-0">
+                <span *ngIf="activeTab() === 'accepted'"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100 text-[10px] font-bold uppercase tracking-wide">
+                  <i class="pi pi-check text-[9px]"></i> Accepted
+                </span>
+                <span *ngIf="activeTab() === 'rejected'"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-500 border border-red-100 text-[10px] font-bold uppercase tracking-wide">
+                  <i class="pi pi-times text-[9px]"></i> Rejected
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="currentList().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm text-center px-6">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+          [class]="activeTab() === 'accepted' ? 'bg-green-50' : 'bg-red-50'">
+          <i [class]="(activeTab() === 'accepted' ? 'pi-check-circle text-green-200' : 'pi-times-circle text-red-200') + ' pi text-4xl'"></i>
+        </div>
+        <h2 class="text-base font-bold text-gray-900">No invitations found</h2>
+        <p class="text-xs text-gray-500 mt-1">
+          {{ activeTab() === 'accepted' ? 'You have not accepted any invitations yet.' : 'You have not rejected any invitations yet.' }}
+        </p>
+      </div>
+    </ng-container>
+  </div>
+</div>

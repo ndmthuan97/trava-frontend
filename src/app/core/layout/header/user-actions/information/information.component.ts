@@ -5,7 +5,8 @@ import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../auth/services/auth/auth.service';
 import { UserService } from '../../../../../shared/services/api/user/user.service';
-import { NotificationService } from '../../../../../shared/services/api/notification/notification.service';
+import { SpaceInvitationService } from '../../../../../shared/services/api/space-invitation/space-invitation.service';
+import { InvitationStatus } from '../../../../../shared/models/enum/invitation-status.enum';
 
 @Component({
   selector: 'app-information',
@@ -14,18 +15,19 @@ import { NotificationService } from '../../../../../shared/services/api/notifica
   templateUrl: './information.component.html',
   styleUrl: './information.component.css',
 })
-export class InformationComponent {
+export class InformationComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
-  private readonly notificationService = inject(NotificationService);
+  private readonly spaceInvitationService = inject(SpaceInvitationService);
 
   readonly user = this.userService.currentUser;
-  invitationCount = 0;
+  pendingCount = 0;
 
   ngOnInit() {
-    this.notificationService.getSpaceInvitations().subscribe(invites => {
-      this.invitationCount = invites.length;
+    // Only fetch pending invitations to decide badge visibility
+    this.spaceInvitationService.getMyInvitations({ Status: InvitationStatus.Pending, PageIndex: 1, PageSize: 50 }).subscribe(result => {
+      this.pendingCount = result?.count ?? 0;
       this.updateMenuItems();
     });
   }
@@ -43,7 +45,9 @@ export class InformationComponent {
         label: 'Invitations',
         icon: 'pi pi-envelope',
         id: 'invitations-menu-item',
-        badge: this.invitationCount > 0 ? this.invitationCount.toString() : undefined,
+        // Badge only shows when there are pending invitations, in orange
+        badge: this.pendingCount > 0 ? this.pendingCount.toString() : undefined,
+        badgeStyleClass: 'p-badge-warn',
         command: () => {
           this.router.navigate(['/invitations']);
         }

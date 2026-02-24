@@ -3,14 +3,13 @@
   <div class="mb-10 flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Invitations</h1>
-      <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Pending workspace requests</p>
+      <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Pending workspace invitations</p>
     </div>
-    
-    <button 
-      (click)="goBack()"
+    <button
+      (click)="viewHistory()"
       class="flex h-[36px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
-      <i class="pi pi-arrow-left text-[10px]"></i>
-      Back
+      <i class="pi pi-history text-[10px]"></i>
+      View History
     </button>
   </div>
 
@@ -26,7 +25,7 @@
     <ng-container *ngIf="!isLoading()">
       <div *ngFor="let item of invitations()" class="invitation-item-card">
         <div class="p-4 sm:p-5 flex gap-4">
-          <!-- Space Avatar (Initial Letter) -->
+          <!-- Space Avatar -->
           <div class="flex-shrink-0">
             <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-orange-50 border-2 border-orange-100 flex items-center justify-center shadow-inner">
               <span class="text-3xl font-extrabold text-orange-500">
@@ -37,48 +36,40 @@
 
           <!-- Content Info -->
           <div class="flex-1 min-w-0 pt-1">
-            <!-- Space Name -->
             <h3 class="text-base font-bold text-gray-900 truncate leading-tight">
               {{ item.spaceName || 'Workspace' }}
             </h3>
 
-            <!-- Sender Info row - Name, Email, Avatar -->
+            <!-- Sender Info -->
             <div class="mt-3 flex items-center gap-2.5">
-              <!-- Inviter Avatar -->
-              <p-avatar 
-                [image]="item.inviterAvatarUrl || ''" 
+              <p-avatar
+                [image]="item.inviterAvatarUrl || ''"
                 [icon]="!item.inviterAvatarUrl ? 'pi pi-user' : ''"
-                shape="circle" 
-                styleClass="w-7 h-7 border-2 border-white shadow-sm bg-orange-100 text-orange-600">
+                shape="circle"
+                styleClass="w-7 h-7 bg-orange-100 text-orange-600">
               </p-avatar>
-
-              <!-- Inviter Name + message -->
-              <p class="text-[13px] text-gray-600 leading-snug">
-                <span class="font-bold text-gray-900">{{ item.inviterName || 'Someone' }}</span>
-                <span class="text-gray-400"> invited you to join this space.</span>
-              </p>
+              <span
+                class="text-[13px] font-bold text-gray-900 cursor-default"
+                [pTooltip]="item.inviterEmail || 'No email available'"
+                tooltipPosition="top">
+                {{ item.inviterName || 'Someone' }}
+              </span>
+              <span class="text-[13px] text-gray-400">invited you to join this space.</span>
             </div>
-
-            <!-- Expiry info -->
-            <p *ngIf="item.expiredAt" class="text-[11px] text-gray-400 mt-2 flex items-center gap-1">
-              <i class="pi pi-clock text-[9px]"></i>
-              Expires: {{ item.expiredAt | date: 'dd/MM/yyyy, HH:mm' }}
-            </p>
           </div>
         </div>
 
         <!-- Action Row -->
         <div class="px-4 pb-4 sm:px-5 sm:pb-5 flex gap-2">
-          <button 
+          <button
             (click)="respond(item, InvitationStatus.Accepted)"
             class="flex-1 h-10 rounded-xl bg-orange-600 text-white text-xs font-bold hover:bg-orange-700 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-orange-100">
-            <i class="pi pi-check text-xs"></i> Chấp nhận
+            <i class="pi pi-check text-xs"></i> Accept
           </button>
-
-          <button 
+          <button
             (click)="respond(item, InvitationStatus.Rejected)"
             class="w-10 h-10 flex-shrink-0 rounded-xl bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all active:scale-95 flex items-center justify-center"
-            pTooltip="Từ chối" tooltipPosition="top">
+            pTooltip="Reject" tooltipPosition="top">
             <i class="pi pi-times"></i>
           </button>
         </div>
@@ -91,7 +82,7 @@
         </div>
         <h2 class="text-xl font-bold text-gray-900">No Pending Requests</h2>
         <p class="text-sm text-gray-500 mt-2 max-w-xs mx-auto">When someone invites you to a space, it will appear here for you to accept!</p>
-        <button 
+        <button
           (click)="goBack()"
           class="mt-8 px-6 py-3 rounded-2xl bg-orange-600 text-white text-sm font-bold hover:bg-orange-700 transition-all shadow-lg shadow-orange-100">
           Go Home

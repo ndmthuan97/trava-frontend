@@ -32,8 +32,13 @@
 }
 
 :host ::ng-deep .p-menu .p-menuitem-badge {
-    background: #f97316;
-    color: white;
+    background: #f97316 !important;
+    color: white !important;
     font-size: 10px;
     font-weight: bold;
+    border-radius: 999px;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 5px;
 }

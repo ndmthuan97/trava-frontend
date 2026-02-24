@@ -8,6 +8,7 @@ export interface Invitation {
   spaceRole?: number;
   invitedUserId: string;
   inviterName?: string;
+  inviterEmail?: string;
   inviterAvatarUrl?: string;
   status: InvitationStatus;
   expiredAt?: string;

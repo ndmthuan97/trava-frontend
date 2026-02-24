@@ -25,7 +25,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   allNotifications = signal<Notification[]>([]);
   unreadCount = signal<number>(0);
   isDropdownOpen = signal<boolean>(false);
-  activeTab = signal<'unread' | 'all'>('unread');
+  activeTab = signal<'unread' | 'all'>('all');
   InvitationStatus = InvitationStatus;
 
   // Detail Dialog State
@@ -49,6 +49,10 @@ export class NotificationComponent implements OnInit, OnDestroy {
     this.notificationService.getUnreadNotifications().subscribe((notifications: Notification[]) => {
       this.notifications.set(notifications);
       this.unreadCount.set(notifications.length);
+      // Debug: log first payload to see actual field names
+      if (notifications.length > 0) {
+        console.log('[Notification payload keys]', Object.keys(notifications[0].payload || {}), notifications[0].payload);
+      }
     });
 
     // Load recent "All" notifications (first 10)
@@ -123,6 +127,26 @@ export class NotificationComponent implements OnInit, OnDestroy {
     this.activeTab.set(tab);
   }
 
+  /** Extract sender avatar URL - handles different payload key casings from backend */
+  getSenderAvatar(payload: any): string {
+    return payload?.AvatarUrl
+      || payload?.SenderAvatarUrl
+      || payload?.SenderAvatar
+      || payload?.avatarUrl
+      || payload?.senderAvatarUrl
+      || payload?.inviterAvatarUrl
+      || '';
+  }
+
+  /** Extract sender name - handles different payload key casings from backend */
+  getSenderName(payload: any): string {
+    return payload?.SenderName
+      || payload?.senderName
+      || payload?.InviterName
+      || payload?.inviterName
+      || '';
+  }
+
   getTimeAgo(date: string | Date): string {
     const now = new Date();
     const past = new Date(date);
@@ -134,16 +158,19 @@ export class NotificationComponent implements OnInit, OnDestroy {
     const diffInDays = Math.floor(diffInHours / 24);
 
     if (diffInSeconds < 60) {
-      return 'Vừa xong';
+      return 'Just now';
     } else if (diffInMinutes < 60) {
-      return `${diffInMinutes} phút trước`;
+      return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
     } else if (diffInHours < 24) {
-      return `${diffInHours} giờ trước`;
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
     } else if (diffInDays < 7) {
-      return `${diffInDays} ngày trước`;
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
     } else {
-      // Fallback to formatted date for old notifications
-      return past.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      return past.toLocaleDateString('en-US', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      });
     }
   }
 }

@@ -22,16 +22,6 @@ import { Router } from '@angular/router';
     .invitation-item-card {
       @apply bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden transition-all hover:shadow-md;
     }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #e2e8f0;
-      border-radius: 10px;
-    }
   `]
 })
 export class InvitationsComponent implements OnInit {
@@ -48,7 +38,6 @@ export class InvitationsComponent implements OnInit {
 
   loadInvitations(): void {
     this.isLoading.set(true);
-    // Call GET /api/invitations/my-invitations, filter only Pending
     this.spaceInvitationService.getMyInvitations({ Status: InvitationStatus.Pending, PageIndex: 1, PageSize: 50 }).subscribe({
       next: (result) => {
         this.invitations.set(result?.data ?? []);
@@ -59,12 +48,15 @@ export class InvitationsComponent implements OnInit {
   }
 
   respond(invitation: Invitation, status: InvitationStatus): void {
-    // Call PUT /api/invitations/{id} with { invitationStatus: status }
     this.spaceInvitationService.updateInvitationStatus(invitation.id, status).subscribe(success => {
       if (success) {
         this.invitations.update(prev => prev.filter(inv => inv.id !== invitation.id));
       }
     });
+  }
+
+  viewHistory(): void {
+    this.router.navigate(['/invitations/history']);
   }
 
   goBack(): void {

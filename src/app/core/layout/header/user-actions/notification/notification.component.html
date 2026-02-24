@@ -26,7 +26,7 @@
       </div>
 
       <!-- Tabs -->
-      <div class="flex gap-2 mb-4">
+      <div class="flex gap-2">
         <button
           (click)="setTab('all')"
           [class]="'px-4 py-1.5 rounded-full text-sm font-bold transition-all ' + (activeTab() === 'all' ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-100')"
@@ -55,10 +55,9 @@
             <!-- Avatar with Badge -->
             <div class="relative flex-shrink-0">
               <p-avatar 
-                [image]="item.payload.AvatarUrl" 
-                [label]="!item.payload.AvatarUrl ? (item.payload.SenderName?.substring(0, 1) || '?') : ''" 
+                [image]="getSenderAvatar(item.payload) || 'trava.png'"
                 shape="circle" 
-                styleClass="w-14 h-14 text-lg font-bold bg-orange-500 text-white"
+                styleClass="w-14 h-14 text-lg font-bold bg-orange-50 text-white"
               ></p-avatar>
               <!-- Small Badge Icon -->
               <div class="absolute -right-0.5 -bottom-0.5 w-6 h-6 rounded-full bg-orange-600 border-2 border-white flex items-center justify-center shadow-sm">
@@ -69,10 +68,10 @@
             <!-- Content -->
             <div class="flex-1 min-w-0 pr-6">
               <div class="text-[13px] leading-[1.4] text-gray-900">
-                @if (item.payload.SenderName) {
-                  <span class="font-bold">{{ item.payload.SenderName }}</span>
+                @if (getSenderName(item.payload)) {
+                  <span class="font-bold">{{ getSenderName(item.payload) }}</span>
                 }
-                <span class="ml-1 text-gray-700 line-clamp-3">{{ item.payload.Message || 'sent a notification to you' }}</span>
+                <span class="ml-1 text-gray-700 line-clamp-3">{{ item.payload.Message || item.payload.message || 'sent a notification to you' }}</span>
               </div>
               
               <!-- Quick Actions for Invitations -->
