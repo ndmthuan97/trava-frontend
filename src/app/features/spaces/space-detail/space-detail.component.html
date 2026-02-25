@@ -34,7 +34,16 @@
           [class.border-orange-600]="activeTab() === 'list'"
           [class.text-gray-500]="activeTab() !== 'list'"
           (click)="showTasks()">
-          <i class="pi pi-list mr-1.5 text-xs"></i>List
+          <i class="pi pi-list mr-1.5 text-xs"></i>All Tasks
+        </button>
+        <button
+          class="pb-2 text-sm font-medium transition-all"
+          [class.text-orange-600]="activeTab() === 'assigned'"
+          [class.border-b-2]="activeTab() === 'assigned'"
+          [class.border-orange-600]="activeTab() === 'assigned'"
+          [class.text-gray-500]="activeTab() !== 'assigned'"
+          (click)="showMyTasks()">
+          <i class="pi pi-user mr-1.5 text-xs"></i>Assigned to me
         </button>
         <button
           class="pb-2 text-sm font-medium transition-all"
@@ -60,7 +69,7 @@
       <!-- Actions (Right) -->
       <div class="flex items-center gap-2 pb-2">
         <!-- Task Actions -->
-        <ng-container *ngIf="activeTab() === 'list'">
+        <ng-container *ngIf="activeTab() === 'list' || activeTab() === 'assigned'">
           <div
             class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
             <i class="pi pi-search text-[10px] text-gray-400"></i>
@@ -180,7 +189,7 @@
   <div class="mb-8 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
     <!-- Tasks Table -->
     <p-table
-      *ngIf="activeTab() === 'list'"
+      *ngIf="activeTab() === 'list' || activeTab() === 'assigned'"
       [value]="tasks()"
       [rows]="10"
       [paginator]="tasks().length > 10"
@@ -306,7 +315,7 @@
     </p-table>
 
     <!-- Custom Footer for Table -->
-    <div class="border-t border-gray-50 p-2" *ngIf="activeTab() === 'list'">
+    <div class="border-t border-gray-50 p-2" *ngIf="activeTab() === 'list' || activeTab() === 'assigned'">
       <button
         class="flex items-center gap-2 rounded px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
         (click)="openCreateTaskDialog()">

@@ -17,19 +17,10 @@
 
       <div class="flex items-center gap-2">
         <!-- Global Edit Actions -->
-        <ng-container *ngIf="!isGlobalEdit()">
-          <button
-            *ngIf="canEditAll() || canChangeStatusOnly()"
-            class="action-btn text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-all"
-            (click)="onGlobalEdit()"
-            pTooltip="Edit All Fields">
-            <i class="pi pi-pencil text-xs"></i>
-          </button>
-        </ng-container>
         <ng-container *ngIf="isGlobalEdit()">
           <button
             (click)="onGlobalSave()"
-            class="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95"
+            class="flex items-center gap-1.5 rounded-md bg-orange-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-orange-700 active:scale-95"
             [disabled]="isSaving()">
             <i class="pi" [class.pi-check]="!isSaving()" [class.pi-spin]="isSaving()" [class.pi-spinner]="isSaving()"></i>
             Save
@@ -41,10 +32,20 @@
           </button>
         </ng-container>
 
-        <div class="mx-1 h-4 w-[1px] bg-gray-200" *ngIf="isSpaceOwner()"></div>
-        <button *ngIf="isSpaceOwner()" class="action-btn group/del" (click)="onDelete()" pTooltip="Delete Task">
+        <div class="mx-1 h-4 w-[1px] bg-gray-200" *ngIf="isSpaceOwner() && !isGlobalEdit()"></div>
+        <button *ngIf="isSpaceOwner() && !isGlobalEdit()" class="action-btn group/del" (click)="onDelete()" pTooltip="Delete Task">
           <i class="pi pi-trash text-xs text-rose-500 group-hover/del:text-rose-600"></i>
         </button>
+
+        <div class="mx-1 h-4 w-[1px] bg-gray-200" *ngIf="!isGlobalEdit()"></div>
+        <button
+          *ngIf="!isGlobalEdit()"
+          class="action-btn text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-all"
+          (click)="onGlobalEdit()"
+          pTooltip="Edit Task">
+          <i class="pi pi-pencil text-xs"></i>
+        </button>
+
         <div class="mx-1 h-4 w-[1px] bg-gray-200"></div>
         <button (click)="close()" class="action-btn hover:bg-rose-50 hover:text-rose-600">
           <i class="pi pi-times text-sm"></i>
@@ -57,17 +58,13 @@
       <!-- Left Column: Content (70%) -->
       <div class="custom-scrollbar flex-[0.65] overflow-y-auto p-8">
         <!-- Title -->
-        <ng-container *ngIf="editingField() !== 'title' && !isGlobalEdit(); else editTitle">
-          <div
-            class="group mb-8 flex items-start gap-3"
-            [class.cursor-pointer]="canEditAll()"
-            (click)="canEditAll() ? onEdit('title') : null">
+        <ng-container *ngIf="!isGlobalEdit(); else editTitle">
+          <div class="mb-8 flex items-start gap-3">
             <i class="pi pi-credit-card mt-1.5 text-lg text-slate-400"></i>
             <div class="flex items-center gap-2">
-              <h1 class="text-2xl font-bold tracking-tight transition-colors group-hover:text-blue-600">
+              <h1 class="text-2xl font-bold tracking-tight">
                 {{ t.title }}
               </h1>
-              <i class="pi pi-pencil text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" *ngIf="canEditAll()"></i>
             </div>
           </div>
         </ng-container>
@@ -79,22 +76,7 @@
               [(ngModel)]="editedTask().title"
               class="flex-1 rounded border-none p-1 text-2xl font-bold tracking-tight focus:ring-2 focus:ring-blue-100"
               placeholder="Task Title"
-              (keydown.enter)="onSaveField('title')"
-              (keydown.escape)="onCancel()" />
-            <div class="flex gap-1" *ngIf="!isGlobalEdit()">
-              <button
-                (click)="onSaveField('title')"
-                class="flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all shadow-sm"
-                pTooltip="Save">
-                <i class="pi pi-check text-xs"></i>
-              </button>
-              <button
-                (click)="onCancel()"
-                class="flex h-8 w-8 items-center justify-center rounded-md bg-gray-50 text-gray-400 hover:bg-gray-100 transition-all shadow-sm"
-                pTooltip="Cancel">
-                <i class="pi pi-times text-xs"></i>
-              </button>
-            </div>
+              (keydown.escape)="onGlobalCancel()" />
           </div>
         </ng-template>
 
@@ -103,24 +85,18 @@
           <h2 class="section-label group flex items-center">
             <i class="pi pi-align-left mr-2"></i>Description
           </h2>
-          <ng-container *ngIf="editingField() !== 'description' && !isGlobalEdit(); else editDescription">
+          <ng-container *ngIf="!isGlobalEdit(); else editDescription">
             <div
               *ngIf="!t.description"
-              class="group -ml-2 flex cursor-pointer items-center justify-between rounded px-2 py-2 text-sm italic text-slate-400 transition-colors hover:bg-gray-50 hover:text-blue-600"
-              (click)="canEditAll() ? onEdit('description') : null">
-              <span>Add a description...</span>
-              <i class="pi pi-pencil text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" *ngIf="canEditAll()"></i>
+              class="group -ml-2 flex items-center justify-between rounded px-2 py-2 text-sm italic text-slate-400">
+              <span>No description provided.</span>
             </div>
             <div
               *ngIf="t.description"
-              class="group relative -ml-1 cursor-pointer rounded p-2 transition-colors hover:bg-gray-50/50"
-              (click)="canEditAll() ? onEdit('description') : null">
+              class="relative -ml-1 rounded p-2">
               <p class="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
                 {{ t.description }}
               </p>
-              <div class="absolute -right-1 top-1 opacity-0 transition-opacity group-hover:opacity-100" *ngIf="canEditAll()">
-                <i class="pi pi-pencil text-[10px] text-blue-400"></i>
-              </div>
             </div>
           </ng-container>
           <ng-template #editDescription>
@@ -130,18 +106,6 @@
                 [(ngModel)]="editedTask().description"
                 class="min-h-[150px] w-full rounded-lg border border-gray-100 p-3 text-sm leading-relaxed text-slate-700 focus:ring-2 focus:ring-blue-50"
                 placeholder="Add a detailed description..."></textarea>
-              <div class="flex justify-end gap-2" *ngIf="!isGlobalEdit()">
-                <button
-                  (click)="onCancel()"
-                  class="flex items-center gap-1.5 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-200 transition-all">
-                  Cancel
-                </button>
-                <button
-                  (click)="onSaveField('description')"
-                  class="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition-all shadow-sm">
-                  <i class="pi pi-check text-[10px]"></i> Save
-                </button>
-              </div>
             </div>
           </ng-template>
         </div>
@@ -243,29 +207,25 @@
             <div class="detail-row">
               <span class="detail-label"><i class="pi pi-user mr-2 text-[10px]"></i>Assignee</span>
               <div class="detail-value flex flex-col gap-1">
-                <ng-container *ngIf="editingField() !== 'assignee' && !isGlobalEdit(); else editAssignee">
-                  <div
-                    class="group flex cursor-pointer items-center justify-between rounded p-1 -ml-1 transition-colors hover:bg-slate-50"
-                    [class.cursor-pointer]="canEditAll()"
-                    (click)="canEditAll() ? onEdit('assignee') : null">
+                <ng-container *ngIf="!isGlobalEdit(); else editAssignee">
+                  <div class="flex items-center gap-2 p-1 -ml-1">
                     <div class="flex items-center gap-2">
                       <ng-container *ngIf="t.assignedUser">
                         <p-avatar
                           [image]="t.assignedUser.avatarUrl"
                           shape="circle"
                           styleClass="w-6 h-6"></p-avatar>
-                        <span class="text-sm font-medium transition-colors group-hover:text-blue-600">{{
+                        <span class="text-sm font-medium">{{
                           t.assignedUser.fullName
                         }}</span>
                       </ng-container>
                       <ng-container *ngIf="!t.assignedUser">
-                        <div class="flex items-center gap-2 text-slate-400 group-hover:text-blue-600">
+                        <div class="flex items-center gap-2 text-slate-400">
                           <i class="pi pi-user-circle text-xl"></i>
                           <span class="text-sm">Unassigned</span>
                         </div>
                       </ng-container>
                     </div>
-                    <i class="pi pi-pencil text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" *ngIf="canEditAll()"></i>
                   </div>
                 </ng-container>
                 <ng-template #editAssignee>
@@ -308,18 +268,6 @@
                         </div>
                       </ng-template>
                     </p-select>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onSaveField('assignee')"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
-                      <i class="pi pi-check text-xs"></i>
-                    </button>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onCancel()"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-400 hover:bg-gray-100 transition-all">
-                      <i class="pi pi-times text-xs"></i>
-                    </button>
                   </div>
                 </ng-template>
 
@@ -330,13 +278,11 @@
             <div class="detail-row">
               <span class="detail-label"><i class="pi pi-tag mr-2 text-[10px]"></i>Status</span>
               <div class="detail-value">
-                <ng-container *ngIf="editingField() !== 'status' && !isGlobalEdit(); else editStatus">
-                  <div
-                    class="group flex cursor-pointer items-center justify-between rounded p-1 -ml-1 transition-colors hover:bg-slate-50"
-                    (click)="onEdit('status')">
+                <ng-container *ngIf="!isGlobalEdit(); else editStatus">
+                  <div class="flex items-center justify-between p-1 -ml-1">
                     <div
                       [class]="
-                        'inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-all ' +
+                        'inline-flex items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ' +
                         (t.status === 2
                           ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
                           : t.status === 1
@@ -345,7 +291,6 @@
                       ">
                       {{ getStatusLabel(t.status) }}
                     </div>
-                    <i class="pi pi-pencil text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100"></i>
                   </div>
                 </ng-container>
                 <ng-template #editStatus>
@@ -357,18 +302,6 @@
                       optionValue="value"
                       appendTo="body"
                       styleClass="w-full text-xs h-8"></p-select>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onSaveField('status')"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
-                      <i class="pi pi-check text-xs"></i>
-                    </button>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onCancel()"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-400 hover:bg-gray-100 transition-all">
-                      <i class="pi pi-times text-xs"></i>
-                    </button>
                   </div>
                 </ng-template>
               </div>
@@ -380,14 +313,11 @@
                 ><i class="pi pi-bookmark mr-2 text-[10px]"></i>Priority</span
               >
               <div class="detail-value flex items-center gap-2">
-                <ng-container *ngIf="editingField() !== 'priority' && !isGlobalEdit(); else editPriority">
-                  <div
-                    class="group flex cursor-pointer items-center justify-between rounded p-1 -ml-1 transition-colors hover:bg-slate-50"
-                    [class.cursor-pointer]="canEditAll()"
-                    (click)="canEditAll() ? onEdit('priority') : null">
+                <ng-container *ngIf="!isGlobalEdit(); else editPriority">
+                  <div class="flex items-center justify-between p-1 -ml-1">
                     <div
                       [class]="
-                        'inline-flex items-center justify-center gap-1.5 rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-all ' +
+                        'inline-flex items-center justify-center gap-1.5 rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ' +
                         (t.priority === 4
                           ? 'border-rose-100 bg-rose-50 text-rose-600'
                           : t.priority === 3
@@ -405,7 +335,6 @@
                       <i class="pi pi-angle-double-down text-[10px]" *ngIf="t.priority === 0"></i>
                       <span>{{ getPriorityLabel(t.priority) }}</span>
                     </div>
-                    <i class="pi pi-pencil text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" *ngIf="canEditAll()"></i>
                   </div>
                 </ng-container>
                 <ng-template #editPriority>
@@ -417,18 +346,6 @@
                       optionValue="value"
                       appendTo="body"
                       styleClass="w-full text-xs h-8"></p-select>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onSaveField('priority')"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
-                      <i class="pi pi-check text-xs"></i>
-                    </button>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onCancel()"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-400 hover:bg-gray-100 transition-all">
-                      <i class="pi pi-times text-xs"></i>
-                    </button>
                   </div>
                 </ng-template>
               </div>
@@ -440,17 +357,13 @@
                 ><i class="pi pi-calendar mr-2 text-[10px]"></i>Start date</span
               >
               <div class="detail-value">
-                <ng-container *ngIf="editingField() !== 'startDate' && !isGlobalEdit(); else editStartDate">
-                  <div
-                    class="group flex cursor-pointer items-center justify-between rounded p-1 -ml-1 transition-colors hover:bg-slate-50"
-                    [class.cursor-pointer]="canEditAll()"
-                    (click)="canEditAll() ? onEdit('startDate') : null">
+                <ng-container *ngIf="!isGlobalEdit(); else editStartDate">
+                  <div class="flex items-center justify-between p-1 -ml-1">
                     <span
-                      class="text-sm font-medium transition-colors group-hover:text-blue-600"
+                      class="text-sm font-medium"
                       [class.text-slate-400]="!t.startDate">
                       {{ t.startDate ? (t.startDate | date: 'dd/MM/yyyy, HH:mm') : 'None' }}
                     </span>
-                    <i class="pi pi-pencil text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" *ngIf="canEditAll()"></i>
                   </div>
                 </ng-container>
                 <ng-template #editStartDate>
@@ -462,18 +375,6 @@
                       hourFormat="24"
                       appendTo="body"
                       styleClass="w-full text-xs"></p-datepicker>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onSaveField('startDate')"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
-                      <i class="pi pi-check text-xs"></i>
-                    </button>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onCancel()"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-400 hover:bg-gray-100 transition-all">
-                      <i class="pi pi-times text-xs"></i>
-                    </button>
                   </div>
                 </ng-template>
               </div>
@@ -485,17 +386,13 @@
                 ><i class="pi pi-calendar-plus mr-2 text-[10px]"></i>Due date</span
               >
               <div class="detail-value">
-                <ng-container *ngIf="editingField() !== 'dueDate' && !isGlobalEdit(); else editDueDate">
-                  <div
-                    class="group flex cursor-pointer items-center justify-between rounded p-1 -ml-1 transition-colors hover:bg-slate-50"
-                    [class.cursor-pointer]="canEditAll()"
-                    (click)="canEditAll() ? onEdit('dueDate') : null">
+                <ng-container *ngIf="!isGlobalEdit(); else editDueDate">
+                  <div class="flex items-center justify-between p-1 -ml-1">
                     <span
-                      class="text-sm font-medium transition-colors group-hover:text-blue-600"
+                      class="text-sm font-medium"
                       [class.text-slate-400]="!t.dueDate">
                       {{ t.dueDate ? (t.dueDate | date: 'dd/MM/yyyy, HH:mm') : 'None' }}
                     </span>
-                    <i class="pi pi-pencil text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" *ngIf="canEditAll()"></i>
                   </div>
                 </ng-container>
                 <ng-template #editDueDate>
@@ -507,18 +404,6 @@
                       hourFormat="24"
                       appendTo="body"
                       styleClass="w-full text-xs"></p-datepicker>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onSaveField('dueDate')"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
-                      <i class="pi pi-check text-xs"></i>
-                    </button>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onCancel()"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-400 hover:bg-gray-100 transition-all">
-                      <i class="pi pi-times text-xs"></i>
-                    </button>
                   </div>
                 </ng-template>
               </div>
@@ -528,16 +413,12 @@
             <div class="detail-row">
               <span class="detail-label"><i class="pi pi-star mr-2 text-[10px]"></i>Points</span>
               <div class="detail-value text-xs font-bold text-slate-700">
-                <ng-container *ngIf="editingField() !== 'point' && !isGlobalEdit(); else editPoint">
-                  <div
-                    class="group flex cursor-pointer items-center justify-between rounded p-1 -ml-1 transition-colors hover:bg-gray-50"
-                    [class.cursor-pointer]="canEditAll()"
-                    (click)="canEditAll() ? onEdit('point') : null">
+                <ng-container *ngIf="!isGlobalEdit(); else editPoint">
+                  <div class="flex items-center justify-between p-1 -ml-1">
                     <div class="flex items-center gap-1.5 font-bold text-slate-700">
                       <span class="text-sm font-bold text-orange-600">{{ t.point || 0 }}</span>
                       <span class="text-[10px] text-gray-400">/ 10</span>
                     </div>
-                    <i class="pi pi-pencil text-[10px] text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" *ngIf="canEditAll()"></i>
                   </div>
                 </ng-container>
                 <ng-template #editPoint>
@@ -549,20 +430,7 @@
                       min="1"
                       max="10"
                       class="h-8 w-16 text-xs font-bold text-orange-600"
-                      (keydown.enter)="onSaveField('point')"
-                      (keydown.escape)="onCancel()" />
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onSaveField('point')"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all">
-                      <i class="pi pi-check text-xs"></i>
-                    </button>
-                    <button
-                      *ngIf="!isGlobalEdit()"
-                      (click)="onCancel()"
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gray-50 text-gray-400 hover:bg-gray-100 transition-all">
-                      <i class="pi pi-times text-xs"></i>
-                    </button>
+                      (keydown.escape)="onGlobalCancel()" />
                   </div>
                 </ng-template>
               </div>

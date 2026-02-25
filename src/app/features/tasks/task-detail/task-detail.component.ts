@@ -19,6 +19,7 @@ import { TaskPriority, TaskPriorityLabels } from '../../../shared/models/enum/ta
 import { TaskItemService } from '../../../shared/services/api/task-item/task-item.service';
 import { Comment } from '../../../shared/models/entities/comment.model';
 import { inject, effect, untracked } from '@angular/core';
+import { ToastService } from '../../../shared/services/core/toast/toast.service';
 
 @Component({
   selector: 'app-task-detail',
@@ -57,6 +58,7 @@ export class TaskDetailComponent {
   statusChange = output<{ task: Task; status: TaskStatus }>();
 
   private readonly taskService = inject(TaskItemService);
+  private readonly toastService = inject(ToastService);
 
   editingField = signal<string | null>(null);
   isGlobalEdit = signal(false);
@@ -168,31 +170,25 @@ export class TaskDetailComponent {
     return priority !== undefined ? TaskPriorityLabels[priority] : 'Unknown';
   }
 
-  onEdit(field: string) {
-    const t = this.internalTask();
-    if (t) {
-      if (!this.isGlobalEdit()) {
-        this.editedTask.set({
-          ...t,
-          startDate: t.startDate ? new Date(t.startDate) : null,
-          dueDate: t.dueDate ? new Date(t.dueDate) : null,
-        });
-      }
-      this.editingField.set(field);
-    }
-  }
+  // Removed onEdit to disable inline editing as requested
+  // onEdit(field: string) { ... }
 
   onGlobalEdit() {
     const t = this.internalTask();
-    if (t) {
-      this.editedTask.set({
-        ...t,
-        startDate: t.startDate ? new Date(t.startDate) : null,
-        dueDate: t.dueDate ? new Date(t.dueDate) : null,
-      });
-      this.isGlobalEdit.set(true);
-      this.editingField.set(null);
+    if (!t) return;
+
+    if (!this.canEditAll() && !this.canChangeStatusOnly()) {
+      this.toastService.error('Permission Denied', 'You do not have permission to edit this task.');
+      return;
     }
+
+    this.editedTask.set({
+      ...t,
+      startDate: t.startDate ? new Date(t.startDate) : null,
+      dueDate: t.dueDate ? new Date(t.dueDate) : null,
+    });
+    this.isGlobalEdit.set(true);
+    this.editingField.set(null);
   }
 
   onGlobalCancel() {
@@ -244,12 +240,13 @@ export class TaskDetailComponent {
       };
       saveObservable = this.taskService.patchTask(t.id, patchPayload);
     } else {
+      this.toastService.error('Permission Denied', 'You do not have permission to save changes to this task.');
       this.isSaving.set(false);
       return;
     }
 
     saveObservable.subscribe({
-      next: result => {
+      next: (result: Task | null) => {
         if (result) {
           const enrichedResult = { ...result };
           if (enrichedResult.assignedUserId) {
@@ -325,7 +322,7 @@ export class TaskDetailComponent {
     this.editingField.set(null);
 
     this.taskService.patchTask(t.id, patchPayload).subscribe({
-      next: result => {
+      next: (result: Task | null) => {
         if (result) {
           // Enrich the result with assignedUser info
           const enrichedResult = { ...result };
@@ -366,7 +363,7 @@ export class TaskDetailComponent {
 
   loadComments(taskId: string) {
     this.taskService.getComments(taskId).subscribe({
-      next: res => this.comments.set(res || []),
+      next: (res: Comment[]) => this.comments.set(res || []),
       error: () => this.comments.set([]),
     });
   }
@@ -377,7 +374,7 @@ export class TaskDetailComponent {
     if (!content || !t) return;
 
     this.taskService.addComment(t.id, content).subscribe({
-      next: comment => {
+      next: (comment: Comment | null) => {
         if (comment) {
           const user = this.currentUser();
           if (user) {

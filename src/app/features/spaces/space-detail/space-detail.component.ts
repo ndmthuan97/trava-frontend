@@ -81,7 +81,7 @@ export class SpaceDetailComponent implements OnInit {
   currentUser = this.userService.currentUser;
   isSpaceOwner = signal<boolean>(false);
   spaceMembers = signal<User[]>([]);
-  activeTab = signal<'list' | 'members' | 'summary'>('list');
+  activeTab = signal<'list' | 'members' | 'summary' | 'assigned'>('list');
 
   taskSearchTerm = signal<string>('');
   memberSearchTerm = signal<string>('');
@@ -115,6 +115,7 @@ export class SpaceDetailComponent implements OnInit {
         this.sortDirection();
         this.filterStatus();
         this.filterPriority();
+        this.activeTab();
 
         if (spaceId && currentUser && spaceInfo) {
           this.getTasksBySpace(spaceId);
@@ -234,16 +235,14 @@ export class SpaceDetailComponent implements OnInit {
       Priorities: this.filterPriority() !== null ? [this.filterPriority() as number] : undefined,
     } as any;
 
-    // Add AssignedUserId for member's task filtering
-    if (!isOwner && currentUserId) {
+    const activeTab = this.activeTab();
+
+    // Add AssignedUserId if we are in 'Assigned to me' tab
+    if (activeTab === 'assigned' && currentUserId) {
       params.AssignedUserId = currentUserId;
     }
 
-    const taskObservable = isOwner
-      ? this.taskItemService.getTasksBySpace(params)
-      : this.taskItemService.getMyTasks(params);
-
-    taskObservable.subscribe({
+    this.taskItemService.getTasksBySpace(params).subscribe({
       next: (tasks: Task[] | null) => {
         const tasksList = tasks ?? [];
         this.mapTasksWithAssignees(tasksList);
@@ -362,6 +361,10 @@ export class SpaceDetailComponent implements OnInit {
     if (this.isSpaceOwner()) {
       this.activeTab.set('summary');
     }
+  }
+
+  showMyTasks() {
+    this.activeTab.set('assigned');
   }
 
   getSpaceRoleLabel(role: any): string {
