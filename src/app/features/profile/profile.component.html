@@ -210,78 +210,80 @@
     <form
       [formGroup]="changePasswordForm"
       (ngSubmit)="onChangePassword()"
-      class="flex flex-col gap-6 pt-4">
-      <div class="flex flex-col gap-2">
-        <label
-          for="currentPassword"
-          class="text-xs font-bold uppercase tracking-widest text-gray-400"
-          >Current Password</label
-        >
-        <p-password
-          id="currentPassword"
-          formControlName="currentPassword"
-          [toggleMask]="true"
-          [feedback]="false"
-          styleClass="w-full"
-          inputStyleClass="custom-input">
-        </p-password>
+      class="flex flex-col gap-6 pt-6">
+      
+      <div class="w-full">
+        <p-floatlabel variant="on" styleClass="w-full">
+          <p-password
+            id="currentPassword"
+            formControlName="currentPassword"
+            [toggleMask]="true"
+            [feedback]="false"
+            styleClass="w-full"
+            [style]="{'width':'100%'}"
+            [inputStyle]="{'width':'100%', 'padding-right':'52px'}"
+            inputStyleClass="custom-input"
+            autocomplete="current-password">
+          </p-password>
+          <label for="currentPassword">Current Password</label>
+        </p-floatlabel>
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="newPassword" class="text-xs font-bold uppercase tracking-widest text-gray-400"
-          >New Password</label
-        >
-        <p-password
-          id="newPassword"
-          formControlName="newPassword"
-          [toggleMask]="true"
-          styleClass="w-full"
-          inputStyleClass="custom-input">
-        </p-password>
-        <small
-          class="mt-1 text-[10px] font-bold uppercase text-red-400"
-          *ngIf="changePasswordForm.get('newPassword')?.hasError('minlength')">
-          Password must be at least 6 characters
-        </small>
+      <div class="w-full">
+        <p-floatlabel variant="on" styleClass="w-full">
+          <p-password
+            id="newPassword"
+            formControlName="newPassword"
+            [toggleMask]="true"
+            [feedback]="false"
+            styleClass="w-full"
+            [style]="{'width':'100%'}"
+            [inputStyle]="{'width':'100%', 'padding-right':'52px'}"
+            inputStyleClass="custom-input"
+            autocomplete="new-password">
+          </p-password>
+          <label for="newPassword">New Password</label>
+        </p-floatlabel>
+        @if (changePasswordForm.get('newPassword')?.touched && changePasswordForm.get('newPassword')?.errors) {
+          <small class="mt-1 block text-[10px] font-bold uppercase text-red-500">
+            {{ getPasswordFieldError('newPassword') }}
+          </small>
+        }
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label
-          for="confirmPassword"
-          class="text-xs font-bold uppercase tracking-widest text-gray-400"
-          >Confirm Password</label
-        >
-        <p-password
-          id="confirmPassword"
-          formControlName="confirmPassword"
-          [toggleMask]="true"
-          [feedback]="false"
-          styleClass="w-full"
-          inputStyleClass="custom-input">
-        </p-password>
-        <small
-          class="mt-1 text-[10px] font-bold uppercase text-red-400"
-          *ngIf="
-            changePasswordForm.hasError('mismatch') &&
-            changePasswordForm.get('confirmPassword')?.touched
-          ">
-          Passwords do not match
-        </small>
+      <div class="w-full">
+        <p-floatlabel variant="on" styleClass="w-full">
+          <p-password
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            [toggleMask]="true"
+            [feedback]="false"
+            styleClass="w-full"
+            [style]="{'width':'100%'}"
+            [inputStyle]="{'width':'100%', 'padding-right':'52px'}"
+            inputStyleClass="custom-input"
+            autocomplete="new-password">
+          </p-password>
+          <label for="confirmPassword">Confirm Password</label>
+        </p-floatlabel>
+        @if (changePasswordForm.hasError('mismatch') && changePasswordForm.get('confirmPassword')?.touched) {
+          <small class="mt-1 block text-[10px] font-bold uppercase text-red-500">
+            Passwords do not match
+          </small>
+        }
       </div>
 
-      <div class="mt-4 flex gap-3">
-        <button
-          type="button"
+      <div class="mt-4 flex justify-end gap-3">
+        <p-button
+          label="Cancel"
           (click)="displayChangePasswordDialog = false"
-          class="h-11 flex-1 rounded-xl border border-gray-200 bg-white text-xs font-bold text-gray-500 transition-all hover:bg-gray-50">
-          Cancel
-        </button>
-        <button
+          [outlined]="true"
+          severity="secondary" />
+        <p-button
           type="submit"
+          label="Update Password"
           [disabled]="changePasswordForm.invalid"
-          class="h-11 flex-1 rounded-xl bg-orange-600 text-xs font-bold text-white shadow-lg shadow-orange-100 transition-all hover:bg-orange-700 disabled:opacity-50">
-          Update Password
-        </button>
+          severity="warn" />
       </div>
     </form>
   </p-dialog>

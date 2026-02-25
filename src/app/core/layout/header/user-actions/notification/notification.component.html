@@ -136,130 +136,100 @@
 <!-- Notification Detail Dialog -->
 <p-dialog
   [(visible)]="showDetail"
-  [header]="selectedNotification()?.type || 'Notification Detail'"
   [modal]="true"
   [draggable]="false"
   [resizable]="false"
   [dismissableMask]="true"
-  [style]="{ width: '450px' }"
-  styleClass="notification-detail-dialog">
-  @if (selectedNotification(); as item) {
-    <div class="flex flex-col gap-6 py-2">
-      <!-- Header with Icon -->
-      <div class="flex items-center gap-4 border-b border-gray-100 pb-4">
+  [style]="{ width: '480px' }"
+  styleClass="notification-detail-dialog shadow-2xl">
+  
+  <!-- Custom Optimized Header -->
+  <ng-template pTemplate="header">
+    @if (selectedNotification(); as item) {
+      <div class="flex items-center gap-3">
         <div
           [class]="
-            'flex h-12 w-12 items-center justify-center rounded-full border-2 ' +
+            'flex h-10 w-10 items-center justify-center rounded-xl border-2 shadow-sm ' +
             getNotificationColor(item.type)
           ">
-          <i [class]="getNotificationIcon(item.type) + ' text-xl'"></i>
+          <i [class]="getNotificationIcon(item.type) + ' text-lg'"></i>
         </div>
-        <div>
-          <p class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ item.type }}</p>
-          <p class="text-sm text-gray-500">{{ item.createdAt | date: 'MMM d, yyyy, h:mm a' }}</p>
+        <div class="flex flex-col">
+          <span class="text-lg font-bold leading-tight text-gray-900">
+            {{ getNotificationTitle(item.type) }}
+          </span>
         </div>
       </div>
+    }
+  </ng-template>
+  @if (selectedNotification(); as item) {
+    <div class="flex flex-col gap-6 py-2">
+      <!-- Main Content Block -->
+      <div class="flex flex-col gap-2">
+        <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+          Message
+        </label>
 
-      <!-- Main Message -->
-      <div class="rounded-xl border border-orange-50 bg-orange-50/30 p-4">
-        <h4 class="text-lg font-bold leading-tight text-gray-900">
-          {{ item.payload.Message }}
-        </h4>
-        @if (item.payload.Description) {
-          <p class="mt-3 text-base leading-relaxed text-gray-700">
-            {{ item.payload.Description }}
-          </p>
-        }
-      </div>
-
-      <!-- Related Information -->
-      @if (
-        item.payload.SpaceName ||
-        item.payload.TaskTitle ||
-        item.payload.SpaceId ||
-        item.payload.TaskItemId
-      ) {
-        <div class="flex flex-col gap-3">
-          <h5 class="text-xs font-bold uppercase tracking-widest text-gray-400">
-            Related Information
-          </h5>
-
-          <div class="grid grid-cols-1 gap-2">
-            @if (item.payload.SpaceName) {
-              <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
-                <i class="pi pi-box text-orange-500"></i>
-                <div class="flex flex-col">
-                  <span class="text-[10px] font-bold uppercase text-gray-400">Space</span>
-                  <span class="text-sm font-semibold text-gray-800">{{
-                    item.payload.SpaceName
-                  }}</span>
-                </div>
-              </div>
-            }
-
-            @if (item.payload.TaskTitle) {
-              <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3">
-                <i class="pi pi-list text-green-500"></i>
-                <div class="flex flex-col">
-                  <span class="text-[10px] font-bold uppercase text-gray-400">Task</span>
-                  <span class="text-sm font-semibold text-gray-800">{{
-                    item.payload.TaskTitle
-                  }}</span>
-                </div>
-              </div>
+        <!-- Message Box Styled as Field -->
+        <div class="rounded-[12px] border border-[#f1f5f9] bg-[#f8fafc] p-5">
+          <div class="flex flex-col gap-3">
+            <h4 class="text-base font-semibold leading-relaxed text-gray-900">
+              {{ item.payload.Message }}
+            </h4>
+            @if (item.payload.Description) {
+              <p class="text-sm leading-relaxed text-gray-500">
+                {{ item.payload.Description }}
+              </p>
             }
           </div>
         </div>
-      }
-
-      <!-- Meta -->
-      <div class="flex items-center justify-between border-t border-gray-100 pt-4">
-        <div class="flex items-center gap-2">
-          <span
-            [class]="
-              'flex h-2 w-2 rounded-full ' + (item.isRead ? 'bg-gray-300' : 'bg-orange-500')
-            "></span>
-          <span class="text-xs font-medium text-gray-500">{{
-            item.isRead ? 'Read' : 'Just read now'
-          }}</span>
-        </div>
       </div>
+
+
     </div>
   }
 
   <ng-template pTemplate="footer">
-    <div class="flex w-full justify-end gap-2 pt-2">
-      @if (
-        selectedNotification()?.type === 'SpaceInvited' &&
-        selectedNotification()?.payload?.InvitationId
-      ) {
-        <button
-          pButton
-          label="Reject"
-          class="p-button-text p-button-danger"
-          (click)="
-            respondToInvitation(
-              selectedNotification()!.payload.InvitationId,
-              InvitationStatus.Rejected
-            )
-          "></button>
-        <button
-          pButton
-          label="Accept"
-          class="p-button-raised p-button-primary"
-          (click)="
-            respondToInvitation(
-              selectedNotification()!.payload.InvitationId,
-              InvitationStatus.Accepted
-            )
-          "></button>
-      } @else {
-        <button
-          pButton
-          label="Close"
-          class="p-button-text p-button-secondary"
-          (click)="showDetail.set(false)"></button>
-      }
-    </div>
+    @if (selectedNotification(); as item) {
+      <div class="flex w-full flex-col gap-4 border-t border-gray-100 pt-3">
+        @if (item.type === 'SpaceInvited' && item.payload?.InvitationId) {
+          <div class="flex justify-end gap-2">
+            <button
+              pButton
+              label="Reject"
+              class="p-button-text p-button-danger border border-rose-100"
+              (click)="respondToInvitation(item.payload.InvitationId, InvitationStatus.Rejected)"></button>
+            <button
+              pButton
+              label="Accept Invitation"
+              class="p-button-raised p-button-primary"
+              (click)="respondToInvitation(item.payload.InvitationId, InvitationStatus.Accepted)"></button>
+          </div>
+        }
+
+        <div class="flex items-center justify-between">
+          <!-- Sender Section -->
+        @if (getSenderName(item.payload)) {
+          <div class="flex items-center justify-between px-1">
+            <div class="flex items-center gap-3">
+              <p-avatar
+                [image]="getSenderAvatar(item.payload) || 'trava.png'"
+                shape="circle"
+                styleClass="w-9 h-9 border border-white ring-2 ring-gray-50"></p-avatar>
+              <div class="flex flex-col">
+                <span class="text-sm font-bold text-gray-900">{{ getSenderName(item.payload) }}</span>
+              </div>
+            </div>
+          </div>
+        }
+
+          <div class="flex flex-col items-end">
+            <span class="text-[11px] font-bold text-gray-500">
+              {{ item.createdAt | date: 'EEEE, MMM d, yyyy • h:mm a' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    }
   </ng-template>
 </p-dialog>

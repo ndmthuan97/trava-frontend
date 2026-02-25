@@ -16,11 +16,14 @@ import { PasswordModule } from 'primeng/password';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { FloatLabelModule } from 'primeng/floatlabel';
 import { UserService } from '../../shared/services/api/user/user.service';
 import { AuthService } from '../../core/auth/services/auth/auth.service';
+import { JwtService } from '../../core/auth/services/jwt/jwt.service';
 import { User } from '../../shared/models/entities/user.model';
 import { SupabaseService } from '../../shared/services/api/supabase/supabase.service';
 import { ToastService } from '../../shared/services/core/toast/toast.service';
+import { strongPasswordValidator, getPasswordError } from '../../shared/services/core/validators/password.validator';
 
 @Component({
   selector: 'app-profile',
@@ -36,6 +39,7 @@ import { ToastService } from '../../shared/services/core/toast/toast.service';
     PasswordModule,
     DatePickerModule,
     MenuModule,
+    FloatLabelModule,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
@@ -44,6 +48,7 @@ export class ProfileComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
+  private readonly jwtService = inject(JwtService);
   private readonly route = inject(ActivatedRoute);
   private readonly supabaseService = inject(SupabaseService);
   private readonly toastService = inject(ToastService);
@@ -70,12 +75,16 @@ export class ProfileComponent implements OnInit {
     this.changePasswordForm = this.fb.group(
       {
         currentPassword: ['', Validators.required],
-        newPassword: ['', [Validators.required, Validators.minLength(6)]],
+        newPassword: ['', [Validators.required, strongPasswordValidator()]],
         confirmPassword: ['', Validators.required],
       },
       { validators: this.passwordMatchValidator }
     );
     this.initSettingsMenu();
+  }
+
+  getPasswordFieldError(controlName: string): string {
+    return getPasswordError(this.changePasswordForm.get(controlName));
   }
 
   private initSettingsMenu() {
@@ -194,8 +203,14 @@ export class ProfileComponent implements OnInit {
 
   onChangePassword() {
     if (this.changePasswordForm.valid) {
-      this.authService.changePassword(this.changePasswordForm.value).subscribe((success: boolean) => {
+      const accessToken = this.jwtService.getAccessToken() ?? '';
+      const request = {
+        ...this.changePasswordForm.value,
+        currentAccessToken: accessToken,
+      };
+      this.authService.changePassword(request).subscribe((success: boolean) => {
         if (success) {
+          this.changePasswordForm.reset();
           this.displayChangePasswordDialog = false;
         }
       });

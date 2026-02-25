@@ -11,6 +11,7 @@ import { LoadingService } from '../../../../shared/services/core/loading/loading
 import { AuthService } from '../../services/auth/auth.service';
 
 import { type RegisterRequest } from '../../models/request/register-request.model';
+import { strongPasswordValidator } from '../../../../shared/services/core/validators/password.validator';
 
 @Component({
   selector: 'app-register',
@@ -42,7 +43,7 @@ export class RegisterComponent {
       {
         fullName: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
-        password: ['', Validators.required],
+        password: ['', [Validators.required, strongPasswordValidator()]],
         confirmPassword: ['', Validators.required],
       },
       {

@@ -35,9 +35,14 @@
               [feedback]="false"
               styleClass="w-full"
               inputStyleClass="w-full"
-              autocomplete="off" />
+              autocomplete="new-password" />
             <label for="password">Password</label>
           </p-floatlabel>
+          @if (registerForm.get('password')?.touched && registerForm.get('password')?.errors) {
+            <small class="mt-1 block text-xs text-red-500">
+              {{ registerForm.get('password')!.errors!['minLength'] || registerForm.get('password')!.errors!['uppercase'] || registerForm.get('password')!.errors!['lowercase'] || registerForm.get('password')!.errors!['digit'] || registerForm.get('password')!.errors!['special'] || 'Invalid password.' }}
+            </small>
+          }
         </div>
 
         <!-- Confirm Password Field -->

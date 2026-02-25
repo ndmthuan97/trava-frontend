@@ -90,3 +90,37 @@
 :host ::ng-deep .p-dialog .p-dialog-content {
   padding: 24px !important;
 }
+
+/* Float label full width */
+:host ::ng-deep .p-dialog p-floatlabel,
+:host ::ng-deep .p-dialog .p-floatlabel {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Password component full width */
+:host ::ng-deep .p-dialog p-password,
+:host ::ng-deep .p-dialog .p-password {
+  display: block !important;
+  width: 100% !important;
+  position: relative !important;
+}
+
+/* The inner input wrapper */
+:host ::ng-deep .p-dialog .p-password .p-password-input {
+  width: 100% !important;
+  padding-right: 52px !important;
+}
+
+/* Icon inside the field */
+:host ::ng-deep .p-dialog .p-password .p-password-icon,
+:host ::ng-deep .p-dialog .p-password .p-password-toggle-mask-icon {
+  position: absolute !important;
+  right: 14px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 2 !important;
+  cursor: pointer !important;
+  color: #94a3b8 !important;
+  pointer-events: all !important;
+}

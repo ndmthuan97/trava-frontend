@@ -17,6 +17,8 @@ import { SpaceInvitationService } from '../../../../../shared/services/api/space
 import { InvitationStatus } from '../../../../../shared/models/enum/invitation-status.enum';
 import { Subscription, interval } from 'rxjs';
 
+import { Router } from '@angular/router';
+ 
 @Component({
   selector: 'app-notification',
   standalone: true,
@@ -28,6 +30,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
   private readonly spaceInvitationService = inject(SpaceInvitationService);
   private readonly elementRef = inject(ElementRef);
+  private readonly router = inject(Router);
 
   notifications = signal<Notification[]>([]);
   allNotifications = signal<Notification[]>([]);
@@ -118,6 +121,28 @@ export class NotificationComponent implements OnInit, OnDestroy {
         }
       });
   }
+ 
+  navigateTo(payload: any): void {
+    const spaceId = this.getSpaceId(payload);
+    if (spaceId) {
+      this.router.navigate(['/spaces', spaceId]);
+      this.showDetail.set(false);
+      this.isDropdownOpen.set(false);
+    } else {
+      console.warn('Could not find spaceId in notification payload', payload);
+    }
+  }
+
+  /** Extract space/project ID - handles different payload key casings from backend */
+  getSpaceId(payload: any): string {
+    return (
+      payload?.SpaceId ||
+      payload?.spaceId ||
+      payload?.ProjectId ||
+      payload?.projectId ||
+      ''
+    );
+  }
 
   getNotificationIcon(type: string): string {
     switch (type) {
@@ -132,16 +157,27 @@ export class NotificationComponent implements OnInit, OnDestroy {
     }
   }
 
+  getNotificationTitle(type: string | undefined): string {
+    if (!type) return 'Notification Detail';
+    // Convert CamelCase to Space Separated
+    return type.replace(/([A-Z])/g, ' $1').trim();
+  }
+
   getNotificationColor(type: string): string {
     switch (type) {
       case 'TaskAssigned':
+      case 'SpaceInvited':
         return 'text-orange-500 bg-orange-50';
       case 'TaskCompleted':
         return 'text-green-500 bg-green-50';
       case 'TaskUpdated':
+      case 'ProjectUpdated':
         return 'text-amber-500 bg-amber-50';
+      case 'CommentAdded':
+      case 'NewComment':
+        return 'text-blue-500 bg-blue-50';
       default:
-        return 'text-gray-500 bg-gray-50';
+        return 'text-orange-500 bg-orange-50';
     }
   }
 
