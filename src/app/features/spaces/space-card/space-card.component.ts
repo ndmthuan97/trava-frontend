@@ -10,7 +10,7 @@ import { TooltipModule } from 'primeng/tooltip';
   standalone: true,
   imports: [CommonModule, TooltipModule],
   templateUrl: './space-card.component.html',
-  styleUrl: './space-card.component.css'
+  styleUrl: './space-card.component.css',
 })
 export class SpaceCardComponent {
   space = input.required<Space>();

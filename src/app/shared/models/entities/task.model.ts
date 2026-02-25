@@ -16,4 +16,6 @@ export interface Task {
   assignedUser?: User;
   assignedAt?: string;
   completedAt?: string;
+  creatorFullName?: string;
+  creatorAvatarUrl?: string;
 }

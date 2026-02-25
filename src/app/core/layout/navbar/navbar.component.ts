@@ -7,10 +7,7 @@ import { UserRoles } from '../../../shared/models/enum/user-role.enum';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-],
+  imports: [CommonModule, RouterModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })
@@ -20,11 +17,14 @@ export class NavbarComponent {
   isAdmin = signal<boolean>(false);
 
   constructor() {
-    effect(() => {
-      const user = this.userService.currentUser();
-      if (user) {
-        this.isAdmin.set(user.role === UserRoles.SYSTEM_ADMIN);
-      }
-    }, { allowSignalWrites: true });
+    effect(
+      () => {
+        const user = this.userService.currentUser();
+        if (user) {
+          this.isAdmin.set(user.role === UserRoles.SYSTEM_ADMIN);
+        }
+      },
+      { allowSignalWrites: true }
+    );
   }
 }

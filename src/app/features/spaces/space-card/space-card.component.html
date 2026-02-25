@@ -1,37 +1,47 @@
 <div
-  class="relative flex flex-col p-6 rounded-2xl bg-white border border-gray-100 shadow-sm transition-all hover:shadow-lg hover:border-green-100 cursor-pointer h-full group"
-  *ngIf="open(); else sidebarMode"
->
+  class="group relative flex h-full cursor-pointer flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:border-green-100 hover:shadow-lg"
+  *ngIf="open(); else sidebarMode">
   <!-- Top Row: Icon, Title, Badge -->
-  <div class="flex items-start justify-between mb-4">
-    <div class="flex items-center gap-4 min-w-0">
-      <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors group-hover:bg-green-100">
+  <div class="mb-4 flex items-start justify-between">
+    <div class="flex min-w-0 items-center gap-4">
+      <div
+        class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 transition-colors group-hover:bg-orange-100">
         <i class="pi pi-folder text-xl"></i>
       </div>
       <div class="min-w-0">
-        <h3 class="text-base font-bold text-gray-900 truncate leading-tight" [pTooltip]="space().name" tooltipPosition="top">{{ space().name }}</h3>
+        <h3
+          class="truncate text-base font-bold leading-tight text-gray-900"
+          [pTooltip]="space().name"
+          tooltipPosition="top">
+          {{ space().name }}
+        </h3>
       </div>
     </div>
   </div>
 
   <!-- Description -->
   <div class="mb-2 flex-grow">
-    <p class="text-sm text-gray-500 line-clamp-2 leading-relaxed" [pTooltip]="space().description || 'Manage your team tasks and collaboration in this workspace.'" tooltipPosition="top">
+    <p
+      class="line-clamp-2 text-sm leading-relaxed text-gray-500"
+      [pTooltip]="
+        space().description || 'Manage your team tasks and collaboration in this workspace.'
+      "
+      tooltipPosition="top">
       {{ space().description || 'No description provided for this space.' }}
     </p>
   </div>
 
   <!-- Bottom: Type and Members -->
-  <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-50 mt-auto">
+  <div class="mt-auto flex items-center justify-center gap-6 border-t border-gray-50 pt-2">
     <div class="flex items-center gap-1.5 text-xs text-gray-500">
-      <div class="flex items-center justify-center w-5 h-5 rounded bg-gray-100 text-gray-400">
+      <div class="flex h-5 w-5 items-center justify-center rounded bg-gray-100 text-gray-400">
         <i class="pi pi-briefcase text-[10px]"></i>
       </div>
       <span class="font-medium">{{ spaceTypeLabel() }}</span>
     </div>
-    <span class="text-gray-200 text-xs">|</span>
+    <span class="text-xs text-gray-200">|</span>
     <div class="flex items-center gap-1.5 text-xs text-gray-500">
-      <div class="flex items-center justify-center w-5 h-5 rounded bg-gray-100 text-gray-400">
+      <div class="flex h-5 w-5 items-center justify-center rounded bg-gray-100 text-gray-400">
         <i class="pi pi-wrench text-[11px]"></i>
       </div>
       <span class="font-medium">{{ spaceRoleLabel() }}</span>
@@ -42,9 +52,8 @@
 <!-- Simple mode for sidebar -->
 <ng-template #sidebarMode>
   <div
-    class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
-    [title]="space().name"
-  >
+    class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors hover:bg-green-100"
+    [title]="space().name">
     <i class="pi pi-folder text-base"></i>
   </div>
 </ng-template>

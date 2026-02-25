@@ -17,15 +17,24 @@ import { SpaceRole, SpaceRoleLabels } from '../../../shared/models/enum/space-ro
 @Component({
   selector: 'app-spaces-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, SpaceCardComponent, CreateSpaceComponent, ButtonModule, InputTextModule, FormsModule, PopoverModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    SpaceCardComponent,
+    CreateSpaceComponent,
+    ButtonModule,
+    InputTextModule,
+    FormsModule,
+    PopoverModule,
+  ],
   templateUrl: './spaces-list.component.html',
-  styleUrl: './spaces-list.component.css'
+  styleUrl: './spaces-list.component.css',
 })
 export class SpacesListComponent implements OnInit {
   private readonly spaceService = inject(SpaceService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  
+
   spaces = signal<Space[]>([]);
   showAddSpaceDialog = signal(false);
   searchTerm = signal<string>('');
@@ -41,12 +50,12 @@ export class SpacesListComponent implements OnInit {
 
   typeFilterOptions = [
     { label: 'Personal', value: SpaceType.Personal },
-    { label: 'Team', value: SpaceType.Team }
+    { label: 'Team', value: SpaceType.Team },
   ];
 
   roleFilterOptions = [
     { label: 'Owner', value: SpaceRole.Owner },
-    { label: 'Member', value: SpaceRole.Member }
+    { label: 'Member', value: SpaceRole.Member },
   ];
 
   ngOnInit(): void {
@@ -55,14 +64,12 @@ export class SpacesListComponent implements OnInit {
   }
 
   private setupSearch(): void {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(term => {
-      this.searchTerm.set(term);
-      this.loadSpaces();
-    });
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(term => {
+        this.searchTerm.set(term);
+        this.loadSpaces();
+      });
   }
 
   onSearchTriggered(term: string) {
@@ -73,7 +80,7 @@ export class SpacesListComponent implements OnInit {
     const term = this.searchTerm();
     const type = this.filterType();
     const role = this.filterRole();
-    
+
     this.spaceService.getSpacesByUserId(term, type ?? undefined, role ?? undefined).subscribe({
       next: spaces => {
         if (!Array.isArray(spaces)) {
@@ -82,7 +89,7 @@ export class SpacesListComponent implements OnInit {
         }
         this.spaces.set(spaces);
       },
-      error: err => console.error('Failed to load spaces', err)
+      error: err => console.error('Failed to load spaces', err),
     });
   }
 

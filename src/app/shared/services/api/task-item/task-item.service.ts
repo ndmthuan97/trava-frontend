@@ -7,6 +7,8 @@ import { ToastService } from '../../core/toast/toast.service';
 import { StatusCode } from '../../../constants/status-code.constant';
 import { CreateTaskItemRequest } from '../../../models/request/create-task-item-request.model';
 import { UpdateTaskItemRequest } from '../../../models/request/update-task-item-request.model';
+import { CreateCommentRequest } from '../../../models/request/create-comment-request.model';
+import { Comment } from '../../../models/entities/comment.model';
 
 export interface GetTasksBySpaceParams {
   SpaceId: string;
@@ -29,6 +31,40 @@ export class TaskItemService {
 
   private readonly BASE_API_URL = environment.baseApiUrl;
   private readonly TASKITEM_API_URL = `${this.BASE_API_URL}/taskitems/spaces`;
+
+  getComments(taskId: string): Observable<Comment[]> {
+    const url = `${this.BASE_API_URL}/taskitems/${taskId}/comments`;
+    return this.requestService.get<any>(url, {}, { showLoading: true }).pipe(
+      map(res => {
+        if (res.statusCode === StatusCode.Success && res.data) {
+          return res.data as Comment[];
+        }
+        return [];
+      }),
+      catchError(() => of([]))
+    );
+  }
+
+  addComment(taskId: string, content: string): Observable<Comment | null> {
+    const url = `${this.BASE_API_URL}/taskitems/${taskId}/comments`;
+    const request: CreateCommentRequest = {
+      taskItemId: taskId,
+      content: content,
+    };
+    return this.requestService.post<any>(url, request, { showLoading: true }).pipe(
+      map(res => {
+        const code = Number(res.statusCode);
+        if (code >= 2000 && code < 3000 && res.data) {
+          return res.data as Comment;
+        }
+        return null;
+      }),
+      catchError(() => {
+        this.toastService.error('Error', 'Failed to post comment');
+        return of(null);
+      })
+    );
+  }
 
   getTasksBySpace(params: GetTasksBySpaceParams): Observable<Task[]> {
     return this.requestService.get<any>(this.TASKITEM_API_URL, params, { showLoading: true }).pipe(
@@ -66,10 +102,7 @@ export class TaskItemService {
         return null;
       }),
       catchError(err => {
-        this.toastService.error(
-          'Error',
-          'Failed to create task. Please try again later.'
-        );
+        this.toastService.error('Error', 'Failed to create task. Please try again later.');
         return of(null);
       })
     );
@@ -87,10 +120,33 @@ export class TaskItemService {
         return null;
       }),
       catchError(err => {
-        this.toastService.error(
-          'Error',
-          'Failed to update task. Please try again later.'
-        );
+        this.toastService.error('Error', 'Failed to update task. Please try again later.');
+        return of(null);
+      })
+    );
+  }
+
+  patchTask(
+    id: string,
+    update: {
+      status?: number;
+      startDate?: string | null;
+      dueDate?: string | null;
+      point?: number;
+    }
+  ): Observable<Task | null> {
+    const url = `${this.BASE_API_URL}/taskitems/${id}`;
+    return this.requestService.patch<any>(url, update, { showLoading: true }).pipe(
+      map(res => {
+        const code = Number(res.statusCode);
+        if (code >= 2000 && code < 3000 && res.data) {
+          this.toastService.success('Success', 'Task updated successfully');
+          return res.data as Task;
+        }
+        return null;
+      }),
+      catchError(err => {
+        this.toastService.error('Error', 'Failed to update task. Please try again later.');
         return of(null);
       })
     );
@@ -108,10 +164,7 @@ export class TaskItemService {
         return false;
       }),
       catchError(err => {
-        this.toastService.error(
-          'Error',
-          'Failed to delete task. Please try again later.'
-        );
+        this.toastService.error('Error', 'Failed to delete task. Please try again later.');
         return of(false);
       })
     );
@@ -129,10 +182,7 @@ export class TaskItemService {
         return false;
       }),
       catchError(err => {
-        this.toastService.error(
-          'Error',
-          'Failed to complete task. Please try again later.'
-        );
+        this.toastService.error('Error', 'Failed to complete task. Please try again later.');
         return of(false);
       })
     );
@@ -151,21 +201,17 @@ export class TaskItemService {
         return false;
       }),
       catchError(err => {
-        this.toastService.error(
-          'Error',
-          'Failed to assign task. Please try again later.'
-        );
+        this.toastService.error('Error', 'Failed to assign task. Please try again later.');
         return of(false);
       })
     );
   }
 
-
   updateTaskStatus(id: string, status: number): Observable<boolean> {
-    const url = `${this.BASE_API_URL}/taskitems/status/${id}`;
+    const url = `${this.BASE_API_URL}/taskitems/${id}/status`;
     console.log('Updating task status:', { id, status, url });
-    
-    return this.requestService.put<any>(url, { status }, { showLoading: true }).pipe(
+
+    return this.requestService.patch<any>(url, { status }, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
         console.log('Update status API response:', res);
@@ -176,7 +222,7 @@ export class TaskItemService {
         console.warn('Status code not success:', res.statusCode);
         return false;
       }),
-      catchError((error) => {
+      catchError(error => {
         console.error('Update status API error:', error);
         this.toastService.error('Error', 'Failed to update status. Please try again later.');
         return of(false);

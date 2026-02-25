@@ -33,7 +33,7 @@ export class UserService {
 
     this.profileRequest$ = this.requestService.get<User>(this.USER_PROFILE_API_URL).pipe(
       tap(res => this.handleSetCurrentUser(res)),
-      map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : null),
+      map(res => (res.statusCode === StatusCode.Success && res.data ? res.data : null)),
       catchError(() => {
         this.toastService.error(
           'Failed to load user profile',
@@ -54,13 +54,16 @@ export class UserService {
     let params: Record<string, any> = {};
     if (searchTerm) params['SearchTerm'] = searchTerm;
     if (status !== undefined && status !== null) params['Status'] = status;
-    
+
     return this.requestService.get<any>(this.USER_API_URL, params, { showLoading: true }).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success && res.data?.data) {
           return res.data.data.map((user: any) => ({
             ...user,
-            status: user.status === 'Active' || user.status === 0 ? UserStatus.Active : UserStatus.Inactive
+            status:
+              user.status === 'Active' || user.status === 0
+                ? UserStatus.Active
+                : UserStatus.Inactive,
           }));
         }
         return [];
@@ -76,26 +79,28 @@ export class UserService {
   }
 
   searchUsers(searchTerm: string): Observable<User[]> {
-    return this.requestService.get<any>(`${this.USER_API_URL}/search`, { searchTerm }, { showLoading: true }).pipe(
-      map(res => {
-        if (res.statusCode === StatusCode.Success && res.data) {
-          return res.data;
-        }
-        return [];
-      }),
-      catchError(() => {
-        this.toastService.error(
-          'Failed to search users',
-          'An error occurred during processing. Please try again later.'
-        );
-        return of([]);
-      })
-    );
+    return this.requestService
+      .get<any>(`${this.USER_API_URL}/search`, { searchTerm }, { showLoading: true })
+      .pipe(
+        map(res => {
+          if (res.statusCode === StatusCode.Success && res.data) {
+            return res.data;
+          }
+          return [];
+        }),
+        catchError(() => {
+          this.toastService.error(
+            'Failed to search users',
+            'An error occurred during processing. Please try again later.'
+          );
+          return of([]);
+        })
+      );
   }
 
   getUserProfileById(userId: string): Observable<User | null> {
     return this.requestService.get<User>(`${this.USER_PROFILE_BY_ID_API_URL}/${userId}`).pipe(
-      map(res => (res.statusCode === StatusCode.Success && res.data) ? res.data : null),
+      map(res => (res.statusCode === StatusCode.Success && res.data ? res.data : null)),
       catchError(() => {
         this.toastService.error(
           'Failed to load user profile',
@@ -109,11 +114,12 @@ export class UserService {
   updateUserStatus(userId: string, status: UserStatus): Observable<boolean> {
     return this.requestService.put<any>(`${this.USER_API_URL}/status/${userId}`, { status }).pipe(
       map(res => {
-        const isSuccess = res.statusCode === StatusCode.Success || 
-                         res.statusCode === StatusCode.Updated || 
-                         res.statusCode === 2000 || 
-                         res.statusCode === 2002;
-        
+        const isSuccess =
+          res.statusCode === StatusCode.Success ||
+          res.statusCode === StatusCode.Updated ||
+          res.statusCode === 2000 ||
+          res.statusCode === 2002;
+
         if (isSuccess) {
           this.toastService.success('Status updated successfully', 'User status has been changed.');
           return true;
@@ -121,10 +127,43 @@ export class UserService {
         return false;
       }),
       catchError(() => {
-        this.toastService.error('Failed to update status', 'An error occurred. Please try again later.');
+        this.toastService.error(
+          'Failed to update status',
+          'An error occurred. Please try again later.'
+        );
         return of(false);
       })
     );
+  }
+
+  updateUser(userId: string, data: Partial<User>): Observable<User | null> {
+    return this.requestService
+      .put<User>(this.USER_PROFILE_API_URL, data, { showLoading: true })
+      .pipe(
+        map(res => {
+          const isSuccess = res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Updated;
+
+          if (isSuccess) {
+            this.toastService.success('Profile updated', 'Your profile has been updated successfully.');
+            // Update current user if it's the same user
+            if (this.currentUserSignal()?.id === userId) {
+              const updatedUser = { ...this.currentUserSignal()!, ...(res.data || data) };
+              this.currentUserSignal.set(updatedUser);
+              localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(updatedUser));
+              return updatedUser;
+            }
+            return res.data || (data as User);
+          }
+          return null;
+        }),
+        catchError(() => {
+          this.toastService.error(
+            'Update failed',
+            'An error occurred while updating your profile. Please try again.'
+          );
+          return of(null);
+        })
+      );
   }
 
   private handleSetCurrentUser(res: ApiResponse<User>): void {

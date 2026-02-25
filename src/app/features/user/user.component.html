@@ -1,13 +1,14 @@
-<div class="px-4 py-8 max-w-7xl mx-auto">
+<div class="mx-auto max-w-7xl px-4 py-8">
   <div class="mb-6 flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">User Management</h1>
-      <p class="text-xs text-gray-500 mt-1">Manage system accounts and access status</p>
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900">User Management</h1>
+      <p class="mt-1 text-xs text-gray-500">Manage system accounts and access status</p>
     </div>
     <div class="flex items-center gap-2">
       <!-- Search UI -->
-      <div class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
-        <i class="pi pi-search text-gray-400 text-[10px]"></i>
+      <div
+        class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
+        <i class="pi pi-search text-[10px] text-gray-400"></i>
         <input
           type="text"
           [ngModel]="searchTerm()"
@@ -17,27 +18,48 @@
       </div>
 
       <!-- Filter Button -->
-      <button 
+      <button
         (click)="opStatus.toggle($event)"
-        class="flex h-[36px] items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-orange-300 transition-all active:scale-95">
+        class="flex h-[36px] items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition-all hover:border-orange-300 hover:bg-gray-50 active:scale-95">
         <i class="pi pi-check-circle text-[10px]"></i>
         <span>Status</span>
-        <span *ngIf="filterStatus() !== null" class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white">1</span>
-        <i class="pi pi-chevron-down text-[8px] ml-1 opacity-50"></i>
+        <span
+          *ngIf="filterStatus() !== null"
+          class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white"
+          >1</span
+        >
+        <i class="pi pi-chevron-down ml-1 text-[8px] opacity-50"></i>
       </button>
-
-      <p-popover #opStatus styleClass="filter-overlay-premium">
-        <div class="w-48 p-2 flex flex-col gap-1">
-          <span class="text-[10px] font-bold text-gray-400 px-2 py-1 uppercase tracking-wider">Filter Status</span>
-          <button (click)="onFilterStatusChange(null); opStatus.hide()" class="filter-option-btn" [class.active]="filterStatus() === null">All Users</button>
-          <button (click)="onFilterStatusChange(UserStatus.Active); opStatus.hide()" class="filter-option-btn" [class.active]="filterStatus() === UserStatus.Active">Active Only</button>
-          <button (click)="onFilterStatusChange(UserStatus.Inactive); opStatus.hide()" class="filter-option-btn" [class.active]="filterStatus() === UserStatus.Inactive">Locked Only</button>
-        </div>
-      </p-popover>
     </div>
   </div>
 
-  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8">
+  <p-popover #opStatus styleClass="filter-overlay-premium">
+    <div class="flex w-48 flex-col gap-1 p-2">
+      <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400"
+        >Filter Status</span
+      >
+      <button
+        (click)="onFilterStatusChange(null); opStatus.hide()"
+        class="filter-option-btn"
+        [class.active]="filterStatus() === null">
+        All Users
+      </button>
+      <button
+        (click)="onFilterStatusChange(UserStatus.Active); opStatus.hide()"
+        class="filter-option-btn"
+        [class.active]="filterStatus() === UserStatus.Active">
+        Active Only
+      </button>
+      <button
+        (click)="onFilterStatusChange(UserStatus.Inactive); opStatus.hide()"
+        class="filter-option-btn"
+        [class.active]="filterStatus() === UserStatus.Inactive">
+        Locked Only
+      </button>
+    </div>
+  </p-popover>
+
+  <div class="mb-8 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
     <p-table
       [value]="users()"
       [rows]="10"
@@ -47,60 +69,97 @@
       [tableStyle]="{ 'min-width': '60rem' }">
       <ng-template pTemplate="header">
         <tr class="!border-y !border-gray-100">
-          <th class="w-[35%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">User</th>
-          <th class="w-[30%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Email</th>
-          <th class="w-[15%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Role</th>
-          <th class="w-[15%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Status</th>
-          <th class="w-[10%] !bg-white !py-4 text-right pr-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+          <th
+            class="w-[35%] !bg-white !py-4 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            User
+          </th>
+          <th
+            class="w-[30%] !bg-white !py-4 text-center text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Email
+          </th>
+          <th
+            class="w-[15%] !bg-white !py-4 text-center text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Role
+          </th>
+          <th
+            class="w-[15%] !bg-white !py-4 text-center text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Status
+          </th>
+          <th
+            class="w-[10%] !bg-white !py-4 pr-6 text-right text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Actions
+          </th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-user>
-        <tr class="group !border-b !border-gray-50 hover:bg-gray-50/50 transition-all">
+        <tr class="group !border-b !border-gray-50 transition-all hover:bg-gray-50/50">
           <td class="!py-4">
-            <div class="flex items-center gap-3 ml-2">
-              <p-avatar 
-                [image]="user.avatarUrl" 
-                [label]="!user.avatarUrl ? (user.fullName?.substring(0, 1) || 'U') : ''" 
-                shape="circle" 
+            <div class="ml-2 flex items-center gap-3">
+              <p-avatar
+                [image]="user.avatarUrl"
+                [label]="!user.avatarUrl ? user.fullName?.substring(0, 1) || 'U' : ''"
+                shape="circle"
                 styleClass="w-9 h-9 border border-gray-100 shadow-sm text-sm font-bold bg-orange-50 text-orange-600"></p-avatar>
-              <div class="flex flex-col min-w-0">
-                <span class="text-sm font-bold text-gray-900 truncate">{{ user.fullName || 'User' }}</span>
+              <div class="flex min-w-0 flex-col">
+                <span class="truncate text-sm font-bold text-gray-900">{{
+                  user.fullName || 'User'
+                }}</span>
               </div>
             </div>
           </td>
           <td class="!py-4 text-center">
-            <span class="text-xs text-gray-600 font-medium">{{ user.email }}</span>
+            <span class="text-xs font-medium text-gray-600">{{ user.email }}</span>
           </td>
           <td class="!py-4 text-center">
-            <div [class]="'inline-flex items-center justify-center w-24 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + (user.role === 0 ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-gray-100 text-gray-600 border-gray-200')">
+            <div
+              [class]="
+                'inline-flex w-24 items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ' +
+                (user.role === 0
+                  ? 'border-orange-100 bg-orange-50 text-orange-600'
+                  : 'border-gray-200 bg-gray-100 text-gray-600')
+              ">
               {{ getRoleLabel(user.role) }}
             </div>
           </td>
           <td class="!py-4 text-center">
-            <div [class]="'inline-flex items-center justify-center w-24 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + (user.status === 0 ? 'bg-green-50 text-green-600 border-green-100' : 'bg-rose-50 text-rose-600 border-rose-100')">
+            <div
+              [class]="
+                'inline-flex w-24 items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ' +
+                (user.status === 0
+                  ? 'border-green-100 bg-green-50 text-green-600'
+                  : 'border-rose-100 bg-rose-50 text-rose-600')
+              ">
               {{ getStatusLabel(user.status) }}
             </div>
           </td>
-          <td class="!py-4 text-right pr-6">
+          <td class="!py-4 pr-6 text-right">
             <div class="flex justify-start gap-1">
-              <button 
+              <button
                 *ngIf="currentUser()?.role === UserRoles.SYSTEM_ADMIN"
-                class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-orange-600 hover:bg-orange-50 transition-all active:scale-90"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-orange-50 hover:text-orange-600 active:scale-90"
                 (click)="viewProfile(user)"
                 pTooltip="View Profile"
                 tooltipPosition="top"
                 tooltipStyleClass="user-action-tooltip">
                 <i class="pi pi-eye text-xs"></i>
               </button>
-              <button 
+              <button
                 *ngIf="user.role !== UserRoles.SYSTEM_ADMIN"
-                [class]="'w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-90 ' + (user.status === 1 ? 'text-gray-400 hover:text-green-600 hover:bg-green-50' : 'text-gray-400 hover:text-rose-600 hover:bg-rose-50')"
+                [class]="
+                  'flex h-8 w-8 items-center justify-center rounded-lg transition-all active:scale-90 ' +
+                  (user.status === 1
+                    ? 'text-gray-400 hover:bg-green-50 hover:text-green-600'
+                    : 'text-gray-400 hover:bg-rose-50 hover:text-rose-600')
+                "
                 (click)="onToggleStatus(user)"
                 [pTooltip]="user.status === 1 ? 'Lock User' : 'Unlock User'"
                 tooltipPosition="top"
                 tooltipStyleClass="user-action-tooltip">
-                <i [class]="user.status === 1 ? 'pi pi-lock text-xs' : 'pi pi-lock-open text-xs'"></i>
+                <i
+                  [class]="
+                    user.status === 1 ? 'pi pi-lock text-xs' : 'pi pi-lock-open text-xs'
+                  "></i>
               </button>
             </div>
           </td>

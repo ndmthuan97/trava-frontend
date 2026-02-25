@@ -3,9 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "npm run config-env && ng serve",
-    "build": "npm run config-env && ng build",
-    "config-env": "ts-node scripts/set-env.ts",
+    "start": "ng serve",
+    "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "format": "prettier --write .",
@@ -22,6 +21,8 @@
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
     "@primeng/themes": "^21.0.4",
+    "@supabase/supabase-js": "^2.97.0",
+    "chart.js": "^4.5.1",
     "ngx-cookie-service": "^18.0.0",
     "primeicons": "^7.0.0",
     "primeng": "^18.0.2",
@@ -30,6 +31,7 @@
     "zone.js": "~0.14.10"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^18.0.0",
     "@angular-devkit/build-angular": "^18.2.21",
     "@angular/cli": "^18.2.21",
     "@angular/compiler-cli": "^18.2.0",
@@ -38,6 +40,7 @@
     "@types/node": "^25.0.10",
     "autoprefixer": "^10.4.23",
     "dotenv": "^17.2.3",
+    "dotenv-webpack": "^8.1.1",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

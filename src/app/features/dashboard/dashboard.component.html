@@ -1,157 +1,296 @@
-<div class="px-6 py-8 max-w-7xl mx-auto flex flex-col gap-8" *ngIf="statistics() as stats">
+<div class="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8" *ngIf="statistics() as stats">
   <!-- Header -->
   <div class="flex flex-col gap-1">
-    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Overview & Statistics</h1>
-    <p class="text-xs text-gray-500 font-medium">Welcome back! Here's what's happening in your workspace today.</p>
+    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Overview & Statistics</h1>
+    <p class="text-xs font-medium text-gray-500">
+      Welcome back! Here's what's happening in your workspace today.
+    </p>
   </div>
 
   <!-- Statistics Cards Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- Stat Card 1 -->
-    <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col transition-all hover:shadow-md">
-      <div class="p-6 flex items-center justify-between">
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <!-- Stat Card 1: Users -->
+    <div
+      class="stat-card flex flex-col rounded-3xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+      <div class="mb-6 flex items-center justify-between">
         <div class="stat-card-icon bg-orange-50 text-orange-500">
-          <i class="pi pi-briefcase text-2xl"></i>
+          <i class="pi pi-users text-xl"></i>
         </div>
-        <div class="flex flex-col text-right">
-          <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Projects</span>
-          <span class="text-2xl font-bold text-gray-900 mt-0.5">{{ stats.totalProjects | number }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+            >Total Users</span
+          >
+          <span class="text-2xl font-extrabold tracking-tight text-slate-900">{{
+            stats.totalUsers | number
+          }}</span>
         </div>
       </div>
-      <div class="bg-slate-50/50 px-6 py-3.5 flex items-center justify-between border-t border-gray-50">
-        <div class="flex items-center gap-1.5 text-xs font-bold" [ngClass]="stats.trends.projects >= 0 ? 'text-green-600' : 'text-rose-600'">
-          <i [class]="stats.trends.projects >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" class="text-[10px]"></i>
-          <span>{{ getAbs(stats.trends.projects) }}% <span class="text-gray-400 font-medium ml-1">Since last month</span></span>
+      <div class="flex items-center justify-end gap-2">
+        <div
+          class="flex items-center gap-1 text-[11px] font-bold"
+          [ngClass]="stats.userGrowth >= 0 ? 'text-green-600' : 'text-rose-600'">
+          <i
+            [class]="stats.userGrowth >= 0 ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-right'"
+            class="text-[9px]"></i>
+          <span>{{ stats.userGrowth >= 0 ? '+' : '-' }}{{ getAbs(stats.userGrowth) }}%</span>
         </div>
-        <a href="#" class="text-[10px] font-bold text-gray-700 hover:text-orange-600 uppercase tracking-wider">View More</a>
+        <span class="text-[10px] font-medium text-slate-400">since last week</span>
       </div>
     </div>
 
-    <!-- Stat Card 2 -->
-    <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col transition-all hover:shadow-md">
-      <div class="p-6 flex items-center justify-between">
-        <div class="stat-card-icon bg-orange-50 text-orange-500">
-          <i class="pi pi-check-circle text-2xl"></i>
+    <!-- Stat Card 2: Tasks -->
+    <div
+      class="stat-card flex flex-col rounded-3xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+      <div class="mb-6 flex items-center justify-between">
+        <div class="stat-card-icon bg-blue-50 text-blue-500">
+          <i class="pi pi-check-circle text-xl"></i>
         </div>
-        <div class="flex flex-col text-right">
-          <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Completed Tasks</span>
-          <span class="text-2xl font-bold text-gray-900 mt-0.5">{{ stats.completedTasks | number }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+            >Total Tasks</span
+          >
+          <span class="text-2xl font-extrabold tracking-tight text-slate-900">{{
+            stats.totalTasks | number
+          }}</span>
         </div>
       </div>
-      <div class="bg-slate-50/50 px-6 py-3.5 flex items-center justify-between border-t border-gray-50">
-        <div class="flex items-center gap-1.5 text-xs font-bold" [ngClass]="stats.trends.tasks >= 0 ? 'text-green-600' : 'text-rose-600'">
-          <i [class]="stats.trends.tasks >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" class="text-[10px]"></i>
-          <span>{{ getAbs(stats.trends.tasks) }}% <span class="text-gray-400 font-medium ml-1">Last week</span></span>
+      <div class="flex items-center justify-end gap-2">
+        <div
+          class="flex items-center gap-1 text-[11px] font-bold"
+          [ngClass]="stats.taskGrowth >= 0 ? 'text-green-600' : 'text-rose-600'">
+          <i
+            [class]="stats.taskGrowth >= 0 ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-right'"
+            class="text-[9px]"></i>
+          <span>{{ stats.taskGrowth >= 0 ? '+' : '-' }}{{ getAbs(stats.taskGrowth) }}%</span>
         </div>
-        <a href="#" class="text-[10px] font-bold text-gray-700 hover:text-orange-600 uppercase tracking-wider transition-colors">View More</a>
+        <span class="text-[10px] font-medium text-slate-400">since last week</span>
       </div>
     </div>
 
-    <!-- Stat Card 3 -->
-    <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col transition-all hover:shadow-md">
-      <div class="p-6 flex items-center justify-between">
+    <!-- Stat Card 3: Spaces -->
+    <div
+      class="stat-card flex flex-col rounded-3xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+      <div class="mb-6 flex items-center justify-between">
         <div class="stat-card-icon bg-purple-50 text-purple-500">
-          <i class="pi pi-users text-2xl"></i>
+          <i class="pi pi-briefcase text-xl"></i>
         </div>
-        <div class="flex flex-col text-right">
-          <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Members</span>
-          <span class="text-2xl font-bold text-gray-900 mt-0.5">{{ stats.activeMembers | number }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+            >Total Spaces</span
+          >
+          <span class="text-2xl font-extrabold tracking-tight text-slate-900">{{
+            stats.totalSpaces | number
+          }}</span>
         </div>
       </div>
-      <div class="bg-slate-50/50 px-6 py-3.5 flex items-center justify-between border-t border-gray-50">
-        <div class="flex items-center gap-1.5 text-xs font-bold" [ngClass]="stats.trends.members >= 0 ? 'text-green-600' : 'text-rose-600'">
-          <i [class]="stats.trends.members >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" class="text-[10px]"></i>
-          <span>{{ getAbs(stats.trends.members) }}% <span class="text-gray-400 font-medium ml-1">Than yesterday</span></span>
+      <div class="flex items-center justify-end gap-2">
+        <div
+          class="flex items-center gap-1 text-[11px] font-bold"
+          [ngClass]="stats.spaceGrowth >= 0 ? 'text-green-600' : 'text-rose-600'">
+          <i
+            [class]="stats.spaceGrowth >= 0 ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-right'"
+            class="text-[9px]"></i>
+          <span>{{ stats.spaceGrowth >= 0 ? '+' : '-' }}{{ getAbs(stats.spaceGrowth) }}%</span>
         </div>
-        <a href="#" class="text-[10px] font-bold text-gray-700 hover:text-orange-600 uppercase tracking-wider">View More</a>
+        <span class="text-[10px] font-medium text-slate-400">since last week</span>
       </div>
     </div>
 
-    <!-- Stat Card 4 -->
-    <div class="stat-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col transition-all hover:shadow-md">
-      <div class="p-6 flex items-center justify-between">
+    <!-- Stat Card 4: Retention -->
+    <div
+      class="stat-card flex flex-col rounded-3xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+      <div class="mb-6 flex items-center justify-between">
         <div class="stat-card-icon bg-emerald-50 text-emerald-500">
-          <i class="pi pi-bolt text-2xl"></i>
+          <i class="pi pi-sync text-xl"></i>
         </div>
-        <div class="flex flex-col text-right">
-          <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Team Efficiency</span>
-          <span class="text-2xl font-bold text-gray-900 mt-0.5">{{ stats.efficiency }}%</span>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+            >Returning Users</span
+          >
+          <span class="text-2xl font-extrabold tracking-tight text-slate-900">{{
+            stats.returningUsers | number
+          }}</span>
         </div>
       </div>
-      <div class="bg-slate-50/50 px-6 py-3.5 flex items-center justify-between border-t border-gray-50">
-        <div class="flex items-center gap-1.5 text-xs font-bold" [ngClass]="stats.trends.efficiency >= 0 ? 'text-green-600' : 'text-rose-600'">
-          <i [class]="stats.trends.efficiency >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'" class="text-[10px]"></i>
-          <span>{{ getAbs(stats.trends.efficiency) }}% <span class="text-gray-400 font-medium ml-1">Increased</span></span>
+      <div class="flex items-center justify-end gap-2">
+        <div class="flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+          <i class="pi pi-chart-line text-[9px]"></i>
+          <span>{{ stats.returningUserRate }}% Rate</span>
         </div>
-        <a href="#" class="text-[10px] font-bold text-gray-700 hover:text-orange-600 uppercase tracking-wider">View More</a>
+        <span class="text-[10px] font-medium text-slate-400">since last week</span>
       </div>
     </div>
   </div>
 
-  <!-- Charts Section -->
-  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-    <div class="flex items-center justify-between mb-10">
-      <div class="flex flex-col gap-1">
-        <h2 class="text-xl font-bold text-gray-900 tracking-tight">Performance</h2>
-        <p class="text-xs text-gray-400 font-medium">Activity and completion metrics across the workspace</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button (click)="onFilterChange('ALL')" class="filter-btn" [class.active]="activeFilter() === 'ALL'">All</button>
-        <button (click)="onFilterChange('1M')" class="filter-btn" [class.active]="activeFilter() === '1M'">1M</button>
-        <button (click)="onFilterChange('6M')" class="filter-btn" [class.active]="activeFilter() === '6M'">6M</button>
-        <button (click)="onFilterChange('1Y')" class="filter-btn" [class.active]="activeFilter() === '1Y'">1Y</button>
-      </div>
+  <!-- Performance Summary Section (Dual Progress Bars) -->
+  <div
+    class="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm"
+    *ngIf="statistics() as stats">
+    <div class="mb-10 flex flex-col gap-1">
+      <h2 class="text-xl font-bold tracking-tight text-gray-900">Performance Comparison</h2>
     </div>
 
-    <!-- Main Chart Area -->
-    <div class="relative chart-container w-full flex items-end justify-between px-4 pb-8 border-b border-gray-50">
-      <!-- Grid Lines -->
-      <div class="absolute inset-0 flex flex-col justify-between pointer-events-none mb-8">
-        <div class="w-full border-t border-gray-50 flex items-center gap-4">
-          <span class="text-[10px] font-bold text-gray-300 w-6 text-right">80</span>
-          <div class="flex-1 border-t border-gray-50 border-dashed"></div>
-        </div>
-        <div class="w-full border-t border-gray-50 flex items-center gap-4">
-          <span class="text-[10px] font-bold text-gray-300 w-6 text-right">60</span>
-          <div class="flex-1 border-t border-gray-50 border-dashed"></div>
-        </div>
-        <div class="w-full border-t border-gray-50 flex items-center gap-4">
-          <span class="text-[10px] font-bold text-gray-300 w-6 text-right">40</span>
-          <div class="flex-1 border-t border-gray-50 border-dashed"></div>
-        </div>
-        <div class="w-full border-t border-gray-50 flex items-center gap-4">
-          <span class="text-[10px] font-bold text-gray-300 w-6 text-right">20</span>
-          <div class="flex-1 border-t border-gray-50 border-dashed"></div>
-        </div>
-        <div class="w-full border-t border-gray-100 flex items-center gap-4">
-          <span class="text-[10px] font-bold text-gray-300 w-6 text-right">0</span>
-          <div class="flex-1 border-t border-gray-100"></div>
-        </div>
-      </div>
+    <div class="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
+      @let maxVal = getMaxValue();
 
-      <!-- Bars -->
-      <div class="flex-1 h-full flex items-end justify-around relative z-10 px-8">
-        <div *ngFor="let month of chartData()" class="flex flex-col items-center gap-4 group h-full justify-end">
-          <div class="bar-item w-8" [style.height.%]="month.value">
-            <!-- Tooltip -->
-            <div class="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-lg transition-all pointer-events-none whitespace-nowrap z-30">
-              {{ month.value }} Tasks
+      <!-- Users Performance -->
+      <div class="performance-group flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-700">User Metrics</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+            >{{ stats.userGrowth >= 0 ? '+' : '' }}{{ stats.userGrowth }}%</span
+          >
+        </div>
+        <div class="flex flex-col gap-3">
+          <!-- Previous line -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[9px] font-bold uppercase text-slate-400">Last Week</span>
+              <span class="text-[10px] font-bold text-rose-500">{{
+                stats.totalUsersLastWeek | number
+              }}</span>
+            </div>
+            <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-rose-200 transition-all duration-1000"
+                [style.width.%]="getBarHeight(stats.totalUsersLastWeek, maxVal)"></div>
             </div>
           </div>
-          <span class="text-[10px] font-bold text-gray-400 transition-colors group-hover:text-gray-800">{{ month.label }}</span>
+          <!-- Current line -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[9px] font-bold uppercase text-slate-400">Current</span>
+              <span class="text-[10px] font-bold text-orange-600">{{
+                stats.totalUsers | number
+              }}</span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-orange-400 shadow-sm shadow-orange-200 transition-all duration-1000"
+                [style.width.%]="getBarHeight(stats.totalUsers, maxVal)"></div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Chart Legend -->
-    <div class="flex items-center justify-center gap-8 mt-16">
-      <div class="flex items-center gap-2">
-        <span class="w-3 h-3 rounded-full bg-orange-500 shadow-sm shadow-orange-200"></span>
-        <span class="text-[11px] font-bold text-gray-600">Tasks Completed</span>
+      <!-- Tasks Performance -->
+      <div class="performance-group flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-700">Task Metrics</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+            >{{ stats.taskGrowth >= 0 ? '+' : '' }}{{ stats.taskGrowth }}%</span
+          >
+        </div>
+        <div class="flex flex-col gap-3">
+          <!-- Previous line -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[9px] font-bold uppercase text-slate-400">Last Week</span>
+              <span class="text-[10px] font-bold text-rose-500">{{
+                stats.totalTasksLastWeek | number
+              }}</span>
+            </div>
+            <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-rose-200 transition-all duration-1000"
+                [style.width.%]="getBarHeight(stats.totalTasksLastWeek, maxVal)"></div>
+            </div>
+          </div>
+          <!-- Current line -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[9px] font-bold uppercase text-slate-400">Current</span>
+              <span class="text-[10px] font-bold text-blue-600">{{
+                stats.totalTasks | number
+              }}</span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-blue-400 shadow-sm shadow-blue-200 transition-all duration-1000"
+                [style.width.%]="getBarHeight(stats.totalTasks, maxVal)"></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="w-3 h-3 rounded-full bg-green-500 shadow-sm shadow-green-200"></span>
-        <span class="text-[11px] font-bold text-gray-600">Active Progress</span>
+
+      <!-- Spaces Performance -->
+      <div class="performance-group flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-700">Space Metrics</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+            >{{ stats.spaceGrowth >= 0 ? '+' : '' }}{{ stats.spaceGrowth }}%</span
+          >
+        </div>
+        <div class="flex flex-col gap-3">
+          <!-- Previous line -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[9px] font-bold uppercase text-slate-400">Last Week</span>
+              <span class="text-[10px] font-bold text-rose-500">{{
+                stats.totalSpacesLastWeek | number
+              }}</span>
+            </div>
+            <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-rose-200 transition-all duration-1000"
+                [style.width.%]="getBarHeight(stats.totalSpacesLastWeek, maxVal)"></div>
+            </div>
+          </div>
+          <!-- Current line -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[9px] font-bold uppercase text-slate-400">Current</span>
+              <span class="text-[10px] font-bold text-purple-600">{{
+                stats.totalSpaces | number
+              }}</span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-purple-400 shadow-sm shadow-purple-200 transition-all duration-1000"
+                [style.width.%]="getBarHeight(stats.totalSpaces, maxVal)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Retention Performance -->
+      <div class="performance-group flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-700">Retention Metrics</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+            >{{ stats.returningUserRate }}%</span
+          >
+        </div>
+        <div class="flex flex-col gap-3">
+          <!-- Total Users in system -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[9px] font-bold uppercase text-slate-400">Total Users</span>
+              <span class="text-[10px] font-bold text-rose-500">{{
+                stats.totalUsers | number
+              }}</span>
+            </div>
+            <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-rose-200 transition-all duration-1000"
+                [style.width.%]="getBarHeight(stats.totalUsers, maxVal)"></div>
+            </div>
+          </div>
+          <!-- Returning Users -->
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between px-1">
+              <span class="text-[9px] font-bold uppercase text-slate-400">Returning</span>
+              <span class="text-[10px] font-bold text-emerald-600">{{
+                stats.returningUsers | number
+              }}</span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                class="h-full rounded-full bg-emerald-400 shadow-sm shadow-emerald-200 transition-all duration-1000"
+                [style.width.%]="getBarHeight(stats.returningUsers, maxVal)"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

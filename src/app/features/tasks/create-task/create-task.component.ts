@@ -7,7 +7,9 @@ import { Textarea } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { DatePicker } from 'primeng/datepicker';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
+import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
+import { Rating } from 'primeng/rating';
 import { TaskPriority, TaskPriorityLabels } from '../../../shared/models/enum/task-priority.enum';
 import { TaskStatus, TaskStatusLabels } from '../../../shared/models/enum/task-status.enum';
 import { TaskItemService } from '../../../shared/services/api/task-item/task-item.service';
@@ -17,7 +19,6 @@ import { ToastService } from '../../../shared/services/core/toast/toast.service'
 import { Task } from '../../../shared/models/entities/task.model';
 import { SpaceService } from '../../../shared/services/api/space/space.service';
 import { User } from '../../../shared/models/entities/user.model';
-
 
 @Component({
   selector: 'app-create-task',
@@ -31,7 +32,9 @@ import { User } from '../../../shared/models/entities/user.model';
     SelectModule,
     DatePicker,
     InputNumberModule,
-    DialogComponent,
+    DialogModule,
+    TooltipModule,
+    Rating,
   ],
   templateUrl: './create-task.component.html',
   styleUrl: './create-task.component.css',
@@ -40,7 +43,6 @@ export class CreateTaskComponent {
   private readonly taskService = inject(TaskItemService);
   private readonly toastService = inject(ToastService);
   private readonly spaceService = inject(SpaceService);
-
 
   spaceId = input.required<string>();
   visible = model<boolean>(false);
@@ -60,28 +62,28 @@ export class CreateTaskComponent {
 
   spaceMembers = input<User[]>([]);
 
-
   constructor() {
-    effect(() => {
-      const task = this.taskToEdit();
-      if (task) {
-        this.taskData.set({
-          title: task.title,
-          description: task.description || '',
-          status: task.status,
-          priority: task.priority,
-          point: task.point,
-          startDate: task.startDate ? new Date(task.startDate) : null,
-          dueDate: task.dueDate ? new Date(task.dueDate) : null,
-          assignedUserId: task.assignedUserId || null,
-        });
-      } else {
-        this.resetForm();
-      }
-    }, { allowSignalWrites: true });
+    effect(
+      () => {
+        const task = this.taskToEdit();
+        if (task) {
+          this.taskData.set({
+            title: task.title,
+            description: task.description || '',
+            status: task.status,
+            priority: task.priority,
+            point: task.point,
+            startDate: task.startDate ? new Date(task.startDate) : null,
+            dueDate: task.dueDate ? new Date(task.dueDate) : null,
+            assignedUserId: task.assignedUserId || null,
+          });
+        } else {
+          this.resetForm();
+        }
+      },
+      { allowSignalWrites: true }
+    );
   }
-
-
 
   statusOptions = [
     { label: TaskStatusLabels[TaskStatus.NotStart], value: TaskStatus.NotStart },
@@ -118,7 +120,6 @@ export class CreateTaskComponent {
         assignedUserId: data.assignedUserId || null,
       };
 
-
       this.taskService.updateTask(taskToEdit.id, request).subscribe({
         next: res => {
           if (res) {
@@ -140,7 +141,6 @@ export class CreateTaskComponent {
         dueDate: data.dueDate ? data.dueDate.toISOString() : null,
         assignedUserId: data.assignedUserId || null,
       };
-
 
       this.taskService.createTask(request).subscribe({
         next: res => {
@@ -171,5 +171,4 @@ export class CreateTaskComponent {
       assignedUserId: null,
     });
   }
-
 }

@@ -23,6 +23,7 @@ import { Space } from '../../../shared/models/entities/space.model';
 import { User } from '../../../shared/models/entities/user.model';
 import { CreateTaskComponent } from '../../tasks/create-task/create-task.component';
 import { TaskDetailComponent } from '../../tasks/task-detail/task-detail.component';
+import { SpaceSummaryComponent } from './space-summary/space-summary.component';
 import { SpaceService } from '../../../shared/services/api/space/space.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
@@ -32,7 +33,6 @@ import { DialogModule } from 'primeng/dialog';
 import { MenuModule } from 'primeng/menu';
 import { CheckboxModule } from 'primeng/checkbox';
 import { SpaceInvitationService } from '../../../shared/services/api/space-invitation/space-invitation.service';
-
 
 @Component({
   selector: 'app-space-detail',
@@ -54,6 +54,7 @@ import { SpaceInvitationService } from '../../../shared/services/api/space-invit
     FormsModule,
     CheckboxModule,
     TaskDetailComponent,
+    SpaceSummaryComponent,
   ],
   templateUrl: './space-detail.component.html',
   styleUrl: './space-detail.component.css',
@@ -67,25 +68,24 @@ export class SpaceDetailComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly toastService = inject(ToastService);
   private readonly spaceInvitationService = inject(SpaceInvitationService);
-  
+
   public readonly SpaceRoleLabels = SpaceRoleLabels;
   public readonly TaskStatusLabels = TaskStatusLabels;
   public readonly TaskPriorityLabels = TaskPriorityLabels;
-
 
   spaceId = signal<string | null>(null);
   spaceInfo = signal<Space | null>(null);
   // Mock tasks for the space
   tasks = signal<Task[]>([]);
-  
+
   currentUser = this.userService.currentUser;
   isSpaceOwner = signal<boolean>(false);
   spaceMembers = signal<User[]>([]);
-  showMembers = signal<boolean>(false);
+  activeTab = signal<'list' | 'members' | 'summary'>('list');
 
   taskSearchTerm = signal<string>('');
   memberSearchTerm = signal<string>('');
-  
+
   // Sorting and Filtering signals
   sortBy = signal<string | null>(null);
   sortDirection = signal<'asc' | 'desc' | null>(null);
@@ -104,34 +104,40 @@ export class SpaceDetailComponent implements OnInit {
   private readonly confirmationService = inject(ConfirmationService);
 
   constructor() {
-    effect(() => {
-      const spaceId = this.spaceId();
-      const currentUser = this.currentUser();
-      const spaceInfo = this.spaceInfo();
-      
-      // Pull signals to trigger effect on change
-      this.sortBy();
-      this.sortDirection();
-      this.filterStatus();
-      this.filterPriority();
-      
-      if (spaceId && currentUser && spaceInfo) {
-        this.getTasksBySpace(spaceId);
-      }
-    }, { allowSignalWrites: true });
+    effect(
+      () => {
+        const spaceId = this.spaceId();
+        const currentUser = this.currentUser();
+        const spaceInfo = this.spaceInfo();
 
-    effect(() => {
-      const term = this.userSearchTerm();
-      if (term.length >= 2) {
-        this.userService.searchUsers(term).subscribe(users => {
-          // Filter out users already in the space
-          const currentMemberIds = new Set(this.spaceMembers().map(m => m.id));
-          this.potentialMembers.set(users.filter(u => !currentMemberIds.has(u.id)));
-        });
-      } else {
-        this.potentialMembers.set([]);
-      }
-    }, { allowSignalWrites: true });
+        // Pull signals to trigger effect on change
+        this.sortBy();
+        this.sortDirection();
+        this.filterStatus();
+        this.filterPriority();
+
+        if (spaceId && currentUser && spaceInfo) {
+          this.getTasksBySpace(spaceId);
+        }
+      },
+      { allowSignalWrites: true }
+    );
+
+    effect(
+      () => {
+        const term = this.userSearchTerm();
+        if (term.length >= 2) {
+          this.userService.searchUsers(term).subscribe(users => {
+            // Filter out users already in the space
+            const currentMemberIds = new Set(this.spaceMembers().map(m => m.id));
+            this.potentialMembers.set(users.filter(u => !currentMemberIds.has(u.id)));
+          });
+        } else {
+          this.potentialMembers.set([]);
+        }
+      },
+      { allowSignalWrites: true }
+    );
   }
 
   ngOnInit(): void {
@@ -152,25 +158,21 @@ export class SpaceDetailComponent implements OnInit {
   }
 
   private setupSearch(): void {
-    this.taskSearchSubject.pipe(
-      debounceTime(200),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(term => {
-      this.taskSearchTerm.set(term);
-      const id = this.spaceId();
-      if (id) this.getTasksBySpace(id);
-    });
+    this.taskSearchSubject
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(term => {
+        this.taskSearchTerm.set(term);
+        const id = this.spaceId();
+        if (id) this.getTasksBySpace(id);
+      });
 
-    this.memberSearchSubject.pipe(
-      debounceTime(200),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(term => {
-      this.memberSearchTerm.set(term);
-      const id = this.spaceId();
-      if (id) this.getSpaceMembers(id);
-    });
+    this.memberSearchSubject
+      .pipe(debounceTime(200), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(term => {
+        this.memberSearchTerm.set(term);
+        const id = this.spaceId();
+        if (id) this.getSpaceMembers(id);
+      });
   }
 
   onTaskSearch(term: string) {
@@ -183,15 +185,16 @@ export class SpaceDetailComponent implements OnInit {
 
   getSpaceMembers(spaceId: string) {
     const term = this.memberSearchTerm();
-    this.spaceService.getSpaceMembers({ spaceId, pageIndex: 1, pageSize: 100, SearchTerm: term }).subscribe(members => {
-      this.spaceMembers.set(members);
-      // Re-map tasks if they are already loaded
-      if (this.tasks().length > 0) {
-        this.mapTasksWithAssignees(this.tasks());
-      }
-    });
+    this.spaceService
+      .getSpaceMembers({ spaceId, pageIndex: 1, pageSize: 100, SearchTerm: term })
+      .subscribe(members => {
+        this.spaceMembers.set(members);
+        // Re-map tasks if they are already loaded
+        if (this.tasks().length > 0) {
+          this.mapTasksWithAssignees(this.tasks());
+        }
+      });
   }
-
 
   checkOwnership() {
     const space = this.spaceInfo();
@@ -218,7 +221,7 @@ export class SpaceDetailComponent implements OnInit {
   getTasksBySpace(spaceId: string): void {
     const isOwner = this.isSpaceOwner();
     const currentUserId = this.currentUser()?.id;
-    
+
     const params = {
       SpaceId: spaceId,
       PageIndex: 1,
@@ -236,7 +239,7 @@ export class SpaceDetailComponent implements OnInit {
       params.AssignedUserId = currentUserId;
     }
 
-    const taskObservable = isOwner 
+    const taskObservable = isOwner
       ? this.taskItemService.getTasksBySpace(params)
       : this.taskItemService.getMyTasks(params);
 
@@ -255,7 +258,7 @@ export class SpaceDetailComponent implements OnInit {
     const members = this.spaceMembers();
     const mappedTasks = tasksList.map(task => ({
       ...task,
-      assignedUser: members.find(m => m.id === task.assignedUserId)
+      assignedUser: members.find(m => m.id === task.assignedUserId),
     }));
     this.tasks.set(mappedTasks);
   }
@@ -289,35 +292,76 @@ export class SpaceDetailComponent implements OnInit {
   }
 
   onSaveTask(updatedData: any) {
-    if (updatedData.id) {
-      // Prepare the payload according to Swagger
-      const payload = {
-        title: updatedData.title,
-        description: updatedData.description,
-        status: updatedData.status,
-        priority: updatedData.priority,
-        point: updatedData.point || 0,
-        startDate: updatedData.startDate instanceof Date ? updatedData.startDate.toISOString() : updatedData.startDate,
-        dueDate: updatedData.dueDate instanceof Date ? updatedData.dueDate.toISOString() : updatedData.dueDate,
-        assignedUserId: updatedData.assignedUserId
-      };
+    // If updatedData has createdAt or createdBy, it's likely a full result from TaskDetailComponent's own save
+    if (updatedData.id && (updatedData.createdAt || updatedData.createdBy)) {
+      this.onTaskCreated(); // Refresh the list
+      this.selectedTask.set(updatedData); // Sync the detail view
+      return;
+    }
 
-      this.taskItemService.updateTask(updatedData.id, payload).subscribe(result => {
-        if (result) {
-          this.onTaskCreated();
-          // Update the selected task to reflect changes in the detail view
-          this.selectedTask.set(result);
-        }
-      });
+    if (updatedData.id) {
+      // Original logic for when save is triggered from elsewhere (like a full edit form)
+      const isOwner = this.isSpaceOwner();
+      const currentUserId = this.currentUser()?.id;
+      const isAssignee = updatedData.assignedUserId === currentUserId;
+
+      const startDate =
+        updatedData.startDate instanceof Date
+          ? updatedData.startDate.toISOString()
+          : updatedData.startDate;
+      const dueDate =
+        updatedData.dueDate instanceof Date
+          ? updatedData.dueDate.toISOString()
+          : updatedData.dueDate;
+
+      if (isOwner) {
+        const payload = {
+          title: updatedData.title,
+          description: updatedData.description,
+          status: updatedData.status,
+          priority: updatedData.priority,
+          point: updatedData.point || 0,
+          startDate,
+          dueDate,
+          assignedUserId: updatedData.assignedUserId,
+        };
+
+        this.taskItemService.updateTask(updatedData.id, payload).subscribe(result => {
+          if (result) {
+            this.onTaskCreated();
+            this.selectedTask.set(result);
+          }
+        });
+      } else if (isAssignee) {
+        const patchPayload = {
+          status: updatedData.status,
+          point: updatedData.point || 0,
+          startDate,
+          dueDate,
+        };
+
+        this.taskItemService.patchTask(updatedData.id, patchPayload).subscribe(result => {
+          if (result) {
+            this.onTaskCreated();
+            this.selectedTask.set(result);
+          }
+        });
+      }
     }
   }
 
   toggleView() {
-    this.showMembers.update(v => !v);
+    this.activeTab.set('members');
   }
 
   showTasks() {
-    this.showMembers.set(false);
+    this.activeTab.set('list');
+  }
+
+  showSummary() {
+    if (this.isSpaceOwner()) {
+      this.activeTab.set('summary');
+    }
   }
 
   getSpaceRoleLabel(role: any): string {
@@ -336,11 +380,13 @@ export class SpaceDetailComponent implements OnInit {
       accept: () => {
         const spaceId = this.spaceId();
         if (spaceId) {
-          this.spaceService.removeMemberFromSpace(spaceId, member.id).subscribe((success: boolean) => {
-            if (success) {
-              this.getSpaceMembers(spaceId);
-            }
-          });
+          this.spaceService
+            .removeMemberFromSpace(spaceId, member.id)
+            .subscribe((success: boolean) => {
+              if (success) {
+                this.getSpaceMembers(spaceId);
+              }
+            });
         }
       },
     });
@@ -359,17 +405,19 @@ export class SpaceDetailComponent implements OnInit {
       const expiredAt = new Date();
       expiredAt.setDate(expiredAt.getDate() + 7);
 
-      this.spaceInvitationService.createInvitation({
-        spaceId: spaceId,
-        invitedUserId: user.id,
-        expiredAt: expiredAt.toISOString()
-      }).subscribe(success => {
-        if (success) {
-          this.inviteMemberVisible.set(false);
-          this.userSearchTerm.set('');
-          this.potentialMembers.set([]);
-        }
-      });
+      this.spaceInvitationService
+        .createInvitation({
+          spaceId: spaceId,
+          invitedUserId: user.id,
+          expiredAt: expiredAt.toISOString(),
+        })
+        .subscribe(success => {
+          if (success) {
+            this.inviteMemberVisible.set(false);
+            this.userSearchTerm.set('');
+            this.potentialMembers.set([]);
+          }
+        });
     }
   }
 
@@ -444,16 +492,21 @@ export class SpaceDetailComponent implements OnInit {
 
   onStatusChange(task: Task, newStatus: TaskStatus) {
     console.log('Status change requested:', { taskId: task.id, oldStatus: task.status, newStatus });
-    
+
     this.taskItemService.updateTaskStatus(task.id, newStatus).subscribe({
-      next: (success) => {
+      next: success => {
         if (success) {
           this.onTaskCreated();
+          // Update selected task if it's currently showing in detail
+          const current = this.selectedTask();
+          if (current && current.id === task.id) {
+            this.selectedTask.set({ ...current, status: newStatus });
+          }
         }
       },
-      error: (err) => {
+      error: err => {
         console.error('Error updating status:', err);
-      }
+      },
     });
   }
 
@@ -471,7 +524,7 @@ export class SpaceDetailComponent implements OnInit {
       this.sortBy.set(field);
       this.sortDirection.set('asc');
     }
-    
+
     const id = this.spaceId();
     if (id) this.getTasksBySpace(id);
   }

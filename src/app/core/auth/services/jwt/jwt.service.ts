@@ -1,10 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
-import { ACCESS_TOKEN_KEY, EXPIRES_DATE_KEY, REFRESH_TOKEN_KEY } from '../../../../shared/constants/jwt.constant';
-
+import {
+  ACCESS_TOKEN_KEY,
+  EXPIRES_DATE_KEY,
+  REFRESH_TOKEN_KEY,
+} from '../../../../shared/constants/jwt.constant';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class JwtService {
   private readonly cookieService = inject(CookieService);

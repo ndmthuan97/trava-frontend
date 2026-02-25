@@ -6,16 +6,17 @@ import { RequestService } from '../../core/request/request.service';
 import { environment } from '../../../../../environments/environment';
 
 export interface DashboardStats {
-  totalProjects: number;
-  completedTasks: number;
-  activeMembers: number;
-  efficiency: number;
-  trends: {
-    projects: number;
-    tasks: number;
-    members: number;
-    efficiency: number;
-  };
+  totalUsers: number;
+  totalUsersLastWeek: number;
+  userGrowth: number;
+  totalSpaces: number;
+  totalSpacesLastWeek: number;
+  spaceGrowth: number;
+  totalTasks: number;
+  totalTasksLastWeek: number;
+  taskGrowth: number;
+  returningUsers: number;
+  returningUserRate: number;
 }
 
 export interface PerformanceData {
@@ -24,7 +25,7 @@ export interface PerformanceData {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DashboardService {
   private readonly requestService = inject(RequestService);
@@ -35,17 +36,7 @@ export class DashboardService {
     return this.requestService.get<any>(`${this.DASHBOARD_API_URL}`).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success && res.data) {
-          const data = res.data;
-          // Ensure trends exists to prevent template errors
-          if (!data.trends) {
-            data.trends = {
-              projects: 0,
-              tasks: 0,
-              members: 0,
-              efficiency: 0
-            };
-          }
-          return data;
+          return res.data as DashboardStats;
         }
         return null;
       }),
@@ -69,7 +60,7 @@ export class DashboardService {
     const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
     return labels.map(label => ({
       label,
-      value: Math.floor(Math.random() * 60) + 20
+      value: Math.floor(Math.random() * 60) + 20,
     }));
   }
 }

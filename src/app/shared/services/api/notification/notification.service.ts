@@ -17,15 +17,17 @@ export class NotificationService {
   private readonly NOTIFICATION_API_URL = `${this.BASE_API_URL}/notifications`;
 
   getNotifications(params?: any): Observable<Pagination<Notification> | null> {
-    return this.requestService.get<Pagination<Notification>>(this.NOTIFICATION_API_URL, params).pipe(
-      map((res: ApiResponse<Pagination<Notification>>) => {
-        if (res.statusCode === StatusCode.Success && res.data) {
-          return res.data;
-        }
-        return null;
-      }),
-      catchError(() => of(null))
-    );
+    return this.requestService
+      .get<Pagination<Notification>>(this.NOTIFICATION_API_URL, params)
+      .pipe(
+        map((res: ApiResponse<Pagination<Notification>>) => {
+          if (res.statusCode === StatusCode.Success && res.data) {
+            return res.data;
+          }
+          return null;
+        }),
+        catchError(() => of(null))
+      );
   }
 
   getUnreadNotifications(): Observable<Notification[]> {

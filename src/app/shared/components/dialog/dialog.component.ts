@@ -20,6 +20,18 @@ export class DialogComponent {
 
   confirmLabel = input<string>('');
   cancelLabel = input<string>('');
+  confirmSeverity = input<
+    | 'success'
+    | 'info'
+    | 'warn'
+    | 'danger'
+    | 'help'
+    | 'primary'
+    | 'secondary'
+    | 'contrast'
+    | null
+    | undefined
+  >('primary');
 
   confirm = output<void>();
   cancel = output<void>();

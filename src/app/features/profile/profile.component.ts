@@ -1,7 +1,13 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { AvatarModule } from 'primeng/avatar';
@@ -13,30 +19,34 @@ import { MenuItem } from 'primeng/api';
 import { UserService } from '../../shared/services/api/user/user.service';
 import { AuthService } from '../../core/auth/services/auth/auth.service';
 import { User } from '../../shared/models/entities/user.model';
+import { SupabaseService } from '../../shared/services/api/supabase/supabase.service';
+import { ToastService } from '../../shared/services/core/toast/toast.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    ReactiveFormsModule, 
-    ButtonModule, 
-    InputTextModule, 
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ButtonModule,
+    InputTextModule,
     AvatarModule,
     DialogModule,
     PasswordModule,
     DatePickerModule,
-    MenuModule
+    MenuModule,
   ],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.css'
+  styleUrl: './profile.component.css',
 })
 export class ProfileComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly supabaseService = inject(SupabaseService);
+  private readonly toastService = inject(ToastService);
 
   profileForm: FormGroup;
   changePasswordForm: FormGroup;
@@ -51,17 +61,20 @@ export class ProfileComponent implements OnInit {
     this.profileForm = this.fb.group({
       personalDetails: this.fb.group({
         fullName: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]],
-        phone: [''],
-        dob: ['']
-      })
+        email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
+        phoneNumber: [''],
+        birthDate: [''],
+      }),
     });
 
-    this.changePasswordForm = this.fb.group({
-      currentPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required]
-    }, { validators: this.passwordMatchValidator });
+    this.changePasswordForm = this.fb.group(
+      {
+        currentPassword: ['', Validators.required],
+        newPassword: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', Validators.required],
+      },
+      { validators: this.passwordMatchValidator }
+    );
     this.initSettingsMenu();
   }
 
@@ -77,22 +90,22 @@ export class ProfileComponent implements OnInit {
             label: 'Edit Profile',
             icon: 'pi pi-user-edit',
             command: () => this.toggleEditMode(),
-            visible: canEdit && !isEditing
+            visible: canEdit && !isEditing,
           },
           {
             label: 'Change Password',
             icon: 'pi pi-lock',
             command: () => this.showChangePasswordDialog(),
-            visible: canEdit
-          }
-        ]
-      }
+            visible: canEdit,
+          },
+        ],
+      },
     ];
   }
 
   toggleEditMode() {
     if (this.isReadOnly) return;
-    
+
     this.isEditMode.update(v => !v);
     if (this.isEditMode()) {
       this.profileForm.enable();
@@ -105,15 +118,16 @@ export class ProfileComponent implements OnInit {
 
   private passwordMatchValidator(g: FormGroup) {
     return g.get('newPassword')?.value === g.get('confirmPassword')?.value
-      ? null : { 'mismatch': true };
+      ? null
+      : { mismatch: true };
   }
 
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('id');
-    
+
     if (userId) {
       this.isReadOnly = true;
-      this.userService.getUserProfileById(userId).subscribe(user => {
+      this.userService.getUserProfileById(userId).subscribe((user: User | null) => {
         if (user) {
           this.currentUser = user;
           this.patchFormValues(user);
@@ -121,7 +135,7 @@ export class ProfileComponent implements OnInit {
         }
       });
     } else {
-      this.userService.getCurrentUserProfile().subscribe(user => {
+      this.userService.getCurrentUserProfile().subscribe((user: User | null) => {
         if (user) {
           this.currentUser = user;
           this.patchFormValues(user);
@@ -137,19 +151,31 @@ export class ProfileComponent implements OnInit {
       personalDetails: {
         fullName: user.fullName,
         email: user.email,
-        phone: '', 
-        dob: ''
-      }
+        phoneNumber: user.phoneNumber || '',
+        birthDate: user.birthDate ? new Date(user.birthDate) : null,
+      },
     });
   }
 
   onSubmit() {
-    if (this.profileForm.valid) {
-      console.log('Form submitted:', this.profileForm.value);
-      // After successful save
-      this.isEditMode.set(false);
-      this.profileForm.disable();
-      this.initSettingsMenu();
+    if (this.profileForm.valid && this.currentUser) {
+      const formValue = this.profileForm.get('personalDetails')?.value;
+      const payload = {
+        fullName: formValue.fullName,
+        phoneNumber: formValue.phoneNumber || '',
+        birthDate: formValue.birthDate ? new Date(formValue.birthDate).toISOString() : null,
+        avatarUrl: this.currentUser.avatarUrl || '',
+      };
+
+      this.userService.updateUser(this.currentUser.id, payload).subscribe((updatedUser: User | null) => {
+        if (updatedUser) {
+          this.currentUser = updatedUser;
+          this.patchFormValues(updatedUser);
+          this.isEditMode.set(false);
+          this.profileForm.disable();
+          this.initSettingsMenu();
+        }
+      });
     }
   }
 
@@ -168,11 +194,49 @@ export class ProfileComponent implements OnInit {
 
   onChangePassword() {
     if (this.changePasswordForm.valid) {
-      this.authService.changePassword(this.changePasswordForm.value).subscribe(success => {
+      this.authService.changePassword(this.changePasswordForm.value).subscribe((success: boolean) => {
         if (success) {
           this.displayChangePasswordDialog = false;
         }
       });
+    }
+  }
+
+  onAvatarClick(fileInput: HTMLInputElement) {
+    if (this.isReadOnly) return;
+    fileInput.click();
+  }
+
+  async onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file && this.currentUser) {
+      if (!file.type.startsWith('image/')) {
+        this.toastService.error('Invalid file', 'Please select an image file');
+        return;
+      }
+
+      const publicUrl = await this.supabaseService.uploadAvatar(file);
+
+      if (publicUrl) {
+        const formValue = this.profileForm.get('personalDetails')?.value;
+        const payload = {
+          fullName: formValue.fullName || this.currentUser.fullName || '',
+          phoneNumber: formValue.phoneNumber || this.currentUser.phoneNumber || '',
+          birthDate: formValue.birthDate
+            ? new Date(formValue.birthDate).toISOString()
+            : this.currentUser.birthDate || null,
+          avatarUrl: publicUrl,
+        };
+
+        this.userService
+          .updateUser(this.currentUser.id, payload)
+          .subscribe((updatedUser: User | null) => {
+            if (updatedUser) {
+              this.currentUser = updatedUser;
+              this.patchFormValues(updatedUser);
+            }
+          });
+      }
     }
   }
 }

@@ -8,7 +8,7 @@
         class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 font-bold text-white shadow-lg shadow-orange-500/20">
         T
       </div>
-      <span *ngIf="open()" class="text-lg font-bold text-gray-900 tracking-tight"> Trava </span>
+      <span *ngIf="open()" class="text-lg font-bold tracking-tight text-gray-900"> Trava </span>
     </div>
   </div>
 
@@ -21,7 +21,7 @@
         routerLink="/dashboard"
         routerLinkActive="bg-orange-50/50 text-orange-600"
         [routerLinkActiveOptions]="{ exact: true }"
-        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900 group">
+        class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900">
         <i class="pi pi-home text-lg"></i>
         <span *ngIf="open()" class="text-sm font-semibold">Dashboard</span>
       </button>
@@ -30,7 +30,7 @@
         routerLink="/spaces"
         routerLinkActive="bg-orange-50/50 text-orange-600"
         [routerLinkActiveOptions]="{ exact: true }"
-        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900 group">
+        class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900">
         <i class="pi pi-th-large text-lg"></i>
         <span *ngIf="open()" class="text-sm font-semibold">Spaces</span>
       </button>
@@ -39,7 +39,7 @@
         *ngIf="isAdmin()"
         routerLink="/users"
         routerLinkActive="bg-orange-50/50 text-orange-600"
-        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900 group">
+        class="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 hover:text-gray-900">
         <i class="pi pi-users text-lg"></i>
         <span *ngIf="open()" class="text-sm font-semibold">Users</span>
       </button>
@@ -47,15 +47,18 @@
   </nav>
 
   <!-- Navigation Footer -->
-  <div class="p-4 border-t border-gray-50" *ngIf="open() && userService.currentUser() as user">
+  <div class="border-t border-gray-50 p-4" *ngIf="open() && userService.currentUser() as user">
     <div class="rounded-xl border border-gray-100 bg-gray-50/50 p-3">
       <div class="flex items-center gap-3">
-        <div class="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-orange-600 uppercase">
+        <div
+          class="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-xs font-bold uppercase text-orange-600">
           {{ user.fullName ? user.fullName.substring(0, 2) : 'US' }}
         </div>
         <div class="flex flex-col overflow-hidden">
-          <span class="text-xs font-bold text-gray-900 truncate">{{ user.fullName || 'User' }}</span>
-          <span class="text-[10px] text-gray-500 truncate">{{ user.email }}</span>
+          <span class="truncate text-xs font-bold text-gray-900">{{
+            user.fullName || 'User'
+          }}</span>
+          <span class="truncate text-[10px] text-gray-500">{{ user.email }}</span>
         </div>
       </div>
     </div>

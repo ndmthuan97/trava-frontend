@@ -23,20 +23,20 @@ import { PopoverModule } from 'primeng/popover';
   selector: 'app-user',
   standalone: true,
   imports: [
-    CommonModule, 
-    TableModule, 
-    BadgeComponent, 
-    ButtonModule, 
-    AvatarModule, 
-    InputTextModule, 
-    FormsModule, 
-    ConfirmDialogModule, 
+    CommonModule,
+    TableModule,
+    BadgeComponent,
+    ButtonModule,
+    AvatarModule,
+    InputTextModule,
+    FormsModule,
+    ConfirmDialogModule,
     TooltipModule,
-    PopoverModule
+    PopoverModule,
   ],
   providers: [ConfirmationService],
   templateUrl: './user.component.html',
-  styleUrl: './user.component.css'
+  styleUrl: './user.component.css',
 })
 export class UserComponent {
   protected readonly UserRoles = UserRoles;
@@ -62,14 +62,12 @@ export class UserComponent {
   }
 
   private setupSearch(): void {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(term => {
-      this.searchTerm.set(term);
-      this.loadUsers();
-    });
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(term => {
+        this.searchTerm.set(term);
+        this.loadUsers();
+      });
   }
 
   onSearchTriggered(term: string) {
@@ -79,7 +77,9 @@ export class UserComponent {
   private loadUsers(): void {
     const term = this.searchTerm();
     const status = this.filterStatus();
-    this.userService.getAllUsers(term, status || undefined).subscribe(users => this.users.set(users));
+    this.userService
+      .getAllUsers(term, status || undefined)
+      .subscribe(users => this.users.set(users));
   }
 
   onFilterStatusChange(status: UserStatus | null) {
@@ -124,7 +124,7 @@ export class UserComponent {
   onToggleStatus(user: User): void {
     const isActivating = user.status === UserStatus.Inactive;
     const actionText = isActivating ? 'unlock' : 'lock';
-    
+
     this.confirmationService.confirm({
       message: `Are you sure you want to ${actionText} user "${user.fullName || user.email}"?`,
       header: 'Confirm Status Change',
@@ -139,7 +139,7 @@ export class UserComponent {
             this.loadUsers();
           }
         });
-      }
+      },
     });
   }
 }

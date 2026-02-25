@@ -1,4 +1,12 @@
-import { Component, inject, OnInit, signal, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  OnDestroy,
+  HostListener,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
@@ -20,7 +28,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   private readonly notificationService = inject(NotificationService);
   private readonly spaceInvitationService = inject(SpaceInvitationService);
   private readonly elementRef = inject(ElementRef);
-  
+
   notifications = signal<Notification[]>([]);
   allNotifications = signal<Notification[]>([]);
   unreadCount = signal<number>(0);
@@ -31,7 +39,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
   // Detail Dialog State
   showDetail = signal<boolean>(false);
   selectedNotification = signal<Notification | null>(null);
-  
+
   private pollingSubscription?: Subscription;
 
   ngOnInit(): void {
@@ -51,7 +59,11 @@ export class NotificationComponent implements OnInit, OnDestroy {
       this.unreadCount.set(notifications.length);
       // Debug: log first payload to see actual field names
       if (notifications.length > 0) {
-        console.log('[Notification payload keys]', Object.keys(notifications[0].payload || {}), notifications[0].payload);
+        console.log(
+          '[Notification payload keys]',
+          Object.keys(notifications[0].payload || {}),
+          notifications[0].payload
+        );
       }
     });
 
@@ -97,29 +109,39 @@ export class NotificationComponent implements OnInit, OnDestroy {
   }
 
   respondToInvitation(invitationId: string, status: InvitationStatus): void {
-    this.spaceInvitationService.updateInvitationStatus(invitationId, status).subscribe((success: boolean) => {
-      if (success) {
-        this.showDetail.set(false);
-        this.loadNotifications();
-      }
-    });
+    this.spaceInvitationService
+      .updateInvitationStatus(invitationId, status)
+      .subscribe((success: boolean) => {
+        if (success) {
+          this.showDetail.set(false);
+          this.loadNotifications();
+        }
+      });
   }
 
   getNotificationIcon(type: string): string {
     switch (type) {
-      case 'TaskAssigned': return 'pi pi-user-plus';
-      case 'TaskCompleted': return 'pi pi-check-circle';
-      case 'TaskUpdated': return 'pi pi-info-circle';
-      default: return 'pi pi-bell';
+      case 'TaskAssigned':
+        return 'pi pi-user-plus';
+      case 'TaskCompleted':
+        return 'pi pi-check-circle';
+      case 'TaskUpdated':
+        return 'pi pi-info-circle';
+      default:
+        return 'pi pi-bell';
     }
   }
 
   getNotificationColor(type: string): string {
     switch (type) {
-      case 'TaskAssigned': return 'text-orange-500 bg-orange-50';
-      case 'TaskCompleted': return 'text-green-500 bg-green-50';
-      case 'TaskUpdated': return 'text-amber-500 bg-amber-50';
-      default: return 'text-gray-500 bg-gray-50';
+      case 'TaskAssigned':
+        return 'text-orange-500 bg-orange-50';
+      case 'TaskCompleted':
+        return 'text-green-500 bg-green-50';
+      case 'TaskUpdated':
+        return 'text-amber-500 bg-amber-50';
+      default:
+        return 'text-gray-500 bg-gray-50';
     }
   }
 
@@ -129,29 +151,33 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   /** Extract sender avatar URL - handles different payload key casings from backend */
   getSenderAvatar(payload: any): string {
-    return payload?.AvatarUrl
-      || payload?.SenderAvatarUrl
-      || payload?.SenderAvatar
-      || payload?.avatarUrl
-      || payload?.senderAvatarUrl
-      || payload?.inviterAvatarUrl
-      || '';
+    return (
+      payload?.AvatarUrl ||
+      payload?.SenderAvatarUrl ||
+      payload?.SenderAvatar ||
+      payload?.avatarUrl ||
+      payload?.senderAvatarUrl ||
+      payload?.inviterAvatarUrl ||
+      ''
+    );
   }
 
   /** Extract sender name - handles different payload key casings from backend */
   getSenderName(payload: any): string {
-    return payload?.SenderName
-      || payload?.senderName
-      || payload?.InviterName
-      || payload?.inviterName
-      || '';
+    return (
+      payload?.SenderName ||
+      payload?.senderName ||
+      payload?.InviterName ||
+      payload?.inviterName ||
+      ''
+    );
   }
 
   getTimeAgo(date: string | Date): string {
     const now = new Date();
     const past = new Date(date);
     const diffInMs = now.getTime() - past.getTime();
-    
+
     const diffInSeconds = Math.floor(diffInMs / 1000);
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     const diffInHours = Math.floor(diffInMinutes / 60);
@@ -166,10 +192,10 @@ export class NotificationComponent implements OnInit, OnDestroy {
     } else if (diffInDays < 7) {
       return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
     } else {
-      return past.toLocaleDateString('en-US', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric' 
+      return past.toLocaleDateString('en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
       });
     }
   }

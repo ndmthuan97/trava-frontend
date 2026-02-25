@@ -1,157 +1,197 @@
-<app-dialog
-  [header]="taskToEdit() ? 'Edit Task' : 'Create New Task'"
+<p-dialog
   [(visible)]="visible"
-  [confirmLabel]="taskToEdit() ? 'Update Task' : 'Create Task'"
-  cancelLabel="Cancel"
-  width="50rem"
-  (confirm)="confirmCreate()"
-  (cancel)="cancelCreate()">
-  <div class="flex flex-col gap-4 py-2">
-    <!-- Title -->
-    <div class="flex flex-col gap-2">
-      <label for="title" class="text-sm font-bold text-slate-700">
-        Title <span class="text-red-500">*</span>
-      </label>
-      <input
-        pInputText
-        id="title"
-        [(ngModel)]="taskData().title"
-        placeholder="Enter task title"
-        class="w-full" />
-    </div>
-
-    <!-- Description -->
-    <div class="flex flex-col gap-2">
-      <label for="description" class="text-sm font-bold text-slate-700">Description</label>
-      <textarea
-        pTextarea
-        id="description"
-        [(ngModel)]="taskData().description"
-        placeholder="Enter task description"
-        rows="3"
-        class="w-full"></textarea>
-    </div>
-
-    <div class="grid grid-cols-3 gap-4">
-      <!-- Status -->
-      <div class="flex flex-col gap-2">
-        <label for="status" class="text-sm font-bold text-slate-700">
-          Status <span class="text-red-500">*</span>
-        </label>
-        <p-select
-          id="status"
-          [options]="statusOptions"
-          [(ngModel)]="taskData().status"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Select status"
-          appendTo="body"
-          styleClass="w-full"></p-select>
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '100vw', maxWidth: '1200px' }"
+  [contentStyle]="{ padding: '0' }"
+  [showHeader]="false"
+  [closable]="false"
+  styleClass="task-create-premium-dialog">
+  <div class="flex flex-col bg-white text-slate-900">
+    <!-- Header -->
+    <div class="flex items-center justify-between bg-white px-8 pt-6">
+      <div class="flex items-center gap-2">
+        <span class="text-lg font-bold tracking-tight text-gray-900">
+          {{ taskToEdit() ? 'Edit Task' : 'Create New Task' }}
+        </span>
       </div>
 
-      <!-- Priority -->
-      <div class="flex flex-col gap-2">
-        <label for="priority" class="text-sm font-bold text-slate-700">
-          Priority <span class="text-red-500">*</span>
-        </label>
-        <p-select
-          id="priority"
-          [options]="priorityOptions"
-          [(ngModel)]="taskData().priority"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Select priority"
-          appendTo="body"
-          styleClass="w-full"></p-select>
-      </div>
-
-      <!-- Points -->
-      <div class="flex flex-col gap-2">
-        <label for="point" class="text-sm font-bold text-slate-700">
-          Points <span class="text-red-500">*</span>
-        </label>
-        <p-inputNumber
-          id="point"
-          [(ngModel)]="taskData().point"
-          [min]="1"
-          [max]="10"
-          [showButtons]="true"
-          buttonLayout="horizontal"
-          inputId="horizontal"
-          spinnerMode="horizontal"
-          [step]="1"
-          decrementButtonClass="p-button-secondary"
-          incrementButtonClass="p-button-secondary"
-          incrementButtonIcon="pi pi-plus"
-          decrementButtonIcon="pi pi-minus"
-          class="w-full"></p-inputNumber>
+      <div class="flex items-center gap-2">
+        <button
+          class="flex items-center gap-2 rounded-lg bg-orange-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-100 transition-all hover:bg-orange-700 active:scale-95"
+          (click)="confirmCreate()">
+          <i class="pi pi-check text-[10px]"></i>
+          {{ taskToEdit() ? 'Update' : 'Create' }}
+        </button>
+        <button
+          class="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-xs font-bold text-gray-700 transition-all hover:bg-gray-200 active:scale-95"
+          (click)="cancelCreate()">
+          <i class="pi pi-times text-[10px]"></i> Cancel
+        </button>
       </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-4">
-      <!-- Assignee -->
-      <div class="flex flex-col gap-2">
-        <label for="assignee" class="text-sm font-bold text-slate-700">Assignee</label>
-        <p-select
-          id="assignee"
-          [(ngModel)]="taskData().assignedUserId"
-          [options]="spaceMembers()"
-          optionLabel="fullName"
-          optionValue="id"
-          [showClear]="true"
-          placeholder="Select assignee"
-          appendTo="body"
-          styleClass="w-full">
-          <ng-template pTemplate="selectedItem" let-selectedOption>
-            <div class="flex items-center gap-2" *ngIf="selectedOption">
-              <img [src]="selectedOption.avatarUrl" class="w-6 h-6 rounded-full" *ngIf="selectedOption.avatarUrl" />
-              <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center" *ngIf="!selectedOption.avatarUrl">
-                <i class="pi pi-user text-xs"></i>
-              </div>
-              <span>{{ selectedOption.fullName }}</span>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="item" let-member>
-            <div class="flex items-center gap-2">
-              <img [src]="member.avatarUrl" class="w-6 h-6 rounded-full" *ngIf="member.avatarUrl" />
-              <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center" *ngIf="!member.avatarUrl">
-                <i class="pi pi-user text-xs"></i>
-              </div>
-              <span>{{ member.fullName }}</span>
-            </div>
-          </ng-template>
-        </p-select>
+    <!-- Content Area -->
+    <div class="mt-4 flex h-[70vh] border-t border-gray-50">
+      <!-- Left Column: Content (65%) -->
+      <div class="custom-scrollbar flex-[0.65] overflow-y-auto p-8">
+        <!-- Title Input -->
+        <div class="mb-8">
+          <h2 class="section-label flex items-center gap-2">
+            <i class="pi pi-credit-card text-slate-400"></i>
+            Title <span class="text-red-500">*</span>
+          </h2>
+          <input
+            pInputText
+            [(ngModel)]="taskData().title"
+            class="w-full rounded-xl border-gray-200 p-3 text-xl font-bold tracking-tight transition-all focus:ring-2 focus:ring-blue-100"
+            placeholder="What needs to be done?" />
+        </div>
+
+        <!-- Description Input -->
+        <div class="mb-10">
+          <h2 class="section-label flex items-center gap-2">
+            <i class="pi pi-align-left text-slate-400"></i>
+            Description
+          </h2>
+          <textarea
+            pTextarea
+            [(ngModel)]="taskData().description"
+            class="min-h-[300px] w-full rounded-xl border border-gray-200 p-4 text-sm leading-relaxed text-slate-700 transition-all focus:ring-2 focus:ring-blue-50"
+            placeholder="Add a detailed description..."></textarea>
+        </div>
       </div>
 
-      <!-- Start Date -->
-      <div class="flex flex-col gap-2">
-        <label for="startDate" class="text-sm font-bold text-slate-700">Start Date</label>
-        <p-datepicker
-          id="startDate"
-          [(ngModel)]="taskData().startDate"
-          dateFormat="dd/mm/yy"
-          [showIcon]="true"
-          [showTime]="true"
-          hourFormat="24"
-          placeholder="Select start date"
-          appendTo="body"
-          styleClass="w-full"></p-datepicker>
-      </div>
+      <!-- Right Column: Sidebar (35%) -->
+      <div class="sidebar-container custom-scrollbar flex-[0.35] overflow-y-auto p-6">
+        <div class="mb-6 flex items-center gap-2 text-sm font-bold text-slate-900">
+          <i class="pi pi-info-circle text-[10px] text-slate-400"></i>
+          <span>Properties</span>
+        </div>
 
-      <!-- Due Date -->
-      <div class="flex flex-col gap-2">
-        <label for="dueDate" class="text-sm font-bold text-slate-700">Due Date</label>
-        <p-datepicker
-          id="dueDate"
-          [(ngModel)]="taskData().dueDate"
-          dateFormat="dd/mm/yy"
-          [showIcon]="true"
-          [showTime]="true"
-          hourFormat="24"
-          placeholder="Select due date"
-          appendTo="body"
-          styleClass="w-full"></p-datepicker>
+        <div class="space-y-4">
+          <!-- Status -->
+          <div class="grid grid-cols-[100px_1fr] items-center gap-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400"
+              >Status</label
+            >
+            <p-select
+              [options]="statusOptions"
+              [(ngModel)]="taskData().status"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select status"
+              appendTo="body"
+              styleClass="w-full text-xs h-8 font-semibold"></p-select>
+          </div>
+
+          <!-- Priority -->
+          <div class="grid grid-cols-[100px_1fr] items-center gap-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400"
+              >Priority</label
+            >
+            <p-select
+              [options]="priorityOptions"
+              [(ngModel)]="taskData().priority"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select priority"
+              appendTo="body"
+              styleClass="w-full text-xs h-8 font-semibold"></p-select>
+          </div>
+
+          <!-- Points -->
+          <div class="grid grid-cols-[100px_1fr] items-center gap-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400"
+              >Points</label
+            >
+            <p-rating
+              [(ngModel)]="taskData().point"
+              [stars]="5"
+              styleClass="scale-90 origin-left"></p-rating>
+          </div>
+
+          <!-- Assignee -->
+          <div class="grid grid-cols-[100px_1fr] items-center gap-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400"
+              >Assignee</label
+            >
+            <p-select
+              [(ngModel)]="taskData().assignedUserId"
+              [options]="spaceMembers()"
+              optionLabel="fullName"
+              optionValue="id"
+              [showClear]="true"
+              placeholder=""
+              appendTo="body"
+              styleClass="w-full text-xs h-8">
+              <ng-template pTemplate="selectedItem" let-selectedOption>
+                <div class="flex items-center gap-2" *ngIf="selectedOption">
+                  <img
+                    [src]="selectedOption.avatarUrl"
+                    class="h-4 w-4 rounded-full"
+                    *ngIf="selectedOption.avatarUrl" />
+                  <div
+                    class="flex h-4 w-4 items-center justify-center rounded-full bg-slate-100"
+                    *ngIf="!selectedOption.avatarUrl">
+                    <i class="pi pi-user text-[10px]"></i>
+                  </div>
+                  <span class="text-xs">{{ selectedOption.fullName }}</span>
+                </div>
+              </ng-template>
+              <ng-template pTemplate="item" let-member>
+                <div class="flex items-center gap-2">
+                  <img
+                    [src]="member.avatarUrl"
+                    class="h-5 w-5 rounded-full"
+                    *ngIf="member.avatarUrl" />
+                  <div
+                    class="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200"
+                    *ngIf="!member.avatarUrl">
+                    <i class="pi pi-user text-xs"></i>
+                  </div>
+                  <span class="text-xs">{{ member.fullName }}</span>
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <!-- Start Date -->
+          <div class="grid grid-cols-[100px_1fr] items-center gap-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400"
+              >Start Date</label
+            >
+            <p-datepicker
+              [(ngModel)]="taskData().startDate"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              [showTime]="true"
+              hourFormat="24"
+              placeholder=""
+              appendTo="body"
+              styleClass="w-full text-xs"
+              inputStyleClass="h-8 py-0"></p-datepicker>
+          </div>
+
+          <!-- Due Date -->
+          <div class="grid grid-cols-[100px_1fr] items-center gap-2">
+            <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400"
+              >Due Date</label
+            >
+            <p-datepicker
+              [(ngModel)]="taskData().dueDate"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              [showTime]="true"
+              hourFormat="24"
+              placeholder=""
+              appendTo="body"
+              styleClass="w-full text-xs"
+              inputStyleClass="h-8 py-0"></p-datepicker>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</app-dialog>
+</p-dialog>

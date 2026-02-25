@@ -1,0 +1,67 @@
+<div class="p-6">
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" *ngIf="stats() as s">
+    <div class="stat-card group">
+      <div class="icon-container bg-orange-50 text-orange-600 transition-colors group-hover:bg-orange-600 group-hover:text-white">
+        <i class="pi pi-list text-xl"></i>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Tasks</p>
+        <h3 class="text-2xl font-black text-gray-900 leading-tight">{{ s.totalTasks }}</h3>
+      </div>
+    </div>
+
+    <div class="stat-card group">
+      <div class="icon-container bg-slate-100 text-slate-500 transition-colors group-hover:bg-slate-600 group-hover:text-white">
+        <i class="pi pi-circle text-xl"></i>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Not Started</p>
+        <h3 class="text-2xl font-black text-gray-900 leading-tight">{{ s.tasksByStatus.NotStart }}</h3>
+      </div>
+    </div>
+
+    <div class="stat-card group">
+      <div class="icon-container bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+        <i class="pi pi-spinner text-xl"></i>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">In Progress</p>
+        <h3 class="text-2xl font-black text-gray-900 leading-tight">{{ s.tasksByStatus.InProgress }}</h3>
+      </div>
+    </div>
+
+    <div class="stat-card group">
+      <div class="icon-container bg-emerald-50 text-emerald-600 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+        <i class="pi pi-check-circle text-xl"></i>
+      </div>
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Completed</p>
+        <h3 class="text-2xl font-black text-gray-900 leading-tight">{{ s.tasksByStatus.Completed }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+    <div class="chart-container lg:col-span-2">
+      <h4 class="text-xs font-black text-gray-900 mb-8 flex items-center gap-2 uppercase tracking-widest">
+        <div class="h-6 w-1 bg-orange-500 rounded-full"></div>
+        Tasks by Status
+      </h4>
+      <div class="relative h-64">
+        <p-chart type="doughnut" [data]="statusChartData" [options]="statusChartOptions" height="250px"></p-chart>
+      </div>
+    </div>
+
+    <div class="chart-container lg:col-span-3">
+      <h4 class="text-xs font-black text-gray-900 mb-8 flex items-center gap-2 uppercase tracking-widest">
+        <div class="h-6 w-1 bg-blue-500 rounded-full"></div>
+        Tasks by Priority
+      </h4>
+      <div class="relative h-64">
+        <p-chart type="bar" [data]="priorityChartData" [options]="priorityChartOptions" height="250px"></p-chart>
+      </div>
+    </div>
+  </div>
+</div>

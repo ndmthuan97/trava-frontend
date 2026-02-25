@@ -19,7 +19,11 @@
         [label]="cancelLabel()"
         severity="secondary"
         (click)="onCancel()" />
-      <p-button *ngIf="confirmLabel()" [label]="confirmLabel()" (click)="onConfirm()" />
+      <p-button
+        *ngIf="confirmLabel()"
+        [label]="confirmLabel()"
+        [severity]="confirmSeverity()"
+        (click)="onConfirm()" />
     </div>
     <ng-content select="[footer]"></ng-content>
   </ng-template>

@@ -2,10 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { finalize } from 'rxjs';
 import { LoadingService } from '../../shared/services/core/loading/loading.service';
-import {
-  LOADING_KEY,
-  SHOW_LOADING,
-} from '../../shared/services/tokens/http-context.token';
+import { LOADING_KEY, SHOW_LOADING } from '../../shared/services/tokens/http-context.token';
 
 export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.context.get(SHOW_LOADING) === false) {

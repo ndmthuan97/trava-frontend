@@ -1,15 +1,18 @@
-<div class="px-4 py-8 max-w-7xl mx-auto pb-20">
+<div class="mx-auto max-w-7xl px-4 py-8 pb-20">
   <!-- Standardized Header -->
   <div class="mb-6 flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Space Management</h1>
-      <p class="text-xs text-gray-500 mt-1">Organize and manage your collaborative work environments</p>
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Space Management</h1>
+      <p class="mt-1 text-xs text-gray-500">
+        Organize and manage your collaborative work environments
+      </p>
     </div>
-    
+
     <div class="flex items-center gap-2">
       <!-- Standardized Search UI -->
-      <div class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
-        <i class="pi pi-search text-gray-400 text-[10px]"></i>
+      <div
+        class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
+        <i class="pi pi-search text-[10px] text-gray-400"></i>
         <input
           type="text"
           [ngModel]="searchTerm()"
@@ -18,41 +21,32 @@
           class="w-48 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none" />
       </div>
 
-      <button 
+      <button
         (click)="opType.toggle($event)"
-        class="flex h-[36px] w-[100px] items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-orange-300 transition-all active:scale-95">
+        class="flex h-[36px] items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition-all hover:border-orange-300 hover:bg-gray-50 active:scale-95">
         <i class="pi pi-briefcase text-[10px]"></i>
         <span>Type</span>
-        <span *ngIf="filterType() !== null" class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white">1</span>
-        <i class="pi pi-chevron-down text-[8px] ml-1 opacity-50"></i>
+        <span
+          *ngIf="filterType() !== null"
+          class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white"
+          >1</span
+        >
+        <i class="pi pi-chevron-down ml-1 text-[8px] opacity-50"></i>
       </button>
 
       <!-- Role Filter -->
-      <button 
+      <button
         (click)="opRole.toggle($event)"
-        class="flex h-[36px] w-[100px] items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-orange-300 transition-all active:scale-95">
+        class="flex h-[36px] items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition-all hover:border-orange-300 hover:bg-gray-50 active:scale-95">
         <i class="pi pi-wrench text-[10px]"></i>
         <span>Role</span>
-        <span *ngIf="filterRole() !== null" class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white">1</span>
-        <i class="pi pi-chevron-down text-[8px] ml-1 opacity-50"></i>
+        <span
+          *ngIf="filterRole() !== null"
+          class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white"
+          >1</span
+        >
+        <i class="pi pi-chevron-down ml-1 text-[8px] opacity-50"></i>
       </button>
-
-      <p-popover #opType styleClass="filter-overlay-premium">
-        <div class="w-48 p-2 flex flex-col gap-1">
-          <span class="text-[10px] font-bold text-gray-400 px-2 py-1 uppercase tracking-wider">Filter Type</span>
-          <button (click)="onFilterTypeChange(null); opType.hide()" class="filter-option-btn" [class.active]="filterType() === null">All Types</button>
-          <button *ngFor="let opt of typeFilterOptions" (click)="onFilterTypeChange(opt.value); opType.hide()" class="filter-option-btn" [class.active]="filterType() === opt.value">{{ opt.label }}</button>
-        </div>
-      </p-popover>
-
-      <p-popover #opRole styleClass="filter-overlay-premium">
-        <div class="w-48 p-2 flex flex-col gap-1">
-          <span class="text-[10px] font-bold text-gray-400 px-2 py-1 uppercase tracking-wider">Filter Role</span>
-          <button (click)="onFilterRoleChange(null); opRole.hide()" class="filter-option-btn" [class.active]="filterRole() === null">All Roles</button>
-          <button *ngFor="let opt of roleFilterOptions" (click)="onFilterRoleChange(opt.value); opRole.hide()" class="filter-option-btn" [class.active]="filterRole() === opt.value">{{ opt.label }}</button>
-        </div>
-      </p-popover>
-
 
       <!-- Add Button -->
       <button
@@ -64,22 +58,65 @@
     </div>
   </div>
 
+  <p-popover #opType styleClass="filter-overlay-premium">
+    <div class="flex w-48 flex-col gap-1 p-2">
+      <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400"
+        >Filter Type</span
+      >
+      <button
+        (click)="onFilterTypeChange(null); opType.hide()"
+        class="filter-option-btn"
+        [class.active]="filterType() === null">
+        All Types
+      </button>
+      <button
+        *ngFor="let opt of typeFilterOptions"
+        (click)="onFilterTypeChange(opt.value); opType.hide()"
+        class="filter-option-btn"
+        [class.active]="filterType() === opt.value">
+        {{ opt.label }}
+      </button>
+    </div>
+  </p-popover>
+
+  <p-popover #opRole styleClass="filter-overlay-premium">
+    <div class="flex w-48 flex-col gap-1 p-2">
+      <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400"
+        >Filter Role</span
+      >
+      <button
+        (click)="onFilterRoleChange(null); opRole.hide()"
+        class="filter-option-btn"
+        [class.active]="filterRole() === null">
+        All Roles
+      </button>
+      <button
+        *ngFor="let opt of roleFilterOptions"
+        (click)="onFilterRoleChange(opt.value); opRole.hide()"
+        class="filter-option-btn"
+        [class.active]="filterRole() === opt.value">
+        {{ opt.label }}
+      </button>
+    </div>
+  </p-popover>
+
   <!-- Space cards grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     <app-space-card
       *ngFor="let space of spaces()"
       [space]="space"
       [open]="true"
       (click)="onSpaceSelect(space)"
-      class="hover:scale-[1.02] transition-transform duration-200 cursor-pointer"
-    />
+      class="cursor-pointer transition-transform duration-200 hover:scale-[1.02]" />
   </div>
 
   <!-- Empty state -->
-  <div *ngIf="spaces().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-100 mt-4">
-    <i class="pi pi-box text-5xl text-gray-200 mb-4"></i>
-    <p class="text-gray-400 font-medium">No workspaces found</p>
-    <button (click)="addSpace()" class="mt-4 text-black font-bold hover:underline">
+  <div
+    *ngIf="spaces().length === 0"
+    class="mt-4 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 bg-white py-20">
+    <i class="pi pi-box mb-4 text-5xl text-gray-200"></i>
+    <p class="font-medium text-gray-400">No workspaces found</p>
+    <button (click)="addSpace()" class="mt-4 font-bold text-black hover:underline">
       Create your first workspace
     </button>
   </div>

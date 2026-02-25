@@ -17,7 +17,7 @@ export class LoadingService {
     this.loadingMapSignal.update(map => {
       const newMap = new Map(map);
       const currentCount = newMap.get(key) || 0;
-      
+
       if (isLoading) {
         newMap.set(key, currentCount + 1);
       } else {
@@ -28,7 +28,7 @@ export class LoadingService {
           newMap.set(key, newCount);
         }
       }
-      
+
       return newMap;
     });
   }

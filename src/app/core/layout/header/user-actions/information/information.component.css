@@ -1,44 +1,48 @@
 :host ::ng-deep .invitations-overlay-premium {
-    padding: 0;
-    border-radius: 12px;
-    border: 1px solid #f1f5f9;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 :host ::ng-deep .invitations-overlay-premium .p-overlaypanel-content {
-    padding: 0;
+  padding: 0;
 }
 
 :host ::ng-deep .p-menu {
-    border-radius: 12px;
-    padding: 0.5rem;
-    border: 1px solid #f1f5f9;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  border-radius: 12px;
+  padding: 0.5rem;
+  border: 1px solid #f1f5f9;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 :host ::ng-deep .p-menu .p-menuitem-link {
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    transition: all 0.2s;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s;
 }
 
 :host ::ng-deep .p-menu .p-menuitem-link:hover {
-    background-color: #fff7ed;
+  background-color: #fff7ed;
 }
 
 :host ::ng-deep .p-menu .p-menuitem-link:hover .p-menuitem-icon,
 :host ::ng-deep .p-menu .p-menuitem-link:hover .p-menuitem-text {
-    color: #f97316;
+  color: #f97316;
 }
 
 :host ::ng-deep .p-menu .p-menuitem-badge {
-    background: #f97316 !important;
-    color: white !important;
-    font-size: 10px;
-    font-weight: bold;
-    border-radius: 999px;
-    min-width: 18px;
-    height: 18px;
-    line-height: 18px;
-    padding: 0 5px;
+  background: #f97316 !important;
+  color: white !important;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 5px;
 }

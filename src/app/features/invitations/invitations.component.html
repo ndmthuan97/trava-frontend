@@ -1,13 +1,15 @@
-<div class="max-w-2xl mx-auto px-4 py-12">
+<div class="mx-auto max-w-2xl px-4 py-12">
   <!-- Header Section -->
   <div class="mb-10 flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Invitations</h1>
-      <p class="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">Pending workspace invitations</p>
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Invitations</h1>
+      <p class="mt-1 text-xs font-bold uppercase tracking-widest text-gray-400">
+        Pending workspace invitations
+      </p>
     </div>
     <button
       (click)="viewHistory()"
-      class="flex h-[36px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-95 shadow-sm">
+      class="flex h-[36px] items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-xs font-bold text-gray-600 shadow-sm transition-all hover:bg-gray-50 active:scale-95">
       <i class="pi pi-history text-[10px]"></i>
       View History
     </button>
@@ -16,27 +18,30 @@
   <!-- Content Section -->
   <div class="space-y-4">
     <!-- Loading State -->
-    <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
-      <i class="pi pi-spin pi-spinner text-orange-600 text-3xl mb-4"></i>
+    <div
+      *ngIf="isLoading()"
+      class="flex flex-col items-center justify-center rounded-3xl border border-gray-100 bg-white py-20 shadow-sm">
+      <i class="pi pi-spin pi-spinner mb-4 text-3xl text-orange-600"></i>
       <p class="text-sm font-medium text-gray-500">Fetching invitations...</p>
     </div>
 
     <!-- Invitations List -->
     <ng-container *ngIf="!isLoading()">
       <div *ngFor="let item of invitations()" class="invitation-item-card">
-        <div class="p-4 sm:p-5 flex gap-4">
+        <div class="flex gap-4 p-4 sm:p-5">
           <!-- Space Avatar -->
           <div class="flex-shrink-0">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-orange-50 border-2 border-orange-100 flex items-center justify-center shadow-inner">
+            <div
+              class="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-orange-100 bg-orange-50 shadow-inner sm:h-20 sm:w-20">
               <span class="text-3xl font-extrabold text-orange-500">
-                {{ item.spaceName?.substring(0, 1)?.toUpperCase() || 'S' }}
+                {{ item.spaceName.substring(0, 1).toUpperCase() || 'S' }}
               </span>
             </div>
           </div>
 
           <!-- Content Info -->
-          <div class="flex-1 min-w-0 pt-1">
-            <h3 class="text-base font-bold text-gray-900 truncate leading-tight">
+          <div class="min-w-0 flex-1 pt-1">
+            <h3 class="truncate text-base font-bold leading-tight text-gray-900">
               {{ item.spaceName || 'Workspace' }}
             </h3>
 
@@ -49,7 +54,7 @@
                 styleClass="w-7 h-7 bg-orange-100 text-orange-600">
               </p-avatar>
               <span
-                class="text-[13px] font-bold text-gray-900 cursor-default"
+                class="cursor-default text-[13px] font-bold text-gray-900"
                 [pTooltip]="item.inviterEmail || 'No email available'"
                 tooltipPosition="top">
                 {{ item.inviterName || 'Someone' }}
@@ -60,31 +65,36 @@
         </div>
 
         <!-- Action Row -->
-        <div class="px-4 pb-4 sm:px-5 sm:pb-5 flex gap-2">
+        <div class="flex gap-2 px-4 pb-4 sm:px-5 sm:pb-5">
           <button
             (click)="respond(item, InvitationStatus.Accepted)"
-            class="flex-1 h-10 rounded-xl bg-orange-600 text-white text-xs font-bold hover:bg-orange-700 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-orange-100">
+            class="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-orange-600 text-xs font-bold text-white shadow-lg shadow-orange-100 transition-all hover:bg-orange-700 active:scale-95">
             <i class="pi pi-check text-xs"></i> Accept
           </button>
           <button
             (click)="respond(item, InvitationStatus.Rejected)"
-            class="w-10 h-10 flex-shrink-0 rounded-xl bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all active:scale-95 flex items-center justify-center"
-            pTooltip="Reject" tooltipPosition="top">
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition-all hover:bg-red-50 hover:text-red-500 active:scale-95"
+            pTooltip="Reject"
+            tooltipPosition="top">
             <i class="pi pi-times"></i>
           </button>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="invitations().length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm text-center px-6">
-        <div class="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center mb-6">
-          <i class="pi pi-envelope text-orange-200 text-4xl"></i>
+      <div
+        *ngIf="invitations().length === 0"
+        class="flex flex-col items-center justify-center rounded-3xl border border-gray-100 bg-white px-6 py-20 text-center shadow-sm">
+        <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-orange-50">
+          <i class="pi pi-envelope text-4xl text-orange-200"></i>
         </div>
         <h2 class="text-xl font-bold text-gray-900">No Pending Requests</h2>
-        <p class="text-sm text-gray-500 mt-2 max-w-xs mx-auto">When someone invites you to a space, it will appear here for you to accept!</p>
+        <p class="mx-auto mt-2 max-w-xs text-sm text-gray-500">
+          When someone invites you to a space, it will appear here for you to accept!
+        </p>
         <button
           (click)="goBack()"
-          class="mt-8 px-6 py-3 rounded-2xl bg-orange-600 text-white text-sm font-bold hover:bg-orange-700 transition-all shadow-lg shadow-orange-100">
+          class="mt-8 rounded-2xl bg-orange-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-orange-100 transition-all hover:bg-orange-700">
           Go Home
         </button>
       </div>

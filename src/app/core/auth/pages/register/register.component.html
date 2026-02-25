@@ -64,14 +64,16 @@
           label="Sign Up"
           [disabled]="!registerForm.valid"
           [loading]="isLoading()"
-          iconPos="right" 
+          iconPos="right"
           styleClass="w-full"
           severity="warn" />
 
         <!-- Sign In Link -->
         <div class="mt-6 text-center">
           <span class="text-sm text-gray-600">Already have an account? </span>
-          <a routerLink="/auth/login" class="text-sm font-medium text-orange-600 hover:text-orange-700">
+          <a
+            routerLink="/auth/login"
+            class="text-sm font-medium text-orange-600 hover:text-orange-700">
             Sign in
           </a>
         </div>

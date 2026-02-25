@@ -26,10 +26,12 @@ export class InformationComponent implements OnInit {
 
   ngOnInit() {
     // Only fetch pending invitations to decide badge visibility
-    this.spaceInvitationService.getMyInvitations({ Status: InvitationStatus.Pending, PageIndex: 1, PageSize: 50 }).subscribe(result => {
-      this.pendingCount = result?.count ?? 0;
-      this.updateMenuItems();
-    });
+    this.spaceInvitationService
+      .getMyInvitations({ Status: InvitationStatus.Pending, PageIndex: 1, PageSize: 50 })
+      .subscribe(result => {
+        this.pendingCount = result?.count ?? 0;
+        this.updateMenuItems();
+      });
   }
 
   updateMenuItems() {
@@ -50,7 +52,7 @@ export class InformationComponent implements OnInit {
         badgeStyleClass: 'p-badge-warn',
         command: () => {
           this.router.navigate(['/invitations']);
-        }
+        },
       },
       {
         label: 'Logout',

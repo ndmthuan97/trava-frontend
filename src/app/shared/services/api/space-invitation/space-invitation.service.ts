@@ -26,47 +26,73 @@ export class SpaceInvitationService {
     SortDirection?: string;
     SearchTerm?: string;
   }): Observable<Pagination<Invitation> | null> {
-    return this.requestService.get<Pagination<Invitation>>(`${this.INVITATION_API_URL}/my-invitations`, params).pipe(
-      map((res: ApiResponse<Pagination<Invitation>>) => {
-        if (res.statusCode === StatusCode.Success && res.data) {
-          return res.data;
-        }
-        return null;
-      }),
-      catchError(() => of(null))
-    );
+    return this.requestService
+      .get<Pagination<Invitation>>(`${this.INVITATION_API_URL}/my-invitations`, params)
+      .pipe(
+        map((res: ApiResponse<Pagination<Invitation>>) => {
+          if (res.statusCode === StatusCode.Success && res.data) {
+            return res.data;
+          }
+          return null;
+        }),
+        catchError(() => of(null))
+      );
   }
 
-  createInvitation(payload: { spaceId: string; invitedUserId: string; expiredAt?: string }): Observable<boolean> {
+  createInvitation(payload: {
+    spaceId: string;
+    invitedUserId: string;
+    expiredAt?: string;
+  }): Observable<boolean> {
     return this.requestService.post<any>(this.INVITATION_API_URL, payload).pipe(
       map(res => {
-        if (res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Created || res.statusCode === 2001) {
+        if (
+          res.statusCode === StatusCode.Success ||
+          res.statusCode === StatusCode.Created ||
+          res.statusCode === 2001
+        ) {
           this.toastService.success('Invitation sent', 'User has been invited to the space.');
           return true;
         }
         return false;
       }),
       catchError(() => {
-        this.toastService.error('Failed to send invitation', 'An error occurred. Please try again later.');
+        this.toastService.error(
+          'Failed to send invitation',
+          'An error occurred. Please try again later.'
+        );
         return of(false);
       })
     );
   }
 
   updateInvitationStatus(invitationId: string, status: InvitationStatus): Observable<boolean> {
-    return this.requestService.put<any>(`${this.INVITATION_API_URL}/${invitationId}`, { invitationStatus: status }).pipe(
-      map(res => {
-        if (res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Updated || res.statusCode === 2000 || res.statusCode === 2002) {
-          const statusText = status === InvitationStatus.Accepted ? 'accepted' : 'rejected';
-          this.toastService.success(`Invitation ${statusText}`, `You have ${statusText} the invitation.`);
-          return true;
-        }
-        return false;
-      }),
-      catchError(() => {
-        this.toastService.error('Failed to update invitation', 'An error occurred. Please try again later.');
-        return of(false);
-      })
-    );
+    return this.requestService
+      .put<any>(`${this.INVITATION_API_URL}/${invitationId}`, { invitationStatus: status })
+      .pipe(
+        map(res => {
+          if (
+            res.statusCode === StatusCode.Success ||
+            res.statusCode === StatusCode.Updated ||
+            res.statusCode === 2000 ||
+            res.statusCode === 2002
+          ) {
+            const statusText = status === InvitationStatus.Accepted ? 'accepted' : 'rejected';
+            this.toastService.success(
+              `Invitation ${statusText}`,
+              `You have ${statusText} the invitation.`
+            );
+            return true;
+          }
+          return false;
+        }),
+        catchError(() => {
+          this.toastService.error(
+            'Failed to update invitation',
+            'An error occurred. Please try again later.'
+          );
+          return of(false);
+        })
+      );
   }
 }

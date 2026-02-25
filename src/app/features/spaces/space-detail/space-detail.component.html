@@ -1,53 +1,69 @@
-<div class="px-4 py-8 max-w-7xl mx-auto">
+<div class="mx-auto max-w-7xl px-4 py-8">
   <!-- Header -->
   <div class="mb-4" *ngIf="spaceInfo() as space">
-    <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
-      <span routerLink="/spaces" class="hover:text-blue-600 cursor-pointer transition-colors">Spaces</span>
+    <div class="mb-2 flex items-center gap-2 text-xs text-gray-500">
+      <span routerLink="/spaces" class="cursor-pointer transition-colors hover:text-blue-600"
+        >Spaces</span
+      >
       <i class="pi pi-chevron-right text-[8px] opacity-40"></i>
       <span class="font-medium text-gray-900">{{ space.name }}</span>
     </div>
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <div class="h-12 w-12 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-sm shadow-orange-200">
+        <div
+          class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-600 text-white shadow-sm shadow-orange-200">
           <i class="pi pi-folder-fill text-[20px]"></i>
         </div>
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ space.name }}</h1>
-          <p class="text-xs text-gray-500 mt-0.5">{{ space.description || 'No description provided for this space' }}</p>
+          <h1 class="text-2xl font-bold tracking-tight text-gray-900">{{ space.name }}</h1>
+          <p class="mt-0.5 text-xs text-gray-500">
+            {{ space.description || 'No description provided for this space' }}
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Navigation & Action Bar -->
-    <div class="flex items-end justify-between mt-4 border-b border-gray-100">
+    <div class="mt-4 flex items-end justify-between border-b border-gray-100">
       <!-- Tabs (Left) -->
       <div class="flex items-center gap-6">
-        <button 
-          class="pb-2 text-sm font-medium transition-all" 
-          [class.text-orange-600]="!showMembers()" 
-          [class.border-b-2]="!showMembers()" 
-          [class.border-orange-600]="!showMembers()"
-          [class.text-gray-500]="showMembers()"
+        <button
+          class="pb-2 text-sm font-medium transition-all"
+          [class.text-orange-600]="activeTab() === 'list'"
+          [class.border-b-2]="activeTab() === 'list'"
+          [class.border-orange-600]="activeTab() === 'list'"
+          [class.text-gray-500]="activeTab() !== 'list'"
           (click)="showTasks()">
           <i class="pi pi-list mr-1.5 text-xs"></i>List
         </button>
-        <button 
-          class="pb-2 text-sm font-medium transition-all" 
-          [class.text-orange-600]="showMembers()" 
-          [class.border-b-2]="showMembers()" 
-          [class.border-orange-600]="showMembers()"
-          [class.text-gray-500]="!showMembers()"
+        <button
+          class="pb-2 text-sm font-medium transition-all"
+          [class.text-orange-600]="activeTab() === 'members'"
+          [class.border-b-2]="activeTab() === 'members'"
+          [class.border-orange-600]="activeTab() === 'members'"
+          [class.text-gray-500]="activeTab() !== 'members'"
           (click)="toggleView()">
           <i class="pi pi-users mr-1.5 text-xs"></i>Members
+        </button>
+        <button
+          *ngIf="isSpaceOwner()"
+          class="pb-2 text-sm font-medium transition-all"
+          [class.text-orange-600]="activeTab() === 'summary'"
+          [class.border-b-2]="activeTab() === 'summary'"
+          [class.border-orange-600]="activeTab() === 'summary'"
+          [class.text-gray-500]="activeTab() !== 'summary'"
+          (click)="showSummary()">
+          <i class="pi pi-chart-bar mr-1.5 text-xs"></i>Summary
         </button>
       </div>
 
       <!-- Actions (Right) -->
       <div class="flex items-center gap-2 pb-2">
         <!-- Task Actions -->
-        <ng-container *ngIf="!showMembers()">
-          <div class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
-            <i class="pi pi-search text-gray-400 text-[10px]"></i>
+        <ng-container *ngIf="activeTab() === 'list'">
+          <div
+            class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
+            <i class="pi pi-search text-[10px] text-gray-400"></i>
             <input
               type="text"
               [ngModel]="taskSearchTerm()"
@@ -56,47 +72,39 @@
               class="w-48 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none" />
           </div>
           <!-- Status Filter -->
-          <button 
+          <button
             (click)="opStatus.toggle($event)"
-            class="flex h-[36px] w-[100px] items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-orange-300 transition-all active:scale-95">
+            class="flex h-[36px] items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition-all hover:border-orange-300 hover:bg-gray-50 active:scale-95 min-w-[100px]">
             <i class="pi pi-check-circle text-[10px]"></i>
             <span>Status</span>
-            <span *ngIf="filterStatus() !== null" class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white">1</span>
-            <i class="pi pi-chevron-down text-[8px] ml-1 opacity-50"></i>
+            <span
+              *ngIf="filterStatus() !== null"
+              class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white"
+              >1</span
+            >
+            <i class="pi pi-chevron-down ml-1 text-[8px] opacity-50"></i>
           </button>
 
           <!-- Priority Filter -->
-          <button 
+          <button
             (click)="opPriority.toggle($event)"
-            class="flex h-[36px] w-[100px] items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:border-orange-300 transition-all active:scale-95">
+            class="flex h-[36px] items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-600 transition-all hover:border-orange-300 hover:bg-gray-50 active:scale-95 min-w-[100px]">
             <i class="pi pi-bolt text-[10px]"></i>
             <span>Priority</span>
-            <span *ngIf="filterPriority() !== null" class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white">1</span>
-            <i class="pi pi-chevron-down text-[8px] ml-1 opacity-50"></i>
+            <span
+              *ngIf="filterPriority() !== null"
+              class="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[8px] text-white"
+              >1</span
+            >
+            <i class="pi pi-chevron-down ml-1 text-[8px] opacity-50"></i>
           </button>
-
-
-          <p-popover #opStatus styleClass="filter-overlay-premium">
-            <div class="w-48 p-2 flex flex-col gap-1">
-              <span class="text-[10px] font-bold text-gray-400 px-2 py-1 uppercase tracking-wider">Filter Status</span>
-              <button (click)="onFilterStatusChange(null); opStatus.hide()" class="filter-option-btn" [class.active]="filterStatus() === null">All Status</button>
-              <button *ngFor="let opt of statusFilterOptions" (click)="onFilterStatusChange(opt.value); opStatus.hide()" class="filter-option-btn" [class.active]="filterStatus() === opt.value">{{ opt.label }}</button>
-            </div>
-          </p-popover>
-
-          <p-popover #opPriority styleClass="filter-overlay-premium">
-            <div class="w-48 p-2 flex flex-col gap-1">
-              <span class="text-[10px] font-bold text-gray-400 px-2 py-1 uppercase tracking-wider">Filter Priority</span>
-              <button (click)="onFilterPriorityChange(null); opPriority.hide()" class="filter-option-btn" [class.active]="filterPriority() === null">All Priority</button>
-              <button *ngFor="let opt of priorityFilterOptions" (click)="onFilterPriorityChange(opt.value); opPriority.hide()" class="filter-option-btn" [class.active]="filterPriority() === opt.value">{{ opt.label }}</button>
-            </div>
-          </p-popover>
         </ng-container>
 
         <!-- Member Actions -->
-        <ng-container *ngIf="showMembers()">
-          <div class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
-            <i class="pi pi-search text-gray-400 text-[10px]"></i>
+        <ng-container *ngIf="activeTab() === 'members'">
+          <div
+            class="flex h-[36px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 transition-all focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-50">
+            <i class="pi pi-search text-[10px] text-gray-400"></i>
             <input
               type="text"
               [ngModel]="memberSearchTerm()"
@@ -104,23 +112,75 @@
               placeholder="Search members..."
               class="w-48 bg-transparent text-xs text-gray-900 placeholder-gray-400 focus:outline-none" />
           </div>
-          <button 
+          <button
             *ngIf="isSpaceOwner()"
-            class="flex h-[36px] items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-4 text-xs font-bold text-orange-600 hover:bg-orange-100 transition-all active:scale-95 shadow-sm shadow-orange-100/50"
+            class="flex h-[36px] items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-4 text-xs font-bold text-orange-600 shadow-sm shadow-orange-100/50 transition-all hover:bg-orange-100 active:scale-95"
             (click)="onInviteMember()">
             <i class="pi pi-user-plus text-[10px]"></i>
             <span>Invite</span>
           </button>
         </ng-container>
+
+        <!-- Summary Actions -->
+        <ng-container *ngIf="activeTab() === 'summary'">
+          <button
+            class="flex h-[36px] items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 active:scale-95"
+            (click)="getSpaceInfo(spaceId()!)">
+            <i class="pi pi-refresh text-[10px]"></i>
+            <span>Refresh Stats</span>
+          </button>
+        </ng-container>
       </div>
     </div>
+
+    <p-popover #opStatus styleClass="filter-overlay-premium">
+      <div class="flex w-48 flex-col gap-1 p-2">
+        <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400"
+          >Filter Status</span
+        >
+        <button
+          (click)="onFilterStatusChange(null); opStatus.hide()"
+          class="filter-option-btn"
+          [class.active]="filterStatus() === null">
+          All Status
+        </button>
+        <button
+          *ngFor="let opt of statusFilterOptions"
+          (click)="onFilterStatusChange(opt.value); opStatus.hide()"
+          class="filter-option-btn"
+          [class.active]="filterStatus() === opt.value">
+          {{ opt.label }}
+        </button>
+      </div>
+    </p-popover>
+
+    <p-popover #opPriority styleClass="filter-overlay-premium">
+      <div class="flex w-48 flex-col gap-1 p-2">
+        <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400"
+          >Filter Priority</span
+        >
+        <button
+          (click)="onFilterPriorityChange(null); opPriority.hide()"
+          class="filter-option-btn"
+          [class.active]="filterPriority() === null">
+          All Priority
+        </button>
+        <button
+          *ngFor="let opt of priorityFilterOptions"
+          (click)="onFilterPriorityChange(opt.value); opPriority.hide()"
+          class="filter-option-btn"
+          [class.active]="filterPriority() === opt.value">
+          {{ opt.label }}
+        </button>
+      </div>
+    </p-popover>
   </div>
 
   <!-- Content Area -->
-  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8">
+  <div class="mb-8 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
     <!-- Tasks Table -->
     <p-table
-      *ngIf="!showMembers()"
+      *ngIf="activeTab() === 'list'"
       [value]="tasks()"
       [rows]="10"
       [paginator]="tasks().length > 10"
@@ -129,64 +189,93 @@
       [tableStyle]="{ 'min-width': '70rem' }">
       <ng-template pTemplate="header">
         <tr class="!border-y !border-gray-100">
-          <th class="w-[28%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider" (click)="toggleSort('title')">
-            <div class="flex items-center gap-1 cursor-pointer">
-              Title
-              <i class="pi text-[8px]" [class.pi-sort-alt]="sortBy() !== 'title'" [class.pi-sort-amount-up]="sortBy() === 'title' && sortDirection() === 'asc'" [class.pi-sort-amount-down]="sortBy() === 'title' && sortDirection() === 'desc'"></i>
-            </div>
+          <th
+            class="w-[28%] !bg-white !py-3 pl-4 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Title
           </th>
-          <th class="w-[16%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Status</th>
-          <th class="w-[20%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Assignee</th>
-          <th class="w-[20%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Due date</th>
-          <th class="w-[16%] !bg-white !py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Priority</th>
+          <th
+            class="w-[16%] !bg-white !py-3 text-center text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Status
+          </th>
+          <th
+            class="w-[20%] !bg-white !py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Assignee
+          </th>
+          <th
+            class="w-[20%] !bg-white !py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Due date
+          </th>
+          <th
+            class="w-[16%] !bg-white !py-3 text-center text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Priority
+          </th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-task let-i="rowIndex">
-        <tr class="group !border-b !border-gray-50 hover:bg-gray-50/50 cursor-pointer" (click)="onViewTask(task)">
+        <tr
+          class="group cursor-pointer !border-b !border-gray-50 hover:bg-gray-50/50"
+          (click)="onViewTask(task)">
           <td class="!py-3">
             <div class="max-w-[400px] truncate" [pTooltip]="task.title" tooltipPosition="top">
-              <span class="text-xs font-semibold text-gray-700 leading-tight">{{ task.title }}</span>
+              <span class="text-xs font-semibold leading-tight text-gray-700">{{
+                task.title
+              }}</span>
             </div>
           </td>
           <td class="!py-3 text-center">
-            <div (click)="isSpaceOwner() ? statusOverlay.toggle($event) : null; $event.stopPropagation()" class="inline-block">
-              <div 
-                [class]="'inline-flex items-center justify-center w-24 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + 
-                  (task.status === 2 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 
-                   task.status === 1 ? 'bg-blue-50 text-blue-700 border-blue-100' : 
-                   'bg-gray-50 text-gray-600 border-gray-100')">
-                {{ getStatusLabel(task.status) }}
-              </div>
+            <div
+              [class]="
+                'inline-flex w-24 items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ' +
+                (task.status === 2
+                  ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
+                  : task.status === 1
+                    ? 'border-blue-100 bg-blue-50 text-blue-700'
+                    : 'border-gray-100 bg-gray-50 text-gray-600')
+              ">
+              {{ getStatusLabel(task.status) }}
             </div>
-            <p-popover #statusOverlay>
-              <div class="flex flex-col gap-1 p-1">
-                <button *ngFor="let option of statusOptions" (click)="onStatusChange(task, option.value); statusOverlay.hide()" class="px-3 py-1.5 text-left text-xs hover:bg-gray-100 rounded transition-colors" [class.bg-gray-50]="task.status === option.value">{{ option.label }}</button>
-              </div>
-            </p-popover>
           </td>
           <td class="!py-3">
             <div class="flex items-center gap-2" *ngIf="task.assignedUser; else unassigned">
-              <p-avatar [image]="task.assignedUser.avatarUrl" shape="circle" styleClass="w-5 h-5 border border-gray-100 shadow-sm"></p-avatar>
-              <span class="text-xs text-gray-600 truncate max-w-[140px]">{{ task.assignedUser.fullName }}</span>
+              <p-avatar
+                [image]="task.assignedUser.avatarUrl || undefined"
+                shape="circle"
+                styleClass="w-5 h-5 border border-gray-100 shadow-sm"></p-avatar>
+              <span class="max-w-[140px] truncate text-xs text-gray-600">{{
+                task.assignedUser.fullName
+              }}</span>
             </div>
-            <ng-template #unassigned><span class="text-xs text-gray-300 italic">Unassigned</span></ng-template>
+            <ng-template #unassigned
+              ><span class="text-xs italic text-gray-300">None</span></ng-template
+            >
           </td>
           <td class="!py-3">
-            <div *ngIf="task.dueDate; else noDate" class="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-orange-100 bg-orange-50/50 text-orange-700">
+            <div
+              *ngIf="task.dueDate; else noDate"
+              class="inline-flex items-center gap-1.5 rounded border border-orange-100 bg-orange-50/50 px-2 py-1 text-orange-700">
               <i class="pi pi-clock text-[9px]"></i>
-              <span class="text-[10px] whitespace-nowrap font-medium">{{ task.dueDate | date: 'dd/MM/yyyy, HH:mm' }}</span>
+              <span class="whitespace-nowrap text-[10px] font-medium">{{
+                task.dueDate | date: 'dd/MM/yyyy, HH:mm'
+              }}</span>
             </div>
             <ng-template #noDate><span class="text-xs text-gray-300">-</span></ng-template>
           </td>
           <td class="!py-3">
             <div class="flex justify-center">
-              <div [class]="'inline-flex items-center justify-center w-24 gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + 
-                (task.priority === 4 ? 'bg-rose-50 text-rose-600 border-rose-100' : 
-                 task.priority === 3 ? 'bg-orange-50 text-orange-600 border-orange-100' : 
-                 task.priority === 2 ? 'bg-blue-50 text-blue-600 border-blue-100' : 
-                 task.priority === 1 ? 'bg-sky-50 text-sky-400 border-sky-100' :
-                 'bg-gray-50 text-gray-400 border-gray-100')">
+              <div
+                [class]="
+                  'inline-flex w-24 items-center justify-center gap-1.5 rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ' +
+                  (task.priority === 4
+                    ? 'border-rose-100 bg-rose-50 text-rose-600'
+                    : task.priority === 3
+                      ? 'border-orange-100 bg-orange-50 text-orange-600'
+                      : task.priority === 2
+                        ? 'border-blue-100 bg-blue-50 text-blue-600'
+                        : task.priority === 1
+                          ? 'border-sky-100 bg-sky-50 text-sky-400'
+                          : 'border-gray-100 bg-gray-50 text-gray-400')
+                ">
                 <i class="pi pi-angle-double-up text-[10px]" *ngIf="task.priority === 4"></i>
                 <i class="pi pi-angle-up text-[10px]" *ngIf="task.priority === 3"></i>
                 <i class="pi pi-minus text-[10px]" *ngIf="task.priority === 2"></i>
@@ -200,13 +289,27 @@
       </ng-template>
 
       <ng-template pTemplate="emptymessage">
-        <tr><td colspan="10" class="py-12 text-center text-gray-500"><div class="flex flex-col items-center gap-2"><i class="pi pi-list text-4xl text-gray-300"></i><span class="text-lg">No tasks found</span><button class="mt-2 text-sm font-medium text-orange-600 hover:text-orange-700" (click)="openCreateTaskDialog()">Create your first task</button></div></td></tr>
+        <tr>
+          <td colspan="10" class="py-12 text-center text-gray-500">
+            <div class="flex flex-col items-center gap-2">
+              <i class="pi pi-list text-4xl text-gray-300"></i
+              ><span class="text-lg">No tasks found</span
+              ><button
+                class="mt-2 text-sm font-medium text-orange-600 hover:text-orange-700"
+                (click)="openCreateTaskDialog()">
+                Create your first task
+              </button>
+            </div>
+          </td>
+        </tr>
       </ng-template>
     </p-table>
-    
+
     <!-- Custom Footer for Table -->
-    <div class="border-t border-gray-50 p-2" *ngIf="!showMembers()">
-      <button class="flex items-center gap-2 rounded px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition-colors" (click)="openCreateTaskDialog()">
+    <div class="border-t border-gray-50 p-2" *ngIf="activeTab() === 'list'">
+      <button
+        class="flex items-center gap-2 rounded px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
+        (click)="openCreateTaskDialog()">
         <i class="pi pi-plus text-[10px]"></i>
         <span>Create</span>
       </button>
@@ -214,7 +317,7 @@
 
     <!-- Members Table -->
     <p-table
-      *ngIf="showMembers()"
+      *ngIf="activeTab() === 'members'"
       [value]="spaceMembers()"
       [rows]="10"
       [paginator]="spaceMembers().length > 10"
@@ -223,41 +326,68 @@
       [tableStyle]="{ 'min-width': '60rem' }">
       <ng-template pTemplate="header">
         <tr class="!border-y !border-gray-100">
-          <th class="w-[40%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">FullName</th>
-          <th class="w-[40%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Email</th>
-          <th class="w-[20%] !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Role</th>
-          <th *ngIf="isSpaceOwner()" class="w-20 !bg-white !py-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-right pr-6">Actions</th>
+          <th
+            class="w-[40%] !bg-white !py-4 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            FullName
+          </th>
+          <th
+            class="w-[40%] !bg-white !py-4 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Email
+          </th>
+          <th
+            class="w-[20%] !bg-white !py-4 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Role
+          </th>
+          <th
+            *ngIf="isSpaceOwner()"
+            class="w-20 !bg-white !py-4 pr-6 text-right text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Actions
+          </th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-member>
-        <tr class="group !border-b !border-gray-50 hover:bg-gray-50/50 transition-all">
+        <tr class="group !border-b !border-gray-50 transition-all hover:bg-gray-50/50">
           <td class="!py-4">
             <div class="flex items-center gap-3">
-              <p-avatar 
-                [image]="member.avatarUrl" 
-                [label]="!member.avatarUrl ? (member.fullName?.substring(0, 1) || 'U') : ''" 
-                shape="circle" 
+              <p-avatar
+                [image]="member.avatarUrl || undefined"
+                [label]="!member.avatarUrl ? (member.fullName || 'U').substring(0, 1) : ''"
+                shape="circle"
                 styleClass="w-8 h-8 border border-gray-100 shadow-sm text-xs font-bold bg-orange-50 text-orange-600"></p-avatar>
-              <div class="flex flex-col min-w-0 text-left">
-                <span class="text-xs font-bold text-gray-900 truncate">{{ member.fullName || 'User' }}</span>
+              <div class="flex min-w-0 flex-col text-left">
+                <span class="truncate text-xs font-bold text-gray-900">{{
+                  member.fullName || 'User'
+                }}</span>
               </div>
             </div>
           </td>
           <td class="!py-4">
-            <span class="text-xs text-gray-600 font-medium">{{ member.email }}</span>
+            <span class="text-xs font-medium text-gray-600">{{ member.email }}</span>
           </td>
           <td class="!py-4">
-            <div 
-              [class]="'inline-flex items-center justify-center w-24 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ' + (member.role === 0 ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-gray-100 text-gray-600 border-gray-200')">
+            <div
+              [class]="
+                'inline-flex w-24 items-center justify-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ' +
+                (member.role === 0
+                  ? 'border-orange-100 bg-orange-50 text-orange-600'
+                  : 'border-gray-200 bg-gray-100 text-gray-600')
+              ">
               {{ getSpaceRoleLabel(member.role) }}
             </div>
           </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
-        <tr><td colspan="5" class="py-12 text-center text-gray-500">No members found</td></tr>
+        <tr>
+          <td colspan="5" class="py-12 text-center text-gray-500">No members found</td>
+        </tr>
       </ng-template>
     </p-table>
+
+    <!-- Summary View -->
+    <app-space-summary
+      *ngIf="activeTab() === 'summary' && spaceId()"
+      [spaceId]="spaceId()!"></app-space-summary>
   </div>
 
   <app-create-task
@@ -273,9 +403,13 @@
     [task]="selectedTask()"
     [spaceName]="spaceInfo()?.name || ''"
     [spaceMembers]="spaceMembers()"
+    [isSpaceOwner]="isSpaceOwner()"
+    [currentUserId]="currentUser()?.id"
+    [currentUser]="currentUser()"
     (edit)="onEditTask($event)"
     (delete)="onDeleteTask($event)"
-    (save)="onSaveTask($event)"></app-task-detail>
+    (save)="onSaveTask($event)"
+    (statusChange)="onStatusChange($event.task, $event.status)"></app-task-detail>
 
   <p-confirmDialog></p-confirmDialog>
 
@@ -287,47 +421,58 @@
     [draggable]="false"
     [resizable]="false"
     [style]="{ width: '450px' }"
-    styleClass="invite-member-dialog"
-  >
+    styleClass="invite-member-dialog">
     <div class="flex flex-col gap-6 py-2">
       <div class="flex flex-col gap-2">
         <label class="text-xs font-bold uppercase tracking-widest text-gray-400">Search User</label>
-        <div class="flex h-[44px] items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 transition-all focus-within:border-orange-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-50">
+        <div
+          class="flex h-[44px] items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 transition-all focus-within:border-orange-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-50">
           <i class="pi pi-search text-gray-400"></i>
           <input
             type="text"
             [ngModel]="userSearchTerm()"
             (ngModelChange)="userSearchTerm.set($event)"
             placeholder="Search by name or email..."
-            class="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
-          />
+            class="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none" />
         </div>
       </div>
 
       <div class="flex flex-col gap-3">
-        <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest">
-          {{ potentialMembers().length > 0 ? 'Results' : userSearchTerm().length >= 2 ? 'No users found' : 'Enter at least 2 characters' }}
+        <h5 class="text-xs font-bold uppercase tracking-widest text-gray-400">
+          {{
+            potentialMembers().length > 0
+              ? 'Results'
+              : userSearchTerm().length >= 2
+                ? 'No users found'
+                : 'Enter at least 2 characters'
+          }}
         </h5>
-        
+
         <div class="max-h-[300px] overflow-y-auto pr-1">
           <div class="flex flex-col gap-2">
             @for (user of potentialMembers(); track user.id) {
-            <div class="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-3 transition-all hover:border-orange-200 hover:bg-orange-50/30 group">
-              <div class="flex items-center gap-3">
-                <p-avatar [image]="user.avatarUrl" icon="pi pi-user" shape="circle" styleClass="w-10 h-10 border border-gray-100 shadow-sm"></p-avatar>
-                <div class="flex flex-col">
-                  <span class="text-sm font-bold text-gray-900">{{ user.fullName || 'User' }}</span>
-                  <span class="text-xs text-gray-500">{{ user.email }}</span>
+              <div
+                class="group flex items-center justify-between rounded-xl border border-gray-100 bg-white p-3 transition-all hover:border-orange-200 hover:bg-orange-50/30">
+                <div class="flex items-center gap-3">
+                  <p-avatar
+                    [image]="user.avatarUrl || undefined"
+                    icon="pi pi-user"
+                    shape="circle"
+                    styleClass="w-10 h-10 border border-gray-100 shadow-sm"></p-avatar>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-gray-900">{{
+                      user.fullName || 'User'
+                    }}</span>
+                    <span class="text-xs text-gray-500">{{ user.email }}</span>
+                  </div>
                 </div>
+                <button
+                  pButton
+                  icon="pi pi-plus"
+                  label="Invite"
+                  class="p-button-sm p-button-rounded p-button-outlined transition-all active:scale-95 group-hover:border-orange-600 group-hover:bg-orange-600 group-hover:text-white"
+                  (click)="sendInvitation(user)"></button>
               </div>
-              <button
-                pButton
-                icon="pi pi-plus"
-                label="Invite"
-                class="p-button-sm p-button-rounded p-button-outlined transition-all active:scale-95 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600"
-                (click)="sendInvitation(user)"
-              ></button>
-            </div>
             }
           </div>
         </div>
