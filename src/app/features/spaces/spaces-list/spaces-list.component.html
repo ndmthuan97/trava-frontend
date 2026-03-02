@@ -107,7 +107,24 @@
       [space]="space"
       [open]="true"
       (click)="onSpaceSelect(space)"
+      (edit)="onEditSpace($event)"
+      (delete)="onDeleteSpace($event)"
       class="cursor-pointer transition-transform duration-200 hover:scale-[1.02]" />
+  </div>
+
+  <!-- Paginator -->
+  <div class="mt-10" *ngIf="totalCount() > 0">
+    <p-paginator
+      (onPageChange)="onPageChange($event)"
+      [first]="(pageIndex() - 1) * pageSize()"
+      [rows]="pageSize()"
+      [totalRecords]="totalCount()"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} spaces"
+      [rowsPerPageOptions]="[8, 16, 32]"
+      dropdownStyleClass="paginator-dropdown-up"
+      dropdownAppendTo="body"
+      styleClass="px-0 py-4 bg-transparent border-t border-gray-100" />
   </div>
 
   <!-- Empty state -->
@@ -122,4 +139,13 @@
   </div>
 </div>
 
-<app-create-space [(visible)]="showAddSpaceDialog" (created)="loadSpaces()" />
+<app-create-space
+  [(visible)]="showAddSpaceDialog"
+  [spaceToEdit]="selectedSpaceToEdit()"
+  (created)="loadSpaces()" />
+
+<p-confirmDialog>
+  <ng-template pTemplate="message" let-message>
+    <div [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>

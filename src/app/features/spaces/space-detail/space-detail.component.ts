@@ -32,7 +32,9 @@ import { PopoverModule } from 'primeng/popover';
 import { DialogModule } from 'primeng/dialog';
 import { MenuModule } from 'primeng/menu';
 import { CheckboxModule } from 'primeng/checkbox';
+import { PaginatorModule } from 'primeng/paginator';
 import { SpaceInvitationService } from '../../../shared/services/api/space-invitation/space-invitation.service';
+import { SpaceType } from '../../../shared/models/enum/space-type.enum';
 
 @Component({
   selector: 'app-space-detail',
@@ -55,6 +57,7 @@ import { SpaceInvitationService } from '../../../shared/services/api/space-invit
     CheckboxModule,
     TaskDetailComponent,
     SpaceSummaryComponent,
+    PaginatorModule,
   ],
   templateUrl: './space-detail.component.html',
   styleUrl: './space-detail.component.css',
@@ -72,15 +75,23 @@ export class SpaceDetailComponent implements OnInit {
   public readonly SpaceRoleLabels = SpaceRoleLabels;
   public readonly TaskStatusLabels = TaskStatusLabels;
   public readonly TaskPriorityLabels = TaskPriorityLabels;
+  public readonly SpaceType = SpaceType;
 
   spaceId = signal<string | null>(null);
   spaceInfo = signal<Space | null>(null);
   // Mock tasks for the space
   tasks = signal<Task[]>([]);
+  taskTotalCount = signal<number>(0);
+  taskPageIndex = signal<number>(1);
+  taskPageSize = signal<number>(8);
 
   currentUser = this.userService.currentUser;
   isSpaceOwner = signal<boolean>(false);
   spaceMembers = signal<User[]>([]);
+  memberTotalCount = signal<number>(0);
+  memberPageIndex = signal<number>(1);
+  memberPageSize = signal<number>(8);
+
   activeTab = signal<'list' | 'members' | 'summary' | 'assigned'>('list');
 
   taskSearchTerm = signal<string>('');
@@ -162,6 +173,7 @@ export class SpaceDetailComponent implements OnInit {
     this.taskSearchSubject
       .pipe(debounceTime(200), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(term => {
+        this.taskPageIndex.set(1);
         this.taskSearchTerm.set(term);
         const id = this.spaceId();
         if (id) this.getTasksBySpace(id);
@@ -170,6 +182,7 @@ export class SpaceDetailComponent implements OnInit {
     this.memberSearchSubject
       .pipe(debounceTime(200), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(term => {
+        this.memberPageIndex.set(1);
         this.memberSearchTerm.set(term);
         const id = this.spaceId();
         if (id) this.getSpaceMembers(id);
@@ -187,14 +200,27 @@ export class SpaceDetailComponent implements OnInit {
   getSpaceMembers(spaceId: string) {
     const term = this.memberSearchTerm();
     this.spaceService
-      .getSpaceMembers({ spaceId, pageIndex: 1, pageSize: 100, SearchTerm: term })
-      .subscribe(members => {
-        this.spaceMembers.set(members);
+      .getSpaceMembers({
+        spaceId,
+        pageIndex: this.memberPageIndex(),
+        pageSize: this.memberPageSize(),
+        SearchTerm: term,
+      })
+      .subscribe(res => {
+        this.spaceMembers.set(res.items);
+        this.memberTotalCount.set(res.totalCount);
         // Re-map tasks if they are already loaded
         if (this.tasks().length > 0) {
           this.mapTasksWithAssignees(this.tasks());
         }
       });
+  }
+
+  onMemberPageChange(event: any) {
+    this.memberPageIndex.set(event.page + 1);
+    this.memberPageSize.set(event.rows);
+    const id = this.spaceId();
+    if (id) this.getSpaceMembers(id);
   }
 
   checkOwnership() {
@@ -225,9 +251,9 @@ export class SpaceDetailComponent implements OnInit {
 
     const params = {
       SpaceId: spaceId,
-      PageIndex: 1,
-      PageSize: 100,
-      IsPagingEnabled: false,
+      PageIndex: this.taskPageIndex(),
+      PageSize: this.taskPageSize(),
+      IsPagingEnabled: true,
       SearchTerm: this.taskSearchTerm(),
       SortBy: this.sortBy() || undefined,
       SortDirection: this.sortDirection() || undefined,
@@ -243,14 +269,22 @@ export class SpaceDetailComponent implements OnInit {
     }
 
     this.taskItemService.getTasksBySpace(params).subscribe({
-      next: (tasks: Task[] | null) => {
-        const tasksList = tasks ?? [];
+      next: res => {
+        const tasksList = res.items ?? [];
+        this.taskTotalCount.set(res.totalCount);
         this.mapTasksWithAssignees(tasksList);
       },
       error: (err: any) => {
         console.error('Error fetching tasks:', err);
       },
     });
+  }
+
+  onTaskPageChange(event: any) {
+    this.taskPageIndex.set(event.page + 1);
+    this.taskPageSize.set(event.rows);
+    const id = this.spaceId();
+    if (id) this.getTasksBySpace(id);
   }
 
   private mapTasksWithAssignees(tasksList: Task[]): void {
@@ -291,61 +325,26 @@ export class SpaceDetailComponent implements OnInit {
   }
 
   onSaveTask(updatedData: any) {
-    // If updatedData has createdAt or createdBy, it's likely a full result from TaskDetailComponent's own save
-    if (updatedData.id && (updatedData.createdAt || updatedData.createdBy)) {
-      this.onTaskCreated(); // Refresh the list
-      this.selectedTask.set(updatedData); // Sync the detail view
-      return;
-    }
-
-    if (updatedData.id) {
-      // Original logic for when save is triggered from elsewhere (like a full edit form)
-      const isOwner = this.isSpaceOwner();
-      const currentUserId = this.currentUser()?.id;
-      const isAssignee = updatedData.assignedUserId === currentUserId;
-
-      const startDate =
-        updatedData.startDate instanceof Date
-          ? updatedData.startDate.toISOString()
-          : updatedData.startDate;
-      const dueDate =
-        updatedData.dueDate instanceof Date
-          ? updatedData.dueDate.toISOString()
-          : updatedData.dueDate;
-
-      if (isOwner) {
-        const payload = {
-          title: updatedData.title,
-          description: updatedData.description,
-          status: updatedData.status,
-          priority: updatedData.priority,
-          point: updatedData.point || 0,
-          startDate,
-          dueDate,
-          assignedUserId: updatedData.assignedUserId,
-        };
-
-        this.taskItemService.updateTask(updatedData.id, payload).subscribe(result => {
-          if (result) {
-            this.onTaskCreated();
-            this.selectedTask.set(result);
-          }
-        });
-      } else if (isAssignee) {
-        const patchPayload = {
-          status: updatedData.status,
-          point: updatedData.point || 0,
-          startDate,
-          dueDate,
-        };
-
-        this.taskItemService.patchTask(updatedData.id, patchPayload).subscribe(result => {
-          if (result) {
-            this.onTaskCreated();
-            this.selectedTask.set(result);
-          }
-        });
+    // If updatedData.id exists, it's an update. 
+    // If it also has other fields like title/status, it's likely a complete result or a valid update set.
+    if (updatedData && updatedData.id) {
+      // If result is already coming from TaskDetailComponent (it handles its own save)
+      // we just need to refresh the list and update the selected task.
+      // We check for fields that wouldn't normally be in a partial update request but are in a result.
+      const isResult = updatedData.createdBy || updatedData.createdAt || updatedData.id;
+      
+      if (isResult) {
+        this.onTaskCreated(); // Refresh the list
+        // If we have a selected task, update it with the new data
+        const current = this.selectedTask();
+        if (current && current.id === updatedData.id) {
+          this.selectedTask.set({ ...current, ...updatedData });
+        }
       }
+
+      // If for some reason it's NOT a result (e.g. from an external component that doesn't handle save),
+      // we would handle the save here. But currently CreateTask and TaskDetail both handle their saves.
+      // So we mainly just need to ensure the reload happens.
     }
   }
 
@@ -547,12 +546,14 @@ export class SpaceDetailComponent implements OnInit {
   ];
 
   onFilterStatusChange(status: TaskStatus | null) {
+    this.taskPageIndex.set(1);
     this.filterStatus.set(status);
     const id = this.spaceId();
     if (id) this.getTasksBySpace(id);
   }
 
   onFilterPriorityChange(priority: TaskPriority | null) {
+    this.taskPageIndex.set(1);
     this.filterPriority.set(priority);
     const id = this.spaceId();
     if (id) this.getTasksBySpace(id);

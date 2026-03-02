@@ -66,26 +66,29 @@ export class TaskItemService {
     );
   }
 
-  getTasksBySpace(params: GetTasksBySpaceParams): Observable<Task[]> {
+  getTasksBySpace(params: GetTasksBySpaceParams): Observable<{ items: Task[]; totalCount: number }> {
     return this.requestService.get<any>(this.TASKITEM_API_URL, params, { showLoading: true }).pipe(
       map(res => {
-        if (res.statusCode !== StatusCode.Success || res.data == null) return [];
+        if (res.statusCode !== StatusCode.Success || res.data == null)
+          return { items: [], totalCount: 0 };
 
         const d = res.data;
-        if (Array.isArray(d)) return d as Task[];
-        if (Array.isArray(d.items)) return d.items as Task[];
-        if (Array.isArray(d.data)) return d.data as Task[];
-        if (typeof d === 'object') {
-          return [];
-        }
-        return [];
+        let items: Task[] = [];
+        const totalCount =
+          d.totalCount || d.count || (Array.isArray(d) ? d.length : d.totalItems || 0);
+
+        if (Array.isArray(d)) items = d as Task[];
+        else if (Array.isArray(d.items)) items = d.items as Task[];
+        else if (Array.isArray(d.data)) items = d.data as Task[];
+
+        return { items, totalCount };
       }),
       catchError(() => {
         this.toastService.error(
           'Failed to load tasks',
           'An error occurred during processing. Please try again later.'
         );
-        return of([]);
+        return of({ items: [], totalCount: 0 });
       })
     );
   }

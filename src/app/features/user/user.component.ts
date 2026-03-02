@@ -18,6 +18,7 @@ import { UserService } from '../../shared/services/api/user/user.service';
 
 import { TooltipModule } from 'primeng/tooltip';
 import { PopoverModule } from 'primeng/popover';
+import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-user',
@@ -33,6 +34,7 @@ import { PopoverModule } from 'primeng/popover';
     ConfirmDialogModule,
     TooltipModule,
     PopoverModule,
+    PaginatorModule,
   ],
   providers: [ConfirmationService],
   templateUrl: './user.component.html',
@@ -51,6 +53,10 @@ export class UserComponent {
   currentUser = this.userService.currentUser;
 
   users = signal<User[]>([]);
+  totalCount = signal<number>(0);
+  pageIndex = signal<number>(1);
+  pageSize = signal<number>(8);
+
   searchTerm = signal<string>('');
   filterStatus = signal<UserStatus | null>(null);
   private readonly searchSubject = new Subject<string>();
@@ -65,6 +71,7 @@ export class UserComponent {
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(term => {
+        this.pageIndex.set(1);
         this.searchTerm.set(term);
         this.loadUsers();
       });
@@ -78,11 +85,21 @@ export class UserComponent {
     const term = this.searchTerm();
     const status = this.filterStatus();
     this.userService
-      .getAllUsers(term, status || undefined)
-      .subscribe(users => this.users.set(users));
+      .getAllUsers(term, status || undefined, this.pageIndex(), this.pageSize())
+      .subscribe(res => {
+        this.users.set(res.items);
+        this.totalCount.set(res.totalCount);
+      });
+  }
+
+  onPageChange(event: any) {
+    this.pageIndex.set(event.page + 1);
+    this.pageSize.set(event.rows);
+    this.loadUsers();
   }
 
   onFilterStatusChange(status: UserStatus | null) {
+    this.pageIndex.set(1);
     this.filterStatus.set(status);
     this.loadUsers();
   }

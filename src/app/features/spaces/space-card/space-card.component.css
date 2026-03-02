@@ -10,3 +10,12 @@
   overflow: hidden;
   min-height: 3em; /* Ensure it always takes up 2 lines worth of height */
 }
+::ng-deep .workspace-action-menu .delete-item .p-menu-item-link .p-menu-item-icon,
+::ng-deep .workspace-action-menu .delete-item .p-menu-item-link .p-menu-item-label {
+  color: #ef4444 !important;
+}
+
+::ng-deep .workspace-action-menu .delete-item:hover .p-menu-item-link .p-menu-item-icon,
+::ng-deep .workspace-action-menu .delete-item:hover .p-menu-item-link .p-menu-item-label {
+  color: #dc2626 !important;
+}

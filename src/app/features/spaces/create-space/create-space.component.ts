@@ -1,4 +1,4 @@
-import { Component, inject, model, output, signal } from '@angular/core';
+import { Component, inject, model, output, signal, effect, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputText } from 'primeng/inputtext';
@@ -9,6 +9,7 @@ import { SpaceType } from '../../../shared/models/enum/space-type.enum';
 import { SpaceService } from '../../../shared/services/api/space/space.service';
 import { CreateSpaceRequest } from '../../../shared/models/request/space-request.model';
 import { ToastService } from '../../../shared/services/core/toast/toast.service';
+import { Space } from '../../../shared/models/entities/space.model';
 
 @Component({
   selector: 'app-create-space',
@@ -21,6 +22,7 @@ export class CreateSpaceComponent {
   private readonly toastService = inject(ToastService);
 
   visible = model<boolean>(false);
+  spaceToEdit = input<Space | null>(null);
   created = output<void>();
 
   spaceData = signal({
@@ -34,33 +36,70 @@ export class CreateSpaceComponent {
     { label: 'Team', value: SpaceType.Team },
   ];
 
-  confirmAddSpace() {
-    const request: CreateSpaceRequest = {
-      name: this.spaceData().name,
-      // send null when description is empty to match backend expectations
-      description: this.spaceData().description || null,
-      spaceType: this.spaceData().spaceType === SpaceType.Personal ? 0 : 1,
-    };
-
-    this.spaceService.createSpace(request).subscribe({
-      next: res => {
-        if (res) {
-          this.toastService.success('Success', 'Space created successfully');
-          this.visible.set(false);
-          this.created.emit();
-          this.resetSpaceForm();
+  constructor() {
+    effect(
+      () => {
+        const space = this.spaceToEdit();
+        if (space) {
+          this.spaceData.set({
+            name: space.name,
+            description: space.description || '',
+            spaceType: space.spaceType,
+          });
         } else {
-          this.toastService.error('Error', 'Failed to create space');
+          this.resetSpaceForm();
         }
       },
-      error: () => {
-        this.toastService.error('Error', 'Failed to create space');
-      },
-    });
+      { allowSignalWrites: true }
+    );
+  }
+
+  confirmAddSpace() {
+    if (!this.spaceData().name) {
+      this.toastService.error('Validation Error', 'Name is required');
+      return;
+    }
+
+    const spaceToEdit = this.spaceToEdit();
+    const data = this.spaceData();
+
+    if (spaceToEdit) {
+      this.spaceService
+        .updateSpace(spaceToEdit.id, {
+          name: data.name,
+          description: data.description || undefined,
+        })
+        .subscribe({
+          next: res => {
+            if (res) {
+              this.visible.set(false);
+              this.created.emit();
+              this.resetSpaceForm();
+            }
+          },
+        });
+    } else {
+      const request: CreateSpaceRequest = {
+        name: data.name,
+        description: data.description || null,
+        spaceType: data.spaceType === SpaceType.Personal ? 0 : 1,
+      };
+
+      this.spaceService.createSpace(request).subscribe({
+        next: res => {
+          if (res) {
+            this.visible.set(false);
+            this.created.emit();
+            this.resetSpaceForm();
+          }
+        },
+      });
+    }
   }
 
   cancelAddSpace() {
     this.visible.set(false);
+    this.resetSpaceForm();
   }
 
   resetSpaceForm() {

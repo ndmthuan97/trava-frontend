@@ -20,29 +20,43 @@ export class SpaceService {
   private readonly SPACE_API_URL = `${this.BASE_API_URL}/spaces`;
   private readonly USER_API_URL = `${this.BASE_API_URL}/users`;
 
-  getSpacesByUserId(searchTerm?: string, spaceType?: number, role?: number): Observable<Space[]> {
+  getSpacesByUserId(
+    searchTerm?: string,
+    spaceType?: number,
+    role?: number,
+    pageIndex?: number,
+    pageSize?: number
+  ): Observable<{ items: Space[]; totalCount: number }> {
     const params: any = {};
     if (searchTerm) params.SearchTerm = searchTerm;
     if (spaceType !== undefined && spaceType !== null) params.SpaceType = spaceType;
     if (role !== undefined && role !== null) params.SpaceRole = role;
+    if (pageIndex) params.PageIndex = pageIndex;
+    if (pageSize) params.PageSize = pageSize;
 
     return this.requestService
       .get<any>(`${this.SPACE_API_URL}/my-spaces`, params, { showLoading: true })
       .pipe(
         map(res => {
-          if (res.statusCode !== StatusCode.Success || !res.data) return [];
+          if (res.statusCode !== StatusCode.Success || !res.data)
+            return { items: [], totalCount: 0 };
           const data = res.data;
-          if (Array.isArray(data)) return data as Space[];
-          if (Array.isArray(data.items)) return data.items as Space[];
-          if (Array.isArray(data.data)) return data.data as Space[];
-          return [];
+          let items: Space[] = [];
+          const totalCount =
+            data.totalCount || data.count || (Array.isArray(data) ? data.length : data.totalItems || 0);
+
+          if (Array.isArray(data)) items = data as Space[];
+          else if (Array.isArray(data.items)) items = data.items as Space[];
+          else if (Array.isArray(data.data)) items = data.data as Space[];
+
+          return { items, totalCount };
         }),
         catchError(() => {
           this.toastService.error(
             'Failed to load workspaces',
             'An error occurred during processing. Please try again later.'
           );
-          return of([]);
+          return of({ items: [], totalCount: 0 });
         })
       );
   }
@@ -51,9 +65,10 @@ export class SpaceService {
     return this.requestService.post<Space>(this.SPACE_API_URL, space, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
-        if (code >= 2000 && code < 3000 && res.data) {
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
           this.toastService.success('Success', 'Workspace created successfully');
-          return res.data;
+          return res.data || ({} as Space);
         }
         return null;
       }),
@@ -79,23 +94,24 @@ export class SpaceService {
       );
   }
 
-  getSpaceMembers(params: any): Observable<User[]> {
+  getSpaceMembers(params: any): Observable<{ items: User[]; totalCount: number }> {
     return this.requestService
       .get<any>(`${this.SPACE_API_URL}/members`, params, { showLoading: true })
       .pipe(
         map(res => {
           if (res.statusCode === StatusCode.Success && res.data) {
-            // The backend response structure provided in the image shows data.data as the array
-            return res.data.data || [];
+            const items = res.data.data || res.data.items || (Array.isArray(res.data) ? res.data : []);
+            const totalCount = res.data.totalCount || items.length;
+            return { items, totalCount };
           }
-          return [];
+          return { items: [], totalCount: 0 };
         }),
         catchError(() => {
           this.toastService.error(
             'Failed to load space members',
             'An error occurred while fetching members. Please try again later.'
           );
-          return of([]);
+          return of({ items: [], totalCount: 0 });
         })
       );
   }
@@ -106,7 +122,8 @@ export class SpaceService {
       .pipe(
         map(res => {
           const code = Number(res.statusCode);
-          if (code >= 2000 && code < 3000) {
+          const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+          if (isSuccess) {
             this.toastService.success('Success', 'Member removed successfully');
             return true;
           }
@@ -130,6 +147,45 @@ export class SpaceService {
             'An error occurred while fetching statistics. Please try again later.'
           );
           return of(null);
+        })
+      );
+  }
+  updateSpace(spaceId: string, data: { name: string; description?: string }): Observable<Space | null> {
+    return this.requestService
+      .put<Space>(`${this.SPACE_API_URL}/${spaceId}`, data, { showLoading: true })
+      .pipe(
+        map(res => {
+          const code = Number(res.statusCode);
+          const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+          if (isSuccess) {
+            this.toastService.success('Success', 'Workspace updated successfully');
+            return res.data || ({} as Space);
+          }
+          return null;
+        }),
+        catchError(() => {
+          this.toastService.error('Error', 'Failed to update workspace. Please try again later.');
+          return of(null);
+        })
+      );
+  }
+
+  deleteSpace(spaceId: string): Observable<boolean> {
+    return this.requestService
+      .delete<any>(`${this.SPACE_API_URL}/${spaceId}`, { showLoading: true })
+      .pipe(
+        map(res => {
+          const code = Number(res.statusCode);
+          const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+          if (isSuccess) {
+            this.toastService.success('Success', 'Workspace deleted successfully');
+            return true;
+          }
+          return false;
+        }),
+        catchError(() => {
+          this.toastService.error('Error', 'Failed to delete workspace. Please try again later.');
+          return of(false);
         })
       );
   }

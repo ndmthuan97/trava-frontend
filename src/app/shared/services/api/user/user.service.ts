@@ -50,30 +50,39 @@ export class UserService {
     return this.profileRequest$;
   }
 
-  getAllUsers(searchTerm?: string, status?: UserStatus): Observable<User[]> {
+  getAllUsers(
+    searchTerm?: string,
+    status?: UserStatus,
+    pageIndex?: number,
+    pageSize?: number
+  ): Observable<{ items: User[]; totalCount: number }> {
     let params: Record<string, any> = {};
     if (searchTerm) params['SearchTerm'] = searchTerm;
     if (status !== undefined && status !== null) params['Status'] = status;
+    if (pageIndex) params['PageIndex'] = pageIndex;
+    if (pageSize) params['PageSize'] = pageSize;
 
     return this.requestService.get<any>(this.USER_API_URL, params, { showLoading: true }).pipe(
       map(res => {
-        if (res.statusCode === StatusCode.Success && res.data?.data) {
-          return res.data.data.map((user: any) => ({
+        if (res.statusCode === StatusCode.Success && res.data) {
+          const items = (res.data.data || []).map((user: any) => ({
             ...user,
             status:
               user.status === 'Active' || user.status === 0
                 ? UserStatus.Active
                 : UserStatus.Inactive,
           }));
+          const totalCount = res.data.totalCount || items.length;
+          return { items, totalCount };
         }
-        return [];
+        return { items: [], totalCount: 0 };
       }),
       catchError(() => {
         this.toastService.error(
           'Failed to load user list',
           'An error occurred during processing. Please try again later.'
         );
-        return of([]);
+        return of({ items: [], totalCount: 0 });
       })
     );
   }

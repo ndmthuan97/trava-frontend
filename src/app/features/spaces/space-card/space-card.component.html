@@ -17,6 +17,18 @@
         </h3>
       </div>
     </div>
+
+    <!-- Actions Menu -->
+    <div class="absolute right-4 top-4" *ngIf="isOwner()">
+      <button
+        pButton
+        type="button"
+        icon="pi pi-ellipsis-v"
+        class="p-button-rounded p-button-text p-button-secondary !h-8 !w-8"
+        (click)="onActionClick($event); menu.toggle($event)"
+        aria-label="Actions"></button>
+      <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body" styleClass="workspace-action-menu"></p-menu>
+    </div>
   </div>
 
   <!-- Description -->
