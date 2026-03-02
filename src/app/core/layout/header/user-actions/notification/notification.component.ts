@@ -60,14 +60,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
     this.notificationService.getUnreadNotifications().subscribe((notifications: Notification[]) => {
       this.notifications.set(notifications);
       this.unreadCount.set(notifications.length);
-      // Debug: log first payload to see actual field names
-      if (notifications.length > 0) {
-        console.log(
-          '[Notification payload keys]',
-          Object.keys(notifications[0].payload || {}),
-          notifications[0].payload
-        );
-      }
+      // Debug log removed
     });
 
     // Load recent "All" notifications (first 10)

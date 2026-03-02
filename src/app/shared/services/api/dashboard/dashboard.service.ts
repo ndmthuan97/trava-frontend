@@ -45,15 +45,7 @@ export class DashboardService {
   }
 
   getPerformance(filter: string = 'ALL'): Observable<PerformanceData[]> {
-    return this.requestService.get<any>(`${this.DASHBOARD_API_URL}/performance`, { filter }).pipe(
-      map(res => {
-        if (res.statusCode === StatusCode.Success && Array.isArray(res.data)) {
-          return res.data;
-        }
-        return this.getMockPerformance(filter);
-      }),
-      catchError(() => of(this.getMockPerformance(filter)))
-    );
+    return of(this.getMockPerformance(filter));
   }
 
   private getMockPerformance(filter: string): PerformanceData[] {

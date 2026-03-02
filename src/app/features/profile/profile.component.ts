@@ -160,7 +160,7 @@ export class ProfileComponent implements OnInit {
       personalDetails: {
         fullName: user.fullName,
         email: user.email,
-        phoneNumber: user.phoneNumber || '',
+        phoneNumber: user.phoneNumber || (user as any).phone || '',
         birthDate: user.birthDate ? new Date(user.birthDate) : null,
       },
     });
@@ -172,6 +172,7 @@ export class ProfileComponent implements OnInit {
       const payload = {
         fullName: formValue.fullName,
         phoneNumber: formValue.phoneNumber || '',
+        phone: formValue.phoneNumber || '',
         birthDate: formValue.birthDate ? new Date(formValue.birthDate).toISOString() : null,
         avatarUrl: this.currentUser.avatarUrl || '',
       };
@@ -236,7 +237,8 @@ export class ProfileComponent implements OnInit {
         const formValue = this.profileForm.get('personalDetails')?.value;
         const payload = {
           fullName: formValue.fullName || this.currentUser.fullName || '',
-          phoneNumber: formValue.phoneNumber || this.currentUser.phoneNumber || '',
+          phoneNumber: formValue.phoneNumber || this.currentUser.phoneNumber || (this.currentUser as any).phone || '',
+          phone: formValue.phoneNumber || this.currentUser.phoneNumber || (this.currentUser as any).phone || '',
           birthDate: formValue.birthDate
             ? new Date(formValue.birthDate).toISOString()
             : this.currentUser.birthDate || null,
