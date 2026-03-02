@@ -106,10 +106,15 @@
             <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400"
               >Points</label
             >
-            <p-rating
-              [(ngModel)]="taskData().point"
-              [stars]="5"
-              styleClass="scale-90 origin-left"></p-rating>
+            <div class="flex items-center gap-2">
+              <input
+                pInputText
+                type="number"
+                [(ngModel)]="taskData().point"
+                min="1"
+                max="10"
+                class="h-8 w-full text-xs font-bold text-orange-600" />
+            </div>
           </div>
 
           <!-- Assignee -->
