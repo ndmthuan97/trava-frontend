@@ -65,14 +65,18 @@ export class UserService {
     return this.requestService.get<any>(this.USER_API_URL, params, { showLoading: true }).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success && res.data) {
-          const items = (res.data.data || []).map((user: any) => ({
+          const rawItems =
+            res.data.data || res.data.items || (Array.isArray(res.data) ? res.data : []);
+          const items = (rawItems || []).map((user: any) => ({
             ...user,
             status:
               user.status === 'Active' || user.status === 0
                 ? UserStatus.Active
                 : UserStatus.Inactive,
           }));
-          const totalCount = res.data.totalCount || items.length;
+          const totalCountRaw =
+            res.data.totalCount ?? res.data.count ?? res.data.totalItems ?? items.length;
+          const totalCount = Number(totalCountRaw) || items.length;
           return { items, totalCount };
         }
         return { items: [], totalCount: 0 };
@@ -150,10 +154,14 @@ export class UserService {
       .put<User>(this.USER_PROFILE_API_URL, data, { showLoading: true })
       .pipe(
         map(res => {
-          const isSuccess = res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Updated;
+          const isSuccess =
+            res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Updated;
 
           if (isSuccess) {
-            this.toastService.success('Profile updated', 'Your profile has been updated successfully.');
+            this.toastService.success(
+              'Profile updated',
+              'Your profile has been updated successfully.'
+            );
             // Update current user if it's the same user
             if (this.currentUserSignal()?.id === userId) {
               const updatedUser = { ...this.currentUserSignal()!, ...(res.data || data) };

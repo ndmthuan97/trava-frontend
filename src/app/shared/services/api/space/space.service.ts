@@ -43,7 +43,9 @@ export class SpaceService {
           const data = res.data;
           let items: Space[] = [];
           const totalCount =
-            data.totalCount || data.count || (Array.isArray(data) ? data.length : data.totalItems || 0);
+            data.totalCount ||
+            data.count ||
+            (Array.isArray(data) ? data.length : data.totalItems || 0);
 
           if (Array.isArray(data)) items = data as Space[];
           else if (Array.isArray(data.items)) items = data.items as Space[];
@@ -100,8 +102,12 @@ export class SpaceService {
       .pipe(
         map(res => {
           if (res.statusCode === StatusCode.Success && res.data) {
-            const items = res.data.data || res.data.items || (Array.isArray(res.data) ? res.data : []);
-            const totalCount = res.data.totalCount || items.length;
+            const items =
+              res.data.data || res.data.items || (Array.isArray(res.data) ? res.data : []);
+            // Backends may return total count in different fields (totalCount, count, totalItems)
+            const totalCountRaw =
+              res.data.totalCount ?? res.data.count ?? res.data.totalItems ?? items.length;
+            const totalCount = Number(totalCountRaw) || items.length;
             return { items, totalCount };
           }
           return { items: [], totalCount: 0 };
@@ -138,7 +144,11 @@ export class SpaceService {
 
   getSpaceStatistics(spaceId: string): Observable<SpaceStatistics | null> {
     return this.requestService
-      .get<SpaceStatistics>(`${this.SPACE_API_URL}/${spaceId}/statistics`, {}, { showLoading: true })
+      .get<SpaceStatistics>(
+        `${this.SPACE_API_URL}/${spaceId}/statistics`,
+        {},
+        { showLoading: true }
+      )
       .pipe(
         map(res => (res.statusCode === StatusCode.Success && res.data ? res.data : null)),
         catchError(() => {
@@ -150,7 +160,10 @@ export class SpaceService {
         })
       );
   }
-  updateSpace(spaceId: string, data: { name: string; description?: string }): Observable<Space | null> {
+  updateSpace(
+    spaceId: string,
+    data: { name: string; description?: string }
+  ): Observable<Space | null> {
     return this.requestService
       .put<Space>(`${this.SPACE_API_URL}/${spaceId}`, data, { showLoading: true })
       .pipe(
@@ -190,4 +203,3 @@ export class SpaceService {
       );
   }
 }
-

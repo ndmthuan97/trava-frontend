@@ -1,4 +1,4 @@
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, Subject } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { RequestService } from './../../core/request/request.service';
 import { inject, Injectable } from '@angular/core';
@@ -32,6 +32,9 @@ export class TaskItemService {
   private readonly BASE_API_URL = environment.baseApiUrl;
   private readonly TASKITEM_API_URL = `${this.BASE_API_URL}/taskitems/spaces`;
 
+  private readonly taskChangedSubject = new Subject<void>();
+  public readonly taskChanged$ = this.taskChangedSubject.asObservable();
+
   getComments(taskId: string): Observable<Comment[]> {
     const url = `${this.BASE_API_URL}/taskitems/${taskId}/comments`;
     return this.requestService.get<any>(url, {}, { showLoading: true }).pipe(
@@ -54,8 +57,9 @@ export class TaskItemService {
     return this.requestService.post<any>(url, request, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
-        if (code >= 2000 && code < 3000 && res.data) {
-          return res.data as Comment;
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
+          return (res.data as Comment) || ({} as Comment);
         }
         return null;
       }),
@@ -66,7 +70,9 @@ export class TaskItemService {
     );
   }
 
-  getTasksBySpace(params: GetTasksBySpaceParams): Observable<{ items: Task[]; totalCount: number }> {
+  getTasksBySpace(
+    params: GetTasksBySpaceParams
+  ): Observable<{ items: Task[]; totalCount: number }> {
     return this.requestService.get<any>(this.TASKITEM_API_URL, params, { showLoading: true }).pipe(
       map(res => {
         if (res.statusCode !== StatusCode.Success || res.data == null)
@@ -98,9 +104,11 @@ export class TaskItemService {
     return this.requestService.post<any>(url, task, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
-        if (code >= 2000 && code < 3000 && res.data) {
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
           this.toastService.success('Success', 'Task created successfully');
-          return res.data as Task;
+          this.taskChangedSubject.next();
+          return (res.data as Task) || ({} as Task);
         }
         return null;
       }),
@@ -116,9 +124,11 @@ export class TaskItemService {
     return this.requestService.put<any>(url, task, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
-        if (code >= 2000 && code < 3000 && res.data) {
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
           this.toastService.success('Success', 'Task updated successfully');
-          return res.data as Task;
+          this.taskChangedSubject.next();
+          return (res.data as Task) || ({} as Task);
         }
         return null;
       }),
@@ -142,9 +152,11 @@ export class TaskItemService {
     return this.requestService.patch<any>(url, update, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
-        if (code >= 2000 && code < 3000 && res.data) {
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
           this.toastService.success('Success', 'Task updated successfully');
-          return res.data as Task;
+          this.taskChangedSubject.next();
+          return (res.data as Task) || ({} as Task);
         }
         return null;
       }),
@@ -160,8 +172,10 @@ export class TaskItemService {
     return this.requestService.delete<any>(url, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
-        if (code >= 2000 && code < 3000) {
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
           this.toastService.success('Success', 'Task deleted successfully');
+          this.taskChangedSubject.next();
           return true;
         }
         return false;
@@ -178,8 +192,10 @@ export class TaskItemService {
     return this.requestService.put<any>(url, {}, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
-        if (code >= 2000 && code < 3000) {
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
           this.toastService.success('Success', 'Task marked as completed');
+          this.taskChangedSubject.next();
           return true;
         }
         return false;
@@ -197,8 +213,10 @@ export class TaskItemService {
       map(res => {
         const response = res as any;
         const code = Number(response.statusCode);
-        if (code >= 2000 && code < 3000) {
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
           this.toastService.success('Success', 'Task assigned successfully');
+          this.taskChangedSubject.next();
           return true;
         }
         return false;
@@ -217,9 +235,11 @@ export class TaskItemService {
     return this.requestService.patch<any>(url, { status }, { showLoading: true }).pipe(
       map(res => {
         const code = Number(res.statusCode);
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         console.log('Update status API response:', res);
-        if (code >= 2000 && code < 3000) {
+        if (isSuccess) {
           this.toastService.success('Success', 'Status updated successfully');
+          this.taskChangedSubject.next();
           return true;
         }
         console.warn('Status code not success:', res.statusCode);

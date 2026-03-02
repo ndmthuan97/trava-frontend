@@ -433,7 +433,8 @@
     <!-- Summary View -->
     <app-space-summary
       *ngIf="activeTab() === 'summary' && spaceId()"
-      [spaceId]="spaceId()!"></app-space-summary>
+      [spaceId]="spaceId()!"
+      [refreshTrigger]="refreshCount()"></app-space-summary>
   </div>
 
   <app-create-task

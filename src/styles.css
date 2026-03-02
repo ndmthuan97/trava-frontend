@@ -33,7 +33,9 @@
   transform: translateY(-5px) !important; /* Slight gap from the trigger */
   margin-top: 0 !important;
   margin-bottom: 0 !important;
-  box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1), 0 -2px 4px -2px rgb(0 0 0 / 0.1) !important;
+  box-shadow:
+    0 -4px 6px -1px rgb(0 0 0 / 0.1),
+    0 -2px 4px -2px rgb(0 0 0 / 0.1) !important;
 }
 
 /* Ensure no clipping or weird layering */
@@ -44,7 +46,7 @@
 }
 
 /* Hide arrows as they would point down instead of up */
-.paginator-dropdown-up .p-select-overlay:before, 
+.paginator-dropdown-up .p-select-overlay:before,
 .paginator-dropdown-up .p-select-overlay:after,
 .p-select-overlay.paginator-dropdown-up:before,
 .p-select-overlay.paginator-dropdown-up:after,
@@ -53,4 +55,71 @@
   display: none !important;
 }
 
+/* Standardize PrimeNG Confirm Dialog button colors */
+.p-confirm-dialog {
+  --confirm-accept-bg: #ea580c; /* orange-600-ish */
+  --confirm-accept-bg-hover: #c2410c; /* darker */
+  --confirm-reject-bg: #ffffff;
+  --confirm-reject-border: #e5e7eb; /* gray-200 */
+  --confirm-reject-text: #374151; /* gray-700 */
+}
 
+/* Primary accept button */
+.p-confirm-dialog .p-button.p-confirm-dialog-accept,
+.p-confirm-dialog .p-confirm-dialog-accept .p-button,
+.p-confirm-dialog .p-confirm-dialog-accept {
+  background-color: var(--confirm-accept-bg) !important;
+  border-color: var(--confirm-accept-bg) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.p-confirm-dialog .p-button.p-confirm-dialog-accept:hover,
+.p-confirm-dialog .p-confirm-dialog-accept .p-button:hover,
+.p-confirm-dialog .p-confirm-dialog-accept:hover {
+  background-color: var(--confirm-accept-bg-hover) !important;
+  border-color: var(--confirm-accept-bg-hover) !important;
+}
+
+/* Secondary/reject button */
+.p-confirm-dialog .p-button.p-confirm-dialog-reject,
+.p-confirm-dialog .p-confirm-dialog-reject .p-button,
+.p-confirm-dialog .p-confirm-dialog-reject {
+  background-color: var(--confirm-reject-bg) !important;
+  border-color: var(--confirm-reject-border) !important;
+  color: var(--confirm-reject-text) !important;
+}
+.p-confirm-dialog .p-button.p-confirm-dialog-reject:hover,
+.p-confirm-dialog .p-confirm-dialog-reject .p-button:hover,
+.p-confirm-dialog .p-confirm-dialog-reject:hover {
+  background-color: #f3f4f6 !important; /* gray-100 */
+}
+
+/* Slightly larger, rounded buttons for all confirm dialogs */
+.p-confirm-dialog .p-button {
+  border-radius: 6px !important;
+  padding: 0.45rem 0.85rem !important;
+}
+
+/* Specific styling for delete confirmation accept button (red) */
+.p-confirm-dialog.confirm-delete .p-button.p-confirm-dialog-accept,
+.p-confirm-dialog.confirm-delete .p-confirm-dialog-accept .p-button,
+.p-confirm-dialog.confirm-delete .p-confirm-dialog-accept {
+  background-color: #dc2626 !important; /* red-600 */
+  border-color: #dc2626 !important;
+  color: #fff !important;
+}
+.p-confirm-dialog.confirm-delete .p-button.p-confirm-dialog-accept:hover,
+.p-confirm-dialog.confirm-delete .p-confirm-dialog-accept .p-button:hover,
+.p-confirm-dialog.confirm-delete .p-confirm-dialog-accept:hover {
+  background-color: #b91c1c !important; /* red-700 */
+  border-color: #b91c1c !important;
+}
+
+/* Ensure any confirm accept button using `p-button-danger` becomes red */
+.p-confirm-dialog .p-button.p-button-danger,
+.p-confirm-dialog .p-button.p-button-danger:focus,
+.p-confirm-dialog .p-button.p-button-danger:hover {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #fff !important;
+}

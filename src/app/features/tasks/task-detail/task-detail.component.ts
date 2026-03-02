@@ -30,15 +30,12 @@ import { ToastService } from '../../../shared/services/core/toast/toast.service'
     DialogModule,
     AvatarModule,
     TooltipModule,
-    BadgeComponent,
     DatePipe,
     SelectModule,
     InputTextModule,
     Textarea,
     DatePicker,
     ButtonModule,
-    Rating,
-    Popover,
   ],
   templateUrl: './task-detail.component.html',
   styleUrl: './task-detail.component.css',
@@ -88,6 +85,7 @@ export class TaskDetailComponent {
                 this.loadComments(t.id);
                 this.internalTask.set(t);
                 this.editingField.set(null);
+                this.isGlobalEdit.set(false);
               } else if (!this.editingField() && !this.isSaving()) {
                 this.internalTask.set(t);
               }
@@ -97,6 +95,7 @@ export class TaskDetailComponent {
               this.lastId = null;
               this.editingField.set(null);
               this.isSaving.set(false);
+              this.isGlobalEdit.set(false);
             });
           }
         });
@@ -240,7 +239,10 @@ export class TaskDetailComponent {
       };
       saveObservable = this.taskService.patchTask(t.id, patchPayload);
     } else {
-      this.toastService.error('Permission Denied', 'You do not have permission to save changes to this task.');
+      this.toastService.error(
+        'Permission Denied',
+        'You do not have permission to save changes to this task.'
+      );
       this.isSaving.set(false);
       return;
     }
@@ -390,5 +392,6 @@ export class TaskDetailComponent {
 
   close() {
     this.visible.set(false);
+    this.isGlobalEdit.set(false);
   }
 }

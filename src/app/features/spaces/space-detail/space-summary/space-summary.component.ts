@@ -14,6 +14,7 @@ import { SpaceStatistics } from '../../../../shared/models/entities/space-statis
 export class SpaceSummaryComponent implements OnChanges {
   private readonly spaceService = inject(SpaceService);
   @Input() spaceId!: string;
+  @Input() refreshTrigger = 0;
 
   stats = signal<SpaceStatistics | null>(null);
   statusChartData: any;
@@ -22,7 +23,7 @@ export class SpaceSummaryComponent implements OnChanges {
   priorityChartOptions: any;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['spaceId'] && this.spaceId) {
+    if ((changes['spaceId'] || changes['refreshTrigger']) && this.spaceId) {
       this.loadStatistics();
     }
   }

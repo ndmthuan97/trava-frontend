@@ -42,7 +42,6 @@ import { SpaceType } from '../../../shared/models/enum/space-type.enum';
   imports: [
     CommonModule,
     TableModule,
-    BadgeComponent,
     ButtonModule,
     AvatarModule,
     TooltipModule,
@@ -102,6 +101,7 @@ export class SpaceDetailComponent implements OnInit {
   sortDirection = signal<'asc' | 'desc' | null>(null);
   filterStatus = signal<TaskStatus | null>(null);
   filterPriority = signal<TaskPriority | null>(null);
+  refreshCount = signal<number>(0);
 
   // Invitation State
   inviteMemberVisible = signal<boolean>(false);
@@ -166,6 +166,16 @@ export class SpaceDetailComponent implements OnInit {
       }
     });
 
+    // Refresh when tasks change elsewhere in the app
+    this.taskItemService.taskChanged$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const id = this.spaceId();
+      if (id) {
+        this.getTasksBySpace(id);
+        this.getSpaceMembers(id);
+        this.getSpaceInfo(id);
+      }
+    });
+
     this.setupSearch();
   }
 
@@ -202,13 +212,14 @@ export class SpaceDetailComponent implements OnInit {
     this.spaceService
       .getSpaceMembers({
         spaceId,
-        pageIndex: this.memberPageIndex(),
-        pageSize: this.memberPageSize(),
+        PageIndex: this.memberPageIndex(),
+        PageSize: this.memberPageSize(),
+        IsPagingEnabled: true,
         SearchTerm: term,
       })
       .subscribe(res => {
         this.spaceMembers.set(res.items);
-        this.memberTotalCount.set(res.totalCount);
+        this.memberTotalCount.set(Number(res.totalCount) || 0);
         // Re-map tasks if they are already loaded
         if (this.tasks().length > 0) {
           this.mapTasksWithAssignees(this.tasks());
@@ -310,6 +321,9 @@ export class SpaceDetailComponent implements OnInit {
     const spaceId = this.spaceId();
     if (spaceId) {
       this.getTasksBySpace(spaceId);
+      this.getSpaceMembers(spaceId);
+      this.getSpaceInfo(spaceId);
+      this.refreshCount.update(c => c + 1);
     }
   }
 
@@ -325,26 +339,13 @@ export class SpaceDetailComponent implements OnInit {
   }
 
   onSaveTask(updatedData: any) {
-    // If updatedData.id exists, it's an update. 
-    // If it also has other fields like title/status, it's likely a complete result or a valid update set.
     if (updatedData && updatedData.id) {
-      // If result is already coming from TaskDetailComponent (it handles its own save)
-      // we just need to refresh the list and update the selected task.
-      // We check for fields that wouldn't normally be in a partial update request but are in a result.
-      const isResult = updatedData.createdBy || updatedData.createdAt || updatedData.id;
-      
-      if (isResult) {
-        this.onTaskCreated(); // Refresh the list
-        // If we have a selected task, update it with the new data
-        const current = this.selectedTask();
-        if (current && current.id === updatedData.id) {
-          this.selectedTask.set({ ...current, ...updatedData });
-        }
-      }
+      this.onTaskCreated(); // Always refresh to ensure all stats/lists are in sync
 
-      // If for some reason it's NOT a result (e.g. from an external component that doesn't handle save),
-      // we would handle the save here. But currently CreateTask and TaskDetail both handle their saves.
-      // So we mainly just need to ensure the reload happens.
+      const current = this.selectedTask();
+      if (current && current.id === updatedData.id) {
+        this.selectedTask.set({ ...current, ...updatedData });
+      }
     }
   }
 
@@ -386,7 +387,7 @@ export class SpaceDetailComponent implements OnInit {
             .removeMemberFromSpace(spaceId, member.id)
             .subscribe((success: boolean) => {
               if (success) {
-                this.getSpaceMembers(spaceId);
+                this.onTaskCreated();
               }
             });
         }
@@ -429,6 +430,7 @@ export class SpaceDetailComponent implements OnInit {
       message: 'Are you sure you want to delete this task?',
       header: 'Delete Confirmation',
       icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
         this.taskItemService.deleteTask(task.id).subscribe(success => {
           if (success) {
