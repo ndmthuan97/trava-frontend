@@ -18,4 +18,5 @@ export interface Task {
   completedAt?: string;
   creatorFullName?: string;
   creatorAvatarUrl?: string;
+  createdByUserId?: string;
 }

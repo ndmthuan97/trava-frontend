@@ -444,17 +444,18 @@
               <div class="detail-value flex flex-col gap-1">
                 <div
                   class="flex items-center gap-2"
-                  *ngIf="t.assignedUser; else reporterUnassigned">
+                  *ngIf="t.creatorFullName; else reporterUnassigned">
                   <p-avatar
-                    [image]="t.assignedUser.avatarUrl"
+                    [image]="t.creatorAvatarUrl"
+                    [label]="!t.creatorAvatarUrl ? t.creatorFullName.substring(0, 1) : ''"
                     shape="circle"
-                    styleClass="w-6 h-6"></p-avatar>
-                  <span class="text-sm font-medium">{{ t.assignedUser.fullName }}</span>
+                    styleClass="w-6 h-6 bg-slate-100 text-slate-700 text-[10px] font-bold"></p-avatar>
+                  <span class="text-sm font-medium">{{ t.creatorFullName }}</span>
                 </div>
                 <ng-template #reporterUnassigned>
                   <div class="flex items-center gap-2 text-slate-400">
                     <i class="pi pi-user-circle text-xl"></i>
-                    <span>Unassigned</span>
+                    <span class="text-xs">Unknown</span>
                   </div>
                 </ng-template>
               </div>
