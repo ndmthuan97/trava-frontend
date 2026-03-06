@@ -8,6 +8,8 @@ import { inject } from '@angular/core';
 import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
 import { AuthService } from '../auth/services/auth/auth.service';
 import { JwtService } from '../auth/services/jwt/jwt.service';
+import { ToastService } from '../../shared/services/core/toast/toast.service';
+import { Router } from '@angular/router';
 
 let isRefreshing = false;
 const refreshTokenSubject = new BehaviorSubject<string | null>(null);
@@ -31,6 +33,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
         return handle401Error(req, next, authService, jwtService);
+      }
+      if (error.status === 403) {
+        const toast = inject(ToastService);
+        const router = inject(Router);
+        toast.error('Access Denied', 'You do not have permission to perform this action or access this resource.');
+        router.navigate(['/spaces']);
       }
       return throwError(() => error);
     })

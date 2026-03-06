@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal, DestroyRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -64,6 +64,7 @@ import { SpaceType } from '../../../shared/models/enum/space-type.enum';
 })
 export class SpaceDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly spaceService = inject(SpaceService);
   private readonly taskItemService = inject(TaskItemService);
   private readonly authService = inject(AuthService);
@@ -248,10 +249,13 @@ export class SpaceDetailComponent implements OnInit {
         if (space) {
           this.spaceInfo.set(space);
           this.checkOwnership();
+        } else {
+          this.router.navigate(['/spaces']);
         }
       },
       error: (error: any) => {
         console.error('Error fetching space info:', error);
+        this.router.navigate(['/spaces']);
       },
     });
   }
@@ -287,6 +291,9 @@ export class SpaceDetailComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Error fetching tasks:', err);
+        if (err.status === 403 || err.status === 401) {
+          this.router.navigate(['/spaces']);
+        }
       },
     });
   }
@@ -387,7 +394,12 @@ export class SpaceDetailComponent implements OnInit {
             .removeMemberFromSpace(spaceId, member.id)
             .subscribe((success: boolean) => {
               if (success) {
-                this.onTaskCreated();
+                // If the user removed themselves (though usually it's the owner removing them)
+                if (member.id === this.currentUser()?.id) {
+                  this.router.navigate(['/spaces']);
+                } else {
+                  this.onTaskCreated();
+                }
               }
             });
         }
