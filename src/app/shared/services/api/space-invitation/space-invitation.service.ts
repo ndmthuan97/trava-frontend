@@ -46,21 +46,19 @@ export class SpaceInvitationService {
   }): Observable<boolean> {
     return this.requestService.post<any>(this.INVITATION_API_URL, payload).pipe(
       map(res => {
+        const code = res.statusCode as StatusCode;
         if (
-          res.statusCode === StatusCode.Success ||
-          res.statusCode === StatusCode.Created ||
-          res.statusCode === 2001
+          code === StatusCode.Success ||
+          code === StatusCode.Created
         ) {
-          this.toastService.success('Invitation sent', 'User has been invited to the space.');
+          this.toastService.successCode(code, 'Invitation sent');
           return true;
         }
+        this.toastService.errorCode(code, 'Error');
         return false;
       }),
-      catchError(() => {
-        this.toastService.error(
-          'Failed to send invitation',
-          'An error occurred. Please try again later.'
-        );
+      catchError(err => {
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(false);
       })
     );
@@ -71,26 +69,20 @@ export class SpaceInvitationService {
       .put<any>(`${this.INVITATION_API_URL}/${invitationId}`, { invitationStatus: status })
       .pipe(
         map(res => {
+          const code = res.statusCode as StatusCode;
           if (
-            res.statusCode === StatusCode.Success ||
-            res.statusCode === StatusCode.Updated ||
-            res.statusCode === 2000 ||
-            res.statusCode === 2002
+            code === StatusCode.Success ||
+            code === StatusCode.Updated
           ) {
             const statusText = status === InvitationStatus.Accepted ? 'accepted' : 'rejected';
-            this.toastService.success(
-              `Invitation ${statusText}`,
-              `You have ${statusText} the invitation.`
-            );
+            this.toastService.successCode(code, `Invitation ${statusText}`);
             return true;
           }
+          this.toastService.errorCode(code, 'Error');
           return false;
         }),
-        catchError(() => {
-          this.toastService.error(
-            'Failed to update invitation',
-            'An error occurred. Please try again later.'
-          );
+        catchError(err => {
+          this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
           return of(false);
         })
       );

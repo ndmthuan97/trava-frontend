@@ -1,6 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 
 import { MessageService } from 'primeng/api';
+import {
+  StatusCode,
+  StatusCodeMessage,
+} from '../../../../shared/constants/status-code.constant';
 
 export interface ToastOptions {
   life?: number;
@@ -46,6 +50,14 @@ export class ToastService {
 
   error(summary: string, detail: string, options?: ToastOptions) {
     this.show('error', summary, detail, options);
+  }
+
+  successCode(code: StatusCode, summary: string = 'Success', options?: ToastOptions) {
+    this.success(summary, StatusCodeMessage[code], options);
+  }
+
+  errorCode(code: StatusCode, summary: string = 'Error', options?: ToastOptions) {
+    this.error(summary, StatusCodeMessage[code], options);
   }
 
   contrast(summary: string, detail: string, options?: ToastOptions) {

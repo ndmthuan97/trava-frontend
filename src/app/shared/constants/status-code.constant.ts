@@ -43,3 +43,49 @@ export enum StatusCode {
   SpaceInvitationNotFound = 4300,
   InvalidInvitationStatusTransition = 4301,
 }
+
+export const StatusCodeMessage: Record<StatusCode, string> = {
+  [StatusCode.Success]: 'Success',
+  [StatusCode.Created]: 'Created successfully',
+  [StatusCode.Updated]: 'Updated successfully',
+  [StatusCode.Deleted]: 'Deleted successfully',
+  [StatusCode.NoContent]: 'No content',
+
+  // Error
+  [StatusCode.ModelInvalid]: 'Invalid data',
+  [StatusCode.Unauthorized]: 'Unauthorized',
+  [StatusCode.Forbidden]: 'Forbidden',
+  [StatusCode.SystemError]: 'System error',
+
+  [StatusCode.InvalidToken]: 'Invalid token',
+  [StatusCode.EmailAlreadyExists]: 'Email already exists',
+  [StatusCode.ProvidedInformationIsInValid]: 'Provided information is invalid',
+  [StatusCode.UserNotExists]: 'User does not exist',
+  [StatusCode.UserNotConfirmed]: 'User is not confirmed',
+  [StatusCode.InvalidCredentials]: 'Invalid credentials',
+  [StatusCode.UserAccountLocked]: 'User account is locked',
+  [StatusCode.ConfirmEmailTokenInvalidOrExpired]: 'Confirm email token is invalid or expired',
+  [StatusCode.UserAlreadyConfirmed]: 'User is already confirmed',
+  [StatusCode.NewPasswordSameAsOld]: 'New password cannot be the same as the old password',
+  [StatusCode.OtpInvalidOrExpired]: 'OTP code is invalid or expired',
+  [StatusCode.TwoFactorIsAlreadyEnabled]: 'Two-factor authentication is already enabled',
+  [StatusCode.TwoFactorIsAlreadyDisabled]: 'Two-factor authentication is already disabled',
+  [StatusCode.UserIdNotFound]: 'User ID not found',
+  [StatusCode.AccessTokenInvalidOrExpired]: 'Access token is invalid or expired',
+  [StatusCode.UnauthorizedAction]: 'Unauthorized action',
+
+  // Space Error
+  [StatusCode.SpaceNotFound]: 'Space not found',
+  [StatusCode.SpaceNameAlreadyExists]: 'Space name already exists',
+
+  // TaskItem Error
+  [StatusCode.TaskItemNotFound]: 'Task item not found',
+  [StatusCode.ParentTaskItemNotFound]: 'Parent task item not found',
+  [StatusCode.TaskItemTitleAlreadyExists]: 'Task item title already exists',
+  [StatusCode.ParentTaskItemNotExistInSpace]: 'Parent task item does not exist in space',
+  [StatusCode.AssignedUserNotInSpace]: 'Assigned user is not in the space',
+
+  // Space Invitation Error
+  [StatusCode.SpaceInvitationNotFound]: 'Space invitation not found',
+  [StatusCode.InvalidInvitationStatusTransition]: 'Invalid invitation status transition',
+};

@@ -56,15 +56,16 @@ export class TaskItemService {
     };
     return this.requestService.post<any>(url, request, { showLoading: true }).pipe(
       map(res => {
-        const code = Number(res.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         if (isSuccess) {
           return (res.data as Comment) || ({} as Comment);
         }
+        this.toastService.errorCode(code, 'Error');
         return null;
       }),
-      catchError(() => {
-        this.toastService.error('Error', 'Failed to post comment');
+      catchError(err => {
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(null);
       })
     );
@@ -89,11 +90,8 @@ export class TaskItemService {
 
         return { items, totalCount };
       }),
-      catchError(() => {
-        this.toastService.error(
-          'Failed to load tasks',
-          'An error occurred during processing. Please try again later.'
-        );
+      catchError(err => {
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of({ items: [], totalCount: 0 });
       })
     );
@@ -103,17 +101,18 @@ export class TaskItemService {
     const url = `${this.BASE_API_URL}/taskitems`;
     return this.requestService.post<any>(url, task, { showLoading: true }).pipe(
       map(res => {
-        const code = Number(res.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         if (isSuccess) {
-          this.toastService.success('Success', 'Task created successfully');
+          this.toastService.successCode(code, 'Success');
           this.taskChangedSubject.next();
           return (res.data as Task) || ({} as Task);
         }
+        this.toastService.errorCode(code, 'Error');
         return null;
       }),
       catchError(err => {
-        this.toastService.error('Error', 'Failed to create task. Please try again later.');
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(null);
       })
     );
@@ -123,17 +122,18 @@ export class TaskItemService {
     const url = `${this.BASE_API_URL}/taskitems/${id}`;
     return this.requestService.put<any>(url, task, { showLoading: true }).pipe(
       map(res => {
-        const code = Number(res.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         if (isSuccess) {
-          this.toastService.success('Success', 'Task updated successfully');
+          this.toastService.successCode(code, 'Success');
           this.taskChangedSubject.next();
           return (res.data as Task) || ({} as Task);
         }
+        this.toastService.errorCode(code, 'Error');
         return null;
       }),
       catchError(err => {
-        this.toastService.error('Error', 'Failed to update task. Please try again later.');
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(null);
       })
     );
@@ -151,17 +151,18 @@ export class TaskItemService {
     const url = `${this.BASE_API_URL}/taskitems/${id}`;
     return this.requestService.patch<any>(url, update, { showLoading: true }).pipe(
       map(res => {
-        const code = Number(res.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         if (isSuccess) {
-          this.toastService.success('Success', 'Task updated successfully');
+          this.toastService.successCode(code, 'Success');
           this.taskChangedSubject.next();
           return (res.data as Task) || ({} as Task);
         }
+        this.toastService.errorCode(code, 'Error');
         return null;
       }),
       catchError(err => {
-        this.toastService.error('Error', 'Failed to update task. Please try again later.');
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(null);
       })
     );
@@ -171,17 +172,18 @@ export class TaskItemService {
     const url = `${this.BASE_API_URL}/taskitems/${id}`;
     return this.requestService.delete<any>(url, { showLoading: true }).pipe(
       map(res => {
-        const code = Number(res.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         if (isSuccess) {
-          this.toastService.success('Success', 'Task deleted successfully');
+          this.toastService.successCode(code, 'Success');
           this.taskChangedSubject.next();
           return true;
         }
+        this.toastService.errorCode(code, 'Error');
         return false;
       }),
       catchError(err => {
-        this.toastService.error('Error', 'Failed to delete task. Please try again later.');
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(false);
       })
     );
@@ -191,17 +193,18 @@ export class TaskItemService {
     const url = `${this.BASE_API_URL}/taskitems/complete/${id}`;
     return this.requestService.put<any>(url, {}, { showLoading: true }).pipe(
       map(res => {
-        const code = Number(res.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         if (isSuccess) {
-          this.toastService.success('Success', 'Task marked as completed');
+          this.toastService.successCode(code, 'Success');
           this.taskChangedSubject.next();
           return true;
         }
+        this.toastService.errorCode(code, 'Error');
         return false;
       }),
       catchError(err => {
-        this.toastService.error('Error', 'Failed to complete task. Please try again later.');
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(false);
       })
     );
@@ -211,18 +214,18 @@ export class TaskItemService {
     const url = `${this.BASE_API_URL}/taskitems/assign/${id}`;
     return this.requestService.patch<any>(url, { assignedUserId }, { showLoading: true }).pipe(
       map(res => {
-        const response = res as any;
-        const code = Number(response.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         if (isSuccess) {
-          this.toastService.success('Success', 'Task assigned successfully');
+          this.toastService.successCode(code, 'Success');
           this.taskChangedSubject.next();
           return true;
         }
+        this.toastService.errorCode(code, 'Error');
         return false;
       }),
       catchError(err => {
-        this.toastService.error('Error', 'Failed to assign task. Please try again later.');
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(false);
       })
     );
@@ -234,20 +237,21 @@ export class TaskItemService {
 
     return this.requestService.patch<any>(url, { status }, { showLoading: true }).pipe(
       map(res => {
-        const code = Number(res.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         console.log('Update status API response:', res);
         if (isSuccess) {
-          this.toastService.success('Success', 'Status updated successfully');
+          this.toastService.successCode(code, 'Success');
           this.taskChangedSubject.next();
           return true;
         }
+        this.toastService.errorCode(code, 'Error');
         console.warn('Status code not success:', res.statusCode);
         return false;
       }),
-      catchError(error => {
-        console.error('Update status API error:', error);
-        this.toastService.error('Error', 'Failed to update status. Please try again later.');
+      catchError(err => {
+        console.error('Update status API error:', err);
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(false);
       })
     );

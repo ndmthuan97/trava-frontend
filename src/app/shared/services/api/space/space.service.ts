@@ -66,16 +66,17 @@ export class SpaceService {
   createSpace(space: CreateSpaceRequest): Observable<Space | null> {
     return this.requestService.post<Space>(this.SPACE_API_URL, space, { showLoading: true }).pipe(
       map(res => {
-        const code = Number(res.statusCode);
+        const code = Number(res.statusCode) as StatusCode;
         const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
         if (isSuccess) {
-          this.toastService.success('Success', 'Workspace created successfully');
+          this.toastService.successCode(code, 'Success');
           return res.data || ({} as Space);
         }
+        this.toastService.errorCode(code, 'Error');
         return null;
       }),
-      catchError(() => {
-        this.toastService.error('Error', 'Failed to create workspace. Please try again later.');
+      catchError(err => {
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
         return of(null);
       })
     );
@@ -127,18 +128,19 @@ export class SpaceService {
       .delete<any>(`${this.SPACE_API_URL}/${spaceId}/members/${userId}`, { showLoading: true })
       .pipe(
         map(res => {
-          const code = Number(res.statusCode);
-          const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
-          if (isSuccess) {
-            this.toastService.success('Success', 'Member removed successfully');
-            return true;
-          }
-          return false;
-        }),
-        catchError(() => {
-          this.toastService.error('Error', 'Failed to remove member. Please try again later.');
-          return of(false);
-        })
+          const code = Number(res.statusCode) as StatusCode;
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
+          this.toastService.successCode(code, 'Success');
+          return true;
+        }
+        this.toastService.errorCode(code, 'Error');
+        return false;
+      }),
+      catchError(err => {
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
+        return of(false);
+      })
       );
   }
 
@@ -168,18 +170,19 @@ export class SpaceService {
       .put<Space>(`${this.SPACE_API_URL}/${spaceId}`, data, { showLoading: true })
       .pipe(
         map(res => {
-          const code = Number(res.statusCode);
-          const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
-          if (isSuccess) {
-            this.toastService.success('Success', 'Workspace updated successfully');
-            return res.data || ({} as Space);
-          }
-          return null;
-        }),
-        catchError(() => {
-          this.toastService.error('Error', 'Failed to update workspace. Please try again later.');
-          return of(null);
-        })
+          const code = Number(res.statusCode) as StatusCode;
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
+          this.toastService.successCode(code, 'Success');
+          return res.data || ({} as Space);
+        }
+        this.toastService.errorCode(code, 'Error');
+        return null;
+      }),
+      catchError(err => {
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
+        return of(null);
+      })
       );
   }
 
@@ -188,18 +191,19 @@ export class SpaceService {
       .delete<any>(`${this.SPACE_API_URL}/${spaceId}`, { showLoading: true })
       .pipe(
         map(res => {
-          const code = Number(res.statusCode);
-          const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
-          if (isSuccess) {
-            this.toastService.success('Success', 'Workspace deleted successfully');
-            return true;
-          }
-          return false;
-        }),
-        catchError(() => {
-          this.toastService.error('Error', 'Failed to delete workspace. Please try again later.');
-          return of(false);
-        })
+          const code = Number(res.statusCode) as StatusCode;
+        const isSuccess = (code >= 200 && code <= 299) || (code >= 2000 && code <= 2999);
+        if (isSuccess) {
+          this.toastService.successCode(code, 'Success');
+          return true;
+        }
+        this.toastService.errorCode(code, 'Error');
+        return false;
+      }),
+      catchError(err => {
+        this.toastService.errorCode(err.error?.statusCode as StatusCode, 'Error');
+        return of(false);
+      })
       );
   }
 }

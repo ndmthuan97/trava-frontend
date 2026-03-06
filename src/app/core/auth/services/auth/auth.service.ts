@@ -59,17 +59,11 @@ export class AuthService {
     return this.requestService.post<void>(this.REGISTER_API_URL, request, options).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success || res.statusCode === StatusCode.Created) {
-          this.toastService.success(
-            'Registration successful',
-            'Congratulations! You have registered successfully.'
-          );
+          this.toastService.successCode(res.statusCode as StatusCode, 'Registration successful');
           this.router.navigateByUrl('/auth/login');
           return;
         }
-        this.toastService.error(
-          'Registration failed',
-          'An error occurred, please try again later.'
-        );
+        this.toastService.errorCode(res.statusCode as StatusCode, 'Registration failed');
         return null;
       }),
       catchError(err => {
@@ -95,7 +89,7 @@ export class AuthService {
             this.handleLoginSuccess(res.data);
             return res.data;
           default:
-            this.toastService.error('Login failed', 'An error occurred, please try again later.');
+            this.toastService.errorCode(res.statusCode as StatusCode, 'Login failed');
             return null;
         }
       }),
@@ -150,40 +144,13 @@ export class AuthService {
   }
 
   private handleRegisterError(err: HttpErrorResponse): void {
-    const statusCode = err.error?.statusCode;
-
-    switch (statusCode) {
-      case StatusCode.ModelInvalid:
-      case StatusCode.ProvidedInformationIsInValid:
-        this.toastService.error('Registration failed', 'Invalid registration data.');
-        break;
-      case StatusCode.EmailAlreadyExists:
-        this.toastService.error('Registration failed', 'This email is already in use.');
-        break;
-      default:
-        this.toastService.error(
-          'Registration failed',
-          'An error occurred, please try again later.'
-        );
-    }
+    const statusCode = err.error?.statusCode as StatusCode;
+    this.toastService.errorCode(statusCode, 'Registration failed');
   }
 
   private handleLoginError(err: HttpErrorResponse): void {
-    const statusCode = err.error?.statusCode;
-
-    switch (statusCode) {
-      case StatusCode.InvalidCredentials:
-        this.toastService.error('Login failed', 'Incorrect email or password.');
-        break;
-      case StatusCode.UserNotExists:
-        this.toastService.error('Login failed', 'Account does not exist.');
-        break;
-      case StatusCode.UserAccountLocked:
-        this.toastService.error('Login failed', 'Account has been locked.');
-        break;
-      default:
-        this.toastService.error('Login failed', 'An error occurred, please try again later.');
-    }
+    const statusCode = err.error?.statusCode as StatusCode;
+    this.toastService.errorCode(statusCode, 'Login failed');
   }
 
   redirectUserAfterLogin(): void {
@@ -209,12 +176,10 @@ export class AuthService {
     return this.requestService.post<any>(this.CHANGE_PASSWORD_API_URL, request).pipe(
       map(res => {
         if (res.statusCode === StatusCode.Success) {
-          this.toastService.success(
-            'Password changed successfully',
-            'Your password has been changed.'
-          );
+          this.toastService.successCode(res.statusCode, 'Success');
           return true;
         }
+        this.toastService.errorCode(res.statusCode as StatusCode, 'Error');
         return false;
       }),
       catchError(err => {
